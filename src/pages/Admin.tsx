@@ -63,7 +63,7 @@ const Admin = () => {
           {sidebarOpen ? '←' : '☰'}
         </button>
         <ul style={{ listStyle: 'none', padding: 0, margin: 0, flex: 1 }}>
-          {sidebarItems.map((item, idx) => (
+          {sidebarItems.map((item) => (
             <li
               key={item}
               onClick={() => setActiveSection(item)}
