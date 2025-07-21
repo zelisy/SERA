@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 const Header = () => {
   const navigate = useNavigate();
+  const isLoggedIn = !!localStorage.getItem('isLoggedIn');
   return (
     <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 2rem', background: '#228B22', color: '#fff' }}>
       <div style={{ fontWeight: 'bold', fontSize: 24 }}>SERA TAKİP</div>
@@ -11,7 +12,7 @@ const Header = () => {
         <Link to="/about" style={{ color: '#fff', textDecoration: 'none', fontSize: 16 }}>Hakkımızda</Link>
         <Link to="/contact" style={{ color: '#fff', textDecoration: 'none', fontSize: 16 }}>İletişim</Link>
         <button onClick={() => navigate('/login')} style={{ background: '#fff', color: '#228B22', border: 'none', borderRadius: 6, padding: '8px 18px', fontWeight: 'bold', cursor: 'pointer', fontSize: 16 }}>
-          Giriş
+          {isLoggedIn ? 'Admin' : 'Giriş'}
         </button>
       </nav>
     </header>
