@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase/config';
+import { useNavigate } from 'react-router-dom';
 
 const Login: React.FC = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -15,6 +17,8 @@ const Login: React.FC = () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       // Başarılı girişte yönlendirme veya bildirim eklenebilir
+      localStorage.setItem('isLoggedIn', 'true');
+      navigate('/admin');
     } catch (err: any) {
       setError(err.message || 'Giriş başarısız.');
     } finally {
