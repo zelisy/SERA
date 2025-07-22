@@ -10,7 +10,7 @@ import Admin from './pages/Admin';
 import DikimOncesiDonem from './components/DikimOncesiDonem';
 import DikimOncesiDetayDonem from './components/DikimOncesiDetayDonem';
 
-// Basit bir authentication kontrolü için örnek bir fonksiyon (gerçek uygulamada context veya global state kullanılmalı)
+// Authentication kontrolü
 const isAuthenticated = () => {
   return !!localStorage.getItem('isLoggedIn');
 };
@@ -28,12 +28,23 @@ function AppContent() {
       {!isAdminPage && <Header />}
       <div style={{ minHeight: isAdminPage ? '100vh' : 'calc(100vh - 120px)' }}>
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/dikim-oncesi" element={<DikimOncesiDonem />} />
-          <Route path="/dikim-oncesi-detay" element={<DikimOncesiDetayDonem />} />
+          
+          {/* Protected Routes - Giriş Gerekli */}
+          <Route path="/dikim-oncesi" element={
+            <PrivateRoute>
+              <DikimOncesiDonem />
+            </PrivateRoute>
+          } />
+          <Route path="/dikim-oncesi-detay" element={
+            <PrivateRoute>
+              <DikimOncesiDetayDonem />
+            </PrivateRoute>
+          } />
           <Route path="/admin" element={
             <PrivateRoute>
               <Admin />

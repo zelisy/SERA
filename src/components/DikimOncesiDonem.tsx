@@ -1,22 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import ChecklistItem from './ChecklistItem';
+import UreticiListesi from './UreticiListesi';
 import { dikimOncesiConfig } from '../data/dikimOncesiConfig';
 import { loadChecklistData, updateChecklistItem, saveChecklistData } from '../utils/firestoreUtils';
 import type { ChecklistSection } from '../types/checklist';
 
+interface Producer {
+  id: string;
+  firstName: string;
+  lastName: string;
+  tcNo: string;
+  phone: string;
+  address: string;
+  gender: string;
+  experienceYear: string;
+  registerDate: string;
+}
+
 const DikimOncesiDonem: React.FC = () => {
   const [checklistData, setChecklistData] = useState<ChecklistSection>(dikimOncesiConfig);
+  const [selectedProducer, setSelectedProducer] = useState<Producer | null>(null);
+  const [currentStep, setCurrentStep] = useState<'select-producer' | 'checklist'>('select-producer');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadInitialData();
-  }, []);
+    if (selectedProducer) {
+      loadInitialData();
+    }
+  }, [selectedProducer]);
 
   const loadInitialData = async () => {
+    if (!selectedProducer) return;
+    
     try {
       setLoading(true);
-      const savedData = await loadChecklistData('dikim-oncesi');
+      const dataKey = `dikim-oncesi-${selectedProducer.id}`;
+      const savedData = await loadChecklistData(dataKey);
       
       if (savedData) {
         // Merge saved data with config to ensure new fields are included
@@ -30,7 +50,7 @@ const DikimOncesiDonem: React.FC = () => {
         setChecklistData(mergedData);
       } else {
         // Save initial config if no saved data exists
-        await saveChecklistData('dikim-oncesi', dikimOncesiConfig);
+        await saveChecklistData(dataKey, dikimOncesiConfig);
         setChecklistData(dikimOncesiConfig);
       }
       setError(null);
@@ -41,11 +61,18 @@ const DikimOncesiDonem: React.FC = () => {
     }
   };
 
+  const handleProducerSelect = (producer: Producer) => {
+    setSelectedProducer(producer);
+    setCurrentStep('checklist');
+  };
+
   const handleItemUpdate = async (
     itemId: string, 
     completed: boolean, 
     data?: Record<string, string | number | boolean | string[]>
   ) => {
+    if (!selectedProducer) return;
+
     try {
       // Update local state immediately for better UX
       setChecklistData(prev => ({
@@ -57,8 +84,9 @@ const DikimOncesiDonem: React.FC = () => {
         )
       }));
 
-      // Update in Firebase
-      await updateChecklistItem('dikim-oncesi', itemId, completed, data);
+      // Update in Firebase with producer-specific key
+      const dataKey = `dikim-oncesi-${selectedProducer.id}`;
+      await updateChecklistItem(dataKey, itemId, completed, data);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Güncelleme başarısız');
@@ -75,115 +103,185 @@ const DikimOncesiDonem: React.FC = () => {
     return { totalItems, completedItems, percentage };
   };
 
-  const stats = getCompletionStats();
+  const resetSelection = () => {
+    setSelectedProducer(null);
+    setCurrentStep('select-producer');
+    setChecklistData(dikimOncesiConfig);
+    setError(null);
+  };
 
-  if (loading) {
+  // Producer Selection Step
+  if (currentStep === 'select-producer') {
     return (
-      <div style={{ padding: '2rem' }}>
-        <h2 style={{ color: '#228B22', marginBottom: 20 }}>Dikim Öncesi Dönem</h2>
-        <div style={{ 
-          background: '#f8f9fa', 
-          borderRadius: '8px', 
-          padding: '24px', 
-          textAlign: 'center',
-          color: '#666'
-        }}>
-          Yükleniyor...
+      <div className="min-h-screen bg-gray-50">
+        <div className="p-4 lg:p-6">
+          {/* Header */}
+          <div className="mb-6 text-center">
+            <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-2">
+              Dikim Öncesi Dönem Kontrolü
+            </h1>
+            <p className="text-slate-600 text-lg">
+              Kontrol işlemlerini başlatmak için önce bir üretici seçin
+            </p>
+          </div>
+
+          {/* Progress Steps */}
+          <div className="mb-8 max-w-md mx-auto">
+            <div className="flex items-center">
+              <div className="flex items-center text-emerald-600">
+                <div className="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                  1
+                </div>
+                <span className="ml-2 font-medium">Üretici Seç</span>
+              </div>
+              <div className="flex-1 mx-4 h-1 bg-gray-200 rounded"></div>
+              <div className="flex items-center text-gray-400">
+                <div className="w-8 h-8 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-sm font-bold">
+                  2
+                </div>
+                <span className="ml-2">Kontrol Listesi</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Producer Selection */}
+          <UreticiListesi 
+            selectionMode={true}
+            onSelect={handleProducerSelect}
+            selectedProducer={selectedProducer}
+          />
         </div>
       </div>
     );
   }
 
+  // Checklist Step
+  const stats = getCompletionStats();
+
   return (
-    <div style={{ padding: '2rem' }}>
-      <div style={{ marginBottom: '24px' }}>
-        <h2 style={{ color: '#228B22', marginBottom: 16 }}>Dikim Öncesi Dönem</h2>
-        
-        {/* Progress Bar */}
-        <div style={{ 
-          background: '#f0f0f0', 
-          borderRadius: '12px', 
-          padding: '16px',
-          marginBottom: '16px'
-        }}>
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center',
-            marginBottom: '8px'
-          }}>
-            <span style={{ fontWeight: '500', color: '#333' }}>
-              İlerleme: {stats.completedItems}/{stats.totalItems} görev tamamlandı
-            </span>
-            <span style={{ 
-              fontWeight: '600', 
-              color: stats.percentage === 100 ? '#228B22' : '#666',
-              fontSize: '18px'
-            }}>
-              %{stats.percentage}
-            </span>
-          </div>
-          <div style={{ 
-            background: '#e0e0e0', 
-            borderRadius: '6px', 
-            height: '8px',
-            overflow: 'hidden'
-          }}>
-            <div style={{ 
-              background: `linear-gradient(90deg, #228B22 0%, ${stats.percentage === 100 ? '#32CD32' : '#228B22'} 100%)`,
-              height: '100%',
-              width: `${stats.percentage}%`,
-              transition: 'width 0.3s ease'
-            }} />
+    <div className="min-h-screen bg-gray-50">
+      <div className="p-4 lg:p-6 space-y-6">
+        {/* Header with Producer Info */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center space-x-4 mb-4 lg:mb-0">
+              <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-xl flex items-center justify-center">
+                <span className="text-white text-xl">
+                  {selectedProducer?.gender === 'Erkek' ? '👨' : selectedProducer?.gender === 'Kadın' ? '👩' : '👤'}
+                </span>
+              </div>
+              <div>
+                <h1 className="text-xl lg:text-2xl font-bold text-slate-800">
+                  Dikim Öncesi Dönem - {selectedProducer?.firstName} {selectedProducer?.lastName}
+                </h1>
+                <p className="text-slate-600">
+                  TC: {selectedProducer?.tcNo} | Tel: {selectedProducer?.phone}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={resetSelection}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
+              >
+                👤 Üretici Değiştir
+              </button>
+              
+              {/* Progress Steps - Mobile */}
+              <div className="flex items-center text-sm">
+                <div className="flex items-center text-emerald-600">
+                  <div className="w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                    ✓
+                  </div>
+                  <span className="ml-2 hidden sm:inline">Üretici Seçildi</span>
+                </div>
+                <div className="flex-1 mx-3 h-0.5 bg-emerald-200 rounded"></div>
+                <div className="flex items-center text-emerald-600">
+                  <div className="w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                    2
+                  </div>
+                  <span className="ml-2 hidden sm:inline">Kontrol</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
+        {/* Progress Bar */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-semibold text-slate-800">
+                İlerleme: {stats.completedItems}/{stats.totalItems} görev tamamlandı
+              </h3>
+              <p className="text-slate-600 text-sm">
+                {selectedProducer?.firstName} {selectedProducer?.lastName} için kontrol durumu
+              </p>
+            </div>
+            <div className="mt-4 lg:mt-0">
+              <span className={`text-2xl lg:text-3xl font-bold ${
+                stats.percentage === 100 ? 'text-emerald-600' : 'text-slate-800'
+              }`}>
+                %{stats.percentage}
+              </span>
+            </div>
+          </div>
+
+          <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+            <div 
+              className={`h-full rounded-full transition-all duration-500 ${
+                stats.percentage === 100 
+                  ? 'bg-gradient-to-r from-emerald-400 to-green-500' 
+                  : 'bg-gradient-to-r from-emerald-400 to-blue-500'
+              }`}
+              style={{ width: `${stats.percentage}%` }}
+            />
+          </div>
+
+          {stats.percentage === 100 && (
+            <div className="mt-4 p-4 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-xl">
+              <div className="flex items-center space-x-2">
+                <span className="text-emerald-600 text-xl">🎉</span>
+                <span className="text-emerald-800 font-medium">
+                  Tebrikler! {selectedProducer?.firstName} {selectedProducer?.lastName} için tüm kontroller tamamlandı!
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Error Message */}
         {error && (
-          <div style={{ 
-            background: '#fee', 
-            color: '#c33', 
-            padding: '12px', 
-            borderRadius: '6px',
-            marginBottom: '16px',
-            border: '1px solid #fcc'
-          }}>
-            ⚠️ {error}
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+            <div className="flex items-center space-x-2">
+              <span className="text-red-500">⚠️</span>
+              <span className="text-red-700">{error}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Loading State */}
+        {loading ? (
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-12">
+            <div className="text-center">
+              <div className="animate-spin h-12 w-12 border-4 border-emerald-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+              <p className="text-slate-600">Kontrol listesi yükleniyor...</p>
+            </div>
+          </div>
+        ) : (
+          /* Checklist Items */
+          <div className="space-y-4">
+            {checklistData.items.map(item => (
+              <ChecklistItem
+                key={item.id}
+                item={item}
+                onUpdate={handleItemUpdate}
+              />
+            ))}
           </div>
         )}
       </div>
-
-      {/* Checklist Items */}
-      <div style={{ 
-        background: '#fff', 
-        borderRadius: '12px', 
-        boxShadow: '0 2px 8px rgba(0,0,0,0.04)', 
-        padding: '24px'
-      }}>
-        {checklistData.items.map(item => (
-          <ChecklistItem
-            key={item.id}
-            item={item}
-            onUpdate={handleItemUpdate}
-          />
-        ))}
-      </div>
-
-      {/* Completion Badge */}
-      {stats.percentage === 100 && (
-        <div style={{
-          marginTop: '24px',
-          background: 'linear-gradient(135deg, #228B22, #32CD32)',
-          color: '#fff',
-          padding: '16px',
-          borderRadius: '12px',
-          textAlign: 'center',
-          fontWeight: '600',
-          fontSize: '18px',
-          boxShadow: '0 4px 12px rgba(34, 139, 34, 0.3)'
-        }}>
-          🎉 Tebrikler! Dikim öncesi dönem kontrolleri tamamlandı!
-        </div>
-      )}
     </div>
   );
 };
