@@ -1,6 +1,6 @@
 import { doc, setDoc, getDoc, updateDoc, serverTimestamp, collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
-import type { ChecklistSection, UretimAlani } from '../types/checklist';
+import type { ChecklistSection, UretimAlani, HasatBilgisi } from '../types/checklist';
 
 // Existing Checklist Functions
 export const saveChecklistData = async (sectionId: string, data: ChecklistSection): Promise<void> => {
@@ -152,4 +152,91 @@ export const getAllUretimAlanlari = async (): Promise<UretimAlani[]> => {
     console.error('Tüm üretim alanları yükleme hatası:', error);
     throw new Error('Üretim alanları yüklenemedi');
   }
-}; 
+};
+
+// Hasat Bilgisi CRUD Functions
+export const saveHasatBilgisi = async (hasatBilgisi: Omit<HasatBilgisi, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> => {
+  try {
+    const docRef = doc(collection(db, 'hasatBilgileri'));
+    
+    // Remove undefined values to prevent Firestore errors
+    const cleanData = Object.fromEntries(
+      Object.entries({
+        ...hasatBilgisi,
+        id: docRef.id,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }).filter(([, value]) => value !== undefined)
+    );
+    
+    await setDoc(docRef, cleanData);
+    return docRef.id;
+  } catch (error) {
+    console.error('Hasat bilgisi kayıt hatası:', error);
+    throw new Error('Hasat bilgisi kaydedilemedi');
+  }
+};
+
+export const updateHasatBilgisi = async (id: string, hasatBilgisi: Partial<HasatBilgisi>): Promise<void> => {
+  try {
+    const docRef = doc(db, 'hasatBilgileri', id);
+    
+    // Remove undefined values to prevent Firestore errors
+    const cleanData = Object.fromEntries(
+      Object.entries({
+        ...hasatBilgisi,
+        updatedAt: new Date().toISOString()
+      }).filter(([, value]) => value !== undefined)
+    );
+    
+    await updateDoc(docRef, cleanData);
+  } catch (error) {
+    console.error('Hasat bilgisi güncelleme hatası:', error);
+    throw new Error('Hasat bilgisi güncellenemedi');
+  }
+};
+
+export const getHasatBilgisi = async (id: string): Promise<HasatBilgisi | null> => {
+  try {
+    const docRef = doc(db, 'hasatBilgileri', id);
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      return docSnap.data() as HasatBilgisi;
+    }
+    return null;
+  } catch (error) {
+    console.error('Hasat bilgisi yükleme hatası:', error);
+    throw new Error('Hasat bilgisi yüklenemedi');
+  }
+};
+
+export const getHasatBilgileriByProducer = async (producerId: string): Promise<HasatBilgisi[]> => {
+  try {
+    const q = query(collection(db, 'hasatBilgileri'), where('producerId', '==', producerId));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => doc.data() as HasatBilgisi);
+  } catch (error) {
+    console.error('Üreticiye ait hasat bilgileri yükleme hatası:', error);
+    throw new Error('Hasat bilgileri yüklenemedi');
+  }
+};
+
+export const deleteHasatBilgisi = async (id: string): Promise<void> => {
+  try {
+    await deleteDoc(doc(db, 'hasatBilgileri', id));
+  } catch (error) {
+    console.error('Hasat bilgisi silme hatası:', error);
+    throw new Error('Hasat bilgisi silinemedi');
+  }
+};
+
+export const getAllHasatBilgileri = async (): Promise<HasatBilgisi[]> => {
+  try {
+    const querySnapshot = await getDocs(collection(db, 'hasatBilgileri'));
+    return querySnapshot.docs.map(doc => doc.data() as HasatBilgisi);
+  } catch (error) {
+    console.error('Tüm hasat bilgileri yükleme hatası:', error);
+    throw new Error('Hasat bilgileri yüklenemedi');
+  }
+};

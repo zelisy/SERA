@@ -93,4 +93,39 @@ export interface UretimAlani {
   // Metadata
   createdAt: string;
   updatedAt: string;
-} 
+}
+
+// Hasat Bilgisi Interface
+export interface HasatBilgisi {
+  id: string;
+  producerId: string; // Üretici ID'si
+  
+  // Dönem Bilgisi
+  donem: string; // 2023-2024, 2024-2025, vb.
+  
+  // Ürün Bilgileri
+  cesit: string; // Çeşit
+  dikimTarihi: string;
+  
+  // Verim Bilgileri
+  tonajDa: number; // Tonaj/da
+  ciroDa: number; // Ciro/da  
+  ortalamaFiyat: number; // Ortalama fiyat
+  kacDa: number; // Kaç da alan
+  
+  // Satış Detayları
+  kasaAdeti: number;
+  kasaFiyati: number;
+  kazanc: number; // Hesaplanacak: kasaAdeti * kasaFiyati
+  
+  // Dokümantasyon
+  halFisiUrl?: string; // Hal fişi fotoğrafı
+  
+  // Notlar
+  teknikEkipNotu?: string;
+  ciftciNotu?: string;
+  
+  // Metadata
+  createdAt: string;
+  updatedAt: string;
+}
