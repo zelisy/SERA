@@ -3,10 +3,12 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './pages/Login'
 import Header from './components/Header';
 import Footer from './components/Footer';
-import Home from './pages/home';
+import Home from './pages/Home';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Admin from './pages/Admin';
+import DikimOncesiDonem from './components/DikimOncesiDonem';
+import DikimOncesiDetayDonem from './components/DikimOncesiDetayDonem';
 
 // Basit bir authentication kontrolü için örnek bir fonksiyon (gerçek uygulamada context veya global state kullanılmalı)
 const isAuthenticated = () => {
@@ -27,6 +29,8 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/dikim-oncesi" element={<DikimOncesiDonem />} />
+          <Route path="/dikim-oncesi-detay" element={<DikimOncesiDetayDonem />} />
           <Route path="/admin" element={
             <PrivateRoute>
               <Admin />
