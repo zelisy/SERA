@@ -1,5 +1,5 @@
 import React from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Login from './pages/Login'
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -19,11 +19,14 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
   return isAuthenticated() ? children : <Navigate to="/login" />;
 }
 
-function App() {
+function AppContent() {
+  const location = useLocation();
+  const isAdminPage = location.pathname === '/admin';
+
   return (
-    <Router>
-      <Header />
-      <div style={{ minHeight: 'calc(100vh - 120px)' }}>
+    <>
+      {!isAdminPage && <Header />}
+      <div style={{ minHeight: isAdminPage ? '100vh' : 'calc(100vh - 120px)' }}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
@@ -38,7 +41,15 @@ function App() {
           } />
         </Routes>
       </div>
-      <Footer />
+      {!isAdminPage && <Footer />}
+    </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }
