@@ -11,3 +11,10 @@ body {
 #root {
   min-height: 100vh;
 }
+
+#hasat-pdf-table, #hasat-pdf-table * {
+  color: #222 !important;
+  background: #fff !important;
+  border-color: #222 !important;
+  box-shadow: none !important;
+}

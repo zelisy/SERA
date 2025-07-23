@@ -33,6 +33,7 @@ const HasatBilgisiComponent = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [isExportingPDF, setIsExportingPDF] = useState(false);
 
   // Validation Schema
   const validationSchema = Yup.object({
@@ -194,21 +195,23 @@ const HasatBilgisiComponent = () => {
 
   // PDF'e aktar fonksiyonu
   const exportToPDF = async () => {
+    setIsExportingPDF(true);
     const input = document.getElementById('hasat-pdf-table');
     if (!input) return;
     const html2canvas = (await import('html2canvas')).default;
     const jsPDF = (await import('jspdf')).default;
+    await new Promise(resolve => setTimeout(resolve, 100)); // render flush
     html2canvas(input, { scale: 2 } as any).then((canvas: any) => {
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('l', 'mm', 'a4');
       const pageWidth = pdf.internal.pageSize.getWidth();
-      // Görselin oranını koruyarak PDF'e sığdır
       const imgWidth = canvas.width;
       const imgHeight = canvas.height;
       const pdfWidth = pageWidth;
       const pdfHeight = (imgHeight * pdfWidth) / imgWidth;
       pdf.addImage(imgData, 'PNG', 0, 10, pdfWidth, pdfHeight);
       pdf.save('hasat_bilgileri.pdf');
+      setIsExportingPDF(false);
     });
   };
 
@@ -347,109 +350,77 @@ const HasatBilgisiComponent = () => {
             </div>
             {/* PDF için kapsayıcı */}
             <div id="hasat-pdf-table">
-              {/* Period Tables */}
-              {Object.keys(groupedRecords).length > 0 ? (
-                Object.entries(groupedRecords).map(([period, records]) => {
-                  const periodTotals = records.reduce((totals, record) => ({
-                    kasaAdeti: Number(totals.kasaAdeti) + Number(record.kasaAdeti),
-                    kg: Number(totals.kg) + (Number(record.tonajDa) * Number(record.kacDa) * 1000),
-                    fiyat: Number(totals.fiyat) + Number(record.ortalamaFiyat),
-                    kazanc: Number(totals.kazanc) + Number(record.kazanc),
-                  }), { kasaAdeti: 0 as number, kg: 0 as number, fiyat: 0 as number, kazanc: 0 as number });
-                  return (
-                    <div key={period} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden mb-8">
-                      <div className="p-6 border-b border-gray-100">
-                        <h2 className="text-xl font-bold text-slate-800">{period} Dönemi</h2>
-                      </div>
-                      <div className="overflow-x-auto">
-                        <table className="w-full">
-                          <thead className="bg-slate-50">
-                            <tr>
-                              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Hasat Tarihi</th>
-                              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Kasa Adeti</th>
-                              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Kg</th>
-                              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Fiyat</th>
-                              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Kazanç</th>
-                              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Hal Fişi Foto</th>
-                              <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">İşlemler</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-gray-100">
-                            {records.map((record) => (
-                              <tr key={record.id} className="hover:bg-slate-50 transition-colors">
-                                <td className="px-4 py-3">{new Date(record.dikimTarihi).toLocaleDateString('tr-TR')}</td>
-                                <td className="px-4 py-3">{record.kasaAdeti ? String(record.kasaAdeti) : ''}</td>
-                                <td className="px-4 py-3">{(Number(record.tonajDa || 0) * Number(record.kacDa || 0) * 1000).toLocaleString()} kg</td>
-                                <td className="px-4 py-3">₺{record.ortalamaFiyat ? String(record.ortalamaFiyat) : ''}</td>
-                                <td className="px-4 py-3 font-bold text-emerald-600">₺{record.kazanc ? Number(record.kazanc).toLocaleString() : ''}</td>
-                                <td className="px-4 py-3">
-                                  {record.halFisiUrl ? (
-                                    <a href={record.halFisiUrl} target="_blank" rel="noopener noreferrer">
-                                      <img src={record.halFisiUrl} alt="Hal Fişi" className="w-16 h-16 object-cover rounded border" />
-                                    </a>
-                                  ) : (
-                                    <span className="text-gray-400">-</span>
-                                  )}
-                                </td>
-                                <td className="px-4 py-3">
-                                  <div className="flex space-x-2">
-                                    <button
-                                      onClick={() => handleEdit(record)}
-                                      className="text-blue-600 hover:text-blue-800 text-sm"
-                                    >Düzenle</button>
-                                    <button
-                                      onClick={() => handleDelete(record.id)}
-                                      className="text-red-600 hover:text-red-800 text-sm"
-                                    >Sil</button>
-                                  </div>
-                                </td>
-                              </tr>
-                            ))}
-                            {/* Period Totals Row */}
-                            <tr className="bg-gray-50 font-semibold">
-                              <td className="px-4 py-3 text-slate-800">Toplam</td>
-                              <td className="px-4 py-3 text-slate-800">{periodTotals.kasaAdeti}</td>
-                              <td className="px-4 py-3 text-slate-800">{periodTotals.kg.toLocaleString()} kg</td>
-                              <td className="px-4 py-3 text-slate-800">-</td>
-                              <td className="px-4 py-3 text-emerald-600">₺{periodTotals.kazanc.toLocaleString()}</td>
-                              <td className="px-4 py-3"></td>
-                              <td className="px-4 py-3"></td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                      {/* Değerlendirme kutuları */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 border-t border-gray-100 bg-slate-50">
-                        <div>
-                          <h4 className="font-semibold text-slate-700 mb-2">Teknik Ekip Değerlendirmesi</h4>
-                          <div className="min-h-[48px] p-3 bg-white border border-gray-200 rounded-xl text-slate-700">
-                            {records[0]?.teknikEkipNotu || <span className="text-gray-400">-</span>}
-                          </div>
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-slate-700 mb-2">Çiftçi Değerlendirmesi</h4>
-                          <div className="min-h-[48px] p-3 bg-white border border-gray-200 rounded-xl text-slate-700">
-                            {records[0]?.ciftciNotu || <span className="text-gray-400">-</span>}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-12 text-center">
-                  <span className="text-6xl mb-4 block">📊</span>
-                  <h3 className="text-lg font-semibold text-slate-800 mb-2">Henüz hasat kaydı yok</h3>
-                  <p className="text-slate-600 mb-4">Bu üretici için henüz hasat kaydı bulunmuyor.</p>
-                  <button
-                    onClick={() => setCurrentStep('form')}
-                    className="bg-gradient-to-r from-emerald-500 to-green-600 text-white px-6 py-2 rounded-xl hover:from-emerald-600 hover:to-green-700 transition-all duration-200"
-                  >
-                    İlk Kaydı Ekle
-                  </button>
+              {/* Tek tablo, sezon ayrımı olmadan */}
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden mb-8">
+                <div className="p-6 border-b border-gray-100">
+                  <h2 className="text-xl font-bold text-slate-800">Tüm Hasat Kayıtları</h2>
                 </div>
-              )}
-            </div> {/* hasat-pdf-table sonu */}
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-slate-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Hasat Tarihi</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Sezon</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Kasa Adeti</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Kg</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Fiyat</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Kazanç</th>
+                        { !isExportingPDF && <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Hal Fişi Foto</th> }
+                        { !isExportingPDF && <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">İşlemler</th> }
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {hasatKayitlari.map((record) => (
+                        <tr key={record.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="px-4 py-3">{new Date(record.dikimTarihi).toLocaleDateString('tr-TR')}</td>
+                          <td className="px-4 py-3">{record.donem}</td>
+                          <td className="px-4 py-3">{record.kasaAdeti ? String(record.kasaAdeti) : ''}</td>
+                          <td className="px-4 py-3">{(Number(record.tonajDa) * Number(record.kacDa) * 1000).toLocaleString()} kg</td>
+                          <td className="px-4 py-3">₺{record.ortalamaFiyat ? String(record.ortalamaFiyat) : ''}</td>
+                          <td className="px-4 py-3 font-bold text-emerald-600">₺{record.kazanc ? Number(record.kazanc).toLocaleString() : ''}</td>
+                          { !isExportingPDF && (
+                            <td className="px-4 py-3">
+                              {record.halFisiUrl ? (
+                                <a href={record.halFisiUrl} target="_blank" rel="noopener noreferrer">
+                                  <img src={record.halFisiUrl} alt="Hal Fişi" className="w-16 h-16 object-cover rounded border" />
+                                </a>
+                              ) : (
+                                <span className="text-gray-400">-</span>
+                              )}
+                            </td>
+                          )}
+                          { !isExportingPDF && (
+                            <td className="px-4 py-3">
+                              <div className="flex space-x-2">
+                                <button
+                                  onClick={() => handleEdit(record)}
+                                  className="text-blue-600 hover:text-blue-800 text-sm"
+                                >Düzenle</button>
+                                <button
+                                  onClick={() => handleDelete(record.id)}
+                                  className="text-red-600 hover:text-red-800 text-sm"
+                                >Sil</button>
+                              </div>
+                            </td>
+                          )}
+                        </tr>
+                      ))}
+                      {/* Toplamlar satırı */}
+                      <tr className="bg-gray-50 font-semibold">
+                        <td className="px-4 py-3 text-slate-800">Toplam</td>
+                        <td className="px-4 py-3"></td>
+                        <td className="px-4 py-3 text-slate-800">{hasatKayitlari.reduce((sum, r) => sum + Number(r.kasaAdeti), 0)}</td>
+                        <td className="px-4 py-3 text-slate-800">{hasatKayitlari.reduce((sum, r) => sum + (Number(r.tonajDa) * Number(r.kacDa) * 1000), 0).toLocaleString()} kg</td>
+                        <td className="px-4 py-3 text-slate-800">-</td>
+                        <td className="px-4 py-3 text-emerald-600">₺{hasatKayitlari.reduce((sum, r) => sum + Number(r.kazanc), 0).toLocaleString()}</td>
+                        { !isExportingPDF && <td className="px-4 py-3"></td> }
+                        { !isExportingPDF && <td className="px-4 py-3"></td> }
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
