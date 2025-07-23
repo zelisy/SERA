@@ -9,18 +9,7 @@ import {
   query,
   orderBy
 } from 'firebase/firestore';
-
-interface Producer {
-  id: string;
-  firstName: string;
-  lastName: string;
-  tcNo: string;
-  phone: string;
-  address: string;
-  gender: string;
-  experienceYear: string;
-  registerDate: string;
-}
+import type { Producer } from '../types/producer';
 
 interface UreticiListesiProps {
   selectionMode?: boolean;

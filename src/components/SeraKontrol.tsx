@@ -1,4 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import UreticiListesi from './UreticiListesi';
+import type { Producer } from '../types/producer';
+import { seraKontrolConfig } from '../data/seraKontrolConfig';
+import ChecklistItem from './ChecklistItem';
+import type { ChecklistItem as ChecklistItemType } from '../types/checklist';
 
 interface SensorData {
   temperature: number;
@@ -8,6 +13,45 @@ interface SensorData {
   ph: number;
   ec: number;
 }
+
+const staticChecklist = [
+  {
+    title: '1) İklim kontrolü',
+    items: ['sıcaklık', 'nem', 'havalandırma']
+  },
+  {
+    title: '2) Su basıncı',
+    items: []
+  },
+  {
+    title: '3) Toprak analizi (foto eklenebilecek yer)',
+    items: ['boyut/foto']
+  },
+  {
+    title: '4) Kontrol bitkisi kontrolü',
+    items: ['kök', 'drenaj', 'yüzeyel kontrol', 'kök kontrol', 'gövde kontrol', 'genel kontrol']
+  },
+  {
+    title: '5) Sulama kontrolü',
+    items: ['damlama mesafe', 'su miktarı ayarlaması']
+  },
+  {
+    title: '6) Bitki gelişim dönemleri',
+    items: ['çıkış', 'yaprak', 'çiçeklenme', 'meyve tutumu', 'meyve olgunlaşma', 'meyve hasat']
+  },
+  {
+    title: '7) Zararlı kontrol',
+    items: ['beyaz sinek', 'trips', 'kırmızı örümcek', 'yeşil kurt', 'yaprak biti', 'biber gal sineği', 'samyeli akarı', 'kullanıcı ekle', 'resim ekle']
+  },
+  {
+    title: '8) Besin eksikliği kontrolü',
+    items: ['azot', 'fosfor', 'potasyum', 'magnezyum', 'kalsiyum', 'mangan', 'demir', 'bor', 'bakır', 'çinko', 'nikel']
+  },
+  {
+    title: '9) Sera kültürü - genel kontrol',
+    items: ['toplama', 'nemlendirme', 'budama', 'sera temizliği', '5 adet mavi', '5 adet sarı', '15 adet mavi', '15 adet sarı']
+  }
+];
 
 const SeraKontrol = () => {
   const [sensorData, setSensorData] = useState<SensorData>({
@@ -21,6 +65,9 @@ const SeraKontrol = () => {
 
   const [loading, setLoading] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(new Date());
+  const [selectedProducer, setSelectedProducer] = useState<Producer | null>(null);
+  const [currentStep, setCurrentStep] = useState<'select-producer' | 'checklist'>('select-producer');
+  const [checklist, setChecklist] = useState<ChecklistItemType[]>(seraKontrolConfig.items);
 
   // Simulate real-time data updates
   useEffect(() => {
@@ -117,6 +164,67 @@ const SeraKontrol = () => {
     { id: 'heating', name: 'Isıtma', status: false, icon: '🔥' },
     { id: 'lighting', name: 'LED Aydınlatma', status: true, icon: '💡' }
   ];
+
+  const handleChecklistUpdate = (itemId: string, completed: boolean, data?: Record<string, string | number | boolean | string[]>) => {
+    setChecklist(prev => prev.map(item =>
+      item.id === itemId ? { ...item, completed, data } : item
+    ));
+  };
+
+  // Producer Selection Step
+  if (currentStep === 'select-producer') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="p-4 lg:p-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="mb-6">
+              <h1 className="text-2xl font-bold text-slate-800">Sera Kontrolü</h1>
+              <p className="text-slate-600 mt-1">Sera kontrolü yapmak için önce bir üretici seçin</p>
+            </div>
+            <UreticiListesi
+              selectionMode={true}
+              onSelect={(producer) => {
+                setSelectedProducer(producer);
+                setCurrentStep('checklist');
+              }}
+              selectedProducer={selectedProducer}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+  // Checklist Step
+  if (currentStep === 'checklist' && selectedProducer) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="p-4 lg:p-6">
+          <div className="max-w-4xl mx-auto">
+            <div className="mb-6 flex items-center space-x-4">
+              <button
+                onClick={() => setCurrentStep('select-producer')}
+                className="text-slate-600 hover:text-slate-800 transition-colors"
+              >
+                ← Geri
+              </button>
+              <h1 className="text-2xl font-bold text-slate-800">
+                {selectedProducer.firstName} {selectedProducer.lastName} - Sera Kontrolü
+              </h1>
+            </div>
+            <div className="space-y-6">
+              {checklist.map((item) => (
+                <ChecklistItem
+                  key={item.id}
+                  item={item}
+                  onUpdate={handleChecklistUpdate}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">

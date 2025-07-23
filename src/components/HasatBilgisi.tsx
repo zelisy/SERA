@@ -7,23 +7,13 @@ import {
   saveHasatBilgisi,
   updateHasatBilgisi,
   getHasatBilgileriByProducer,
-  deleteHasatBilgisi
+  deleteHasatBilgisi,
+  getProducerById
 } from '../utils/firestoreUtils';
 import type { HasatBilgisi } from '../types/checklist';
+import type { Producer } from '../types/producer';
 // import jsPDF from 'jspdf';
 // import html2canvas from 'html2canvas';
-
-interface Producer {
-  id: string;
-  firstName: string;
-  lastName: string;
-  tcNo: string;
-  phone: string;
-  address: string;
-  gender: string;
-  experienceYear: string;
-  registerDate: string;
-}
 
 const HasatBilgisiComponent = () => {
   const [selectedProducer, setSelectedProducer] = useState<Producer | null>(null);
@@ -34,6 +24,8 @@ const HasatBilgisiComponent = () => {
   const [error, setError] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [isExportingPDF, setIsExportingPDF] = useState(false);
+  // Yeni: Üretici bilgilerini cache'leyecek state
+  const [producerMap, setProducerMap] = useState<Record<string, Producer>>({});
 
   // Validation Schema
   const validationSchema = Yup.object({
@@ -71,6 +63,25 @@ const HasatBilgisiComponent = () => {
       loadHasatKayitlari();
     }
   }, [selectedProducer]);
+
+  // Hasat kayıtları yüklendiğinde üretici bilgilerini getir
+  useEffect(() => {
+    const fetchProducers = async () => {
+      const uniqueProducerIds = Array.from(new Set(hasatKayitlari.map(r => r.producerId)));
+      const newMap: Record<string, Producer> = { ...producerMap };
+      for (const id of uniqueProducerIds) {
+        if (!newMap[id]) {
+          const producer = await getProducerById(id);
+          if (producer) newMap[id] = producer;
+        }
+      }
+      setProducerMap(newMap);
+    };
+    if (hasatKayitlari.length > 0) {
+      fetchProducers();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasatKayitlari]);
 
   const loadHasatKayitlari = async () => {
     if (!selectedProducer) return;
@@ -359,6 +370,7 @@ const HasatBilgisiComponent = () => {
                   <table className="w-full">
                     <thead className="bg-slate-50">
                       <tr>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Üretici</th>
                         <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Hasat Tarihi</th>
                         <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Sezon</th>
                         <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Kasa Adeti</th>
@@ -372,6 +384,9 @@ const HasatBilgisiComponent = () => {
                     <tbody className="divide-y divide-gray-100">
                       {hasatKayitlari.map((record) => (
                         <tr key={record.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="px-4 py-3">
+                            {producerMap[record.producerId]?.firstName} {producerMap[record.producerId]?.lastName}
+                          </td>
                           <td className="px-4 py-3">{new Date(record.dikimTarihi).toLocaleDateString('tr-TR')}</td>
                           <td className="px-4 py-3">{record.donem}</td>
                           <td className="px-4 py-3">{record.kasaAdeti ? String(record.kasaAdeti) : ''}</td>
@@ -408,6 +423,7 @@ const HasatBilgisiComponent = () => {
                       {/* Toplamlar satırı */}
                       <tr className="bg-gray-50 font-semibold">
                         <td className="px-4 py-3 text-slate-800">Toplam</td>
+                        <td className="px-4 py-3"></td>
                         <td className="px-4 py-3"></td>
                         <td className="px-4 py-3 text-slate-800">{hasatKayitlari.reduce((sum, r) => sum + Number(r.kasaAdeti), 0)}</td>
                         <td className="px-4 py-3 text-slate-800">{hasatKayitlari.reduce((sum, r) => sum + (Number(r.tonajDa) * Number(r.kacDa) * 1000), 0).toLocaleString()} kg</td>

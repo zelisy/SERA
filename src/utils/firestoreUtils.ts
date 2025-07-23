@@ -1,6 +1,7 @@
 import { doc, setDoc, getDoc, updateDoc, serverTimestamp, collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import type { ChecklistSection, UretimAlani, HasatBilgisi } from '../types/checklist';
+import type { Producer } from '../types/producer';
 
 // Existing Checklist Functions
 export const saveChecklistData = async (sectionId: string, data: ChecklistSection): Promise<void> => {
@@ -238,5 +239,20 @@ export const getAllHasatBilgileri = async (): Promise<HasatBilgisi[]> => {
   } catch (error) {
     console.error('Tüm hasat bilgileri yükleme hatası:', error);
     throw new Error('Hasat bilgileri yüklenemedi');
+  }
+};
+
+// Üretici Bilgisi Getir (id ile)
+export const getProducerById = async (producerId: string): Promise<Producer | null> => {
+  try {
+    const docRef = doc(db, 'producers', producerId);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() } as Producer;
+    }
+    return null;
+  } catch (error) {
+    console.error('Üretici yükleme hatası:', error);
+    throw new Error('Üretici yüklenemedi');
   }
 };

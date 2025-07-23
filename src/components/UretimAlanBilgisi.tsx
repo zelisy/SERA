@@ -9,18 +9,7 @@ import {
   deleteUretimAlani
 } from '../utils/firestoreUtils';
 import type { UretimAlani } from '../types/checklist';
-
-interface Producer {
-  id: string;
-  firstName: string;
-  lastName: string;
-  tcNo: string;
-  phone: string;
-  address: string;
-  gender: string;
-  experienceYear: string;
-  registerDate: string;
-}
+import type { Producer } from '../types/producer';
 
 const UretimAlanBilgisi: React.FC = () => {
   const [selectedProducer, setSelectedProducer] = useState<Producer | null>(null);

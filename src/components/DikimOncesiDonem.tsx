@@ -4,18 +4,7 @@ import UreticiListesi from './UreticiListesi';
 import { dikimOncesiConfig } from '../data/dikimOncesiConfig';
 import { loadChecklistData, updateChecklistItem, saveChecklistData } from '../utils/firestoreUtils';
 import type { ChecklistSection } from '../types/checklist';
-
-interface Producer {
-  id: string;
-  firstName: string;
-  lastName: string;
-  tcNo: string;
-  phone: string;
-  address: string;
-  gender: string;
-  experienceYear: string;
-  registerDate: string;
-}
+import type { Producer } from '../types/producer';
 
 const DikimOncesiDonem: React.FC = () => {
   const [checklistData, setChecklistData] = useState<ChecklistSection>(dikimOncesiConfig);
