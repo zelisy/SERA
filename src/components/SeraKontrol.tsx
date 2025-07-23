@@ -34,6 +34,7 @@ const SeraKontrol = () => {
   const [originalChecklist, setOriginalChecklist] = useState<ChecklistItemType[]>(seraKontrolConfig.items);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [history, setHistory] = useState<any[]>([]); // Geçmiş değişiklikler için
+  const [selectedHistoryIdx, setSelectedHistoryIdx] = useState<number | null>(null);
 
   // Simulate real-time data updates
   useEffect(() => {
@@ -215,6 +216,20 @@ const SeraKontrol = () => {
     setSaveSuccess(false);
   };
 
+  const handleDeleteHistory = async (idx: number) => {
+    if (!selectedProducer) return;
+    if (!window.confirm('Bu geçmiş kaydı silinsin mi?')) return;
+    const dataKey = `sera-kontrol-${selectedProducer.id}`;
+    const newHistory = history.filter((_, i) => i !== idx);
+    setHistory(newHistory);
+    setSelectedHistoryIdx(null);
+    try {
+      await saveChecklistData(dataKey, { ...seraKontrolConfig, items: checklist, history: newHistory });
+    } catch (err) {
+      setError('Geçmiş kaydı silinemedi');
+    }
+  };
+
   // Producer Selection Step
   if (currentStep === 'select-producer') {
     return (
@@ -296,21 +311,60 @@ const SeraKontrol = () => {
                 {/* Geçmiş değişiklikler */}
                 {history.length > 0 && (
                   <div className="mt-10">
-                    <h2 className="text-lg font-bold text-slate-800 mb-2">Geçmiş Kayıtlar</h2>
-                    <ul className="space-y-2">
+                    <h2 className="text-lg font-bold text-slate-800 mb-4">Geçmiş Kayıtlar</h2>
+                    <div className="flex flex-wrap gap-3 mb-6">
                       {history.map((h, idx) => (
-                        <li key={idx} className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                          <div className="font-semibold text-slate-700 mb-1">{new Date(h.date).toLocaleString('tr-TR')}</div>
-                          <ul className="list-disc pl-6 text-slate-600 text-sm">
-                            {h.items.map((item: any) => (
-                              <li key={item.id}>
-                                {item.label}: {item.completed ? '✔️ Tamamlandı' : '⏳ Bekliyor'}
-                              </li>
-                            ))}
-                          </ul>
-                        </li>
+                        <div key={idx} className="flex items-center gap-2">
+                          <button
+                            onClick={() => setSelectedHistoryIdx(idx)}
+                            className={`px-4 py-2 rounded-lg border font-medium transition-colors ${selectedHistoryIdx === idx ? 'bg-emerald-500 text-white border-emerald-600' : 'bg-white text-slate-700 border-gray-300 hover:bg-gray-100'}`}
+                          >
+                            {new Date(h.date).toLocaleString('tr-TR')}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteHistory(idx)}
+                            className="p-2 rounded-full bg-red-100 hover:bg-red-200 text-red-600 border border-red-200"
+                            title="Kaydı Sil"
+                          >
+                            🗑️
+                          </button>
+                        </div>
                       ))}
-                    </ul>
+                    </div>
+                    {selectedHistoryIdx !== null && history[selectedHistoryIdx] && (
+                      <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                        {(() => {
+                          const h = history[selectedHistoryIdx];
+                          const completedCount = h.items.filter((item: any) => item.completed).length;
+                          const totalCount = h.items.length;
+                          const percent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+                          return (
+                            <>
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="font-semibold text-slate-700">{new Date(h.date).toLocaleString('tr-TR')}</div>
+                                <div className="text-sm text-emerald-700 font-bold">%{percent} tamamlandı</div>
+                              </div>
+                              <ul className="list-disc pl-6 text-slate-600 text-sm">
+                                {h.items.map((item: any) => (
+                                  <li key={item.id} className="mb-1">
+                                    <span className="font-medium">{item.label}:</span> {item.completed ? '✔️ Tamamlandı' : '⏳ Bekliyor'}
+                                    {item.data && (
+                                      <ul className="ml-4 list-square text-xs text-gray-500">
+                                        {Object.entries(item.data).map(([k, v]) => (
+                                          <li key={k}>
+                                            <span className="font-semibold">{k}:</span> {typeof v === 'boolean' ? (v ? '✔️' : '❌') : String(v)}
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    )}
+                                  </li>
+                                ))}
+                              </ul>
+                            </>
+                          );
+                        })()}
+                      </div>
+                    )}
                   </div>
                 )}
               </>
