@@ -157,13 +157,6 @@ const Login: React.FC = () => {
           </form>
 
           {/* Demo Account Info */}
-          <div className="mt-8 p-4 bg-slate-50 rounded-xl border border-slate-200">
-            <h4 className="text-sm font-semibold text-slate-700 mb-2">Demo Hesap</h4>
-            <div className="space-y-1 text-xs text-slate-600">
-              <p><strong>E-posta:</strong> admin@sera.com</p>
-              <p><strong>Şifre:</strong> demo123</p>
-            </div>
-          </div>
         </div>
 
         {/* Footer */}

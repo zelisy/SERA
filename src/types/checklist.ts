@@ -73,6 +73,8 @@ export interface UretimAlani {
   suKaynagi: string;
   damlamaSistemiAdeti: number;
   nemlendirmeSistemi: boolean;
+  damlamaDebisi?: string;
+  sulamaSekli?: string;
   
   // Toprak Bilgileri
   toprakYapisi: 'tasli' | 'kumlu' | 'tinli' | 'killi' | 'marnli' | 'humuslu' | 'kirecli';

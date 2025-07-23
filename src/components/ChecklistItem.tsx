@@ -172,6 +172,16 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate }) => {
                 <option key={option} value={option}>{option}</option>
               ))}
             </Field>
+            {/* Eğer Diğer seçiliyse input göster */}
+            {values[field.id] === 'Diğer' && (
+              <input
+                type="text"
+                className="mt-2 w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
+                placeholder="Lütfen belirtiniz..."
+                value={values[`${field.id}_diger`] || ''}
+                onChange={e => setFieldValue(`${field.id}_diger`, e.target.value)}
+              />
+            )}
             <div className="text-red-500 text-xs lg:text-sm mt-1">
               <ErrorMessage name={field.id} />
             </div>

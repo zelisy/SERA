@@ -21,13 +21,14 @@ const Contact = () => {
     {
       icon: '📱',
       title: 'Telefon',
-      value: '+90 212 222 33 44',
-      link: 'tel:+902122223344'
+      value: '+90 537 738 37 43',
+      link: 'tel:+905377383743'
+
     },
     {
       icon: '📍',
       title: 'Adres',
-      value: 'İstanbul Teknokent, Ar-Ge 2 Binası, No: 101, İstanbul',
+      value: 'Demre Mah. 100. Sok. No: 100, Antalya',
       link: 'https://maps.google.com'
     },
     {
@@ -130,7 +131,7 @@ const Contact = () => {
                   Acil durumlar için WhatsApp üzerinden 7/24 destek alabilirsiniz.
                 </p>
                 <a 
-                  href="https://wa.me/905551234567"
+                  href="https://wa.me/905377383743"
                   className="inline-flex items-center space-x-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
                 >
                   <span>📱</span>

@@ -32,42 +32,44 @@ const UretimAlanBilgisi: React.FC = () => {
 
   // Validation Schema
   const validationSchema = Yup.object({
-    seraType: Yup.string().required('Sera tipi zorunludur'),
+    seraType: Yup.string(),
     plastikYil: Yup.number().when('seraType', {
       is: 'plastik',
-      then: (schema) => schema.required('Plastik yaşı gereklidir').min(1, 'En az 1 yıl olmalıdır'),
+      then: (schema) => schema,
       otherwise: (schema) => schema.nullable()
     }),
     katmanType: Yup.string().when('seraType', {
       is: 'plastik',
-      then: (schema) => schema.required('Katman tipi gereklidir'),
+      then: (schema) => schema,
       otherwise: (schema) => schema.nullable()
     }),
-    ada: Yup.string().required('Ada bilgisi zorunludur'),
-    parsel: Yup.string().required('Parsel bilgisi zorunludur'),
-    mahalle: Yup.string().required('Mahalle bilgisi zorunludur'),
-    alanM2: Yup.number().required('Alan m² zorunludur').min(1, 'En az 1 m² olmalıdır'),
-    urunIsmi: Yup.string().required('Ürün ismi zorunludur'),
-    cesitIsmi: Yup.string().required('Çeşit ismi zorunludur'),
-    dikimTarihi: Yup.date().required('Dikim tarihi zorunludur'),
-    dikimYogunlugu: Yup.string().required('Dikim yoğunluğu zorunludur'),
-    siraArasiMesafe: Yup.number().required('Sıra arası mesafe zorunludur').min(0, 'Negatif olamaz'),
-    setUstuMesafe: Yup.number().required('Set üstü mesafe zorunludur').min(0, 'Negatif olamaz'),
-    siraType: Yup.string().required('Sıra tipi zorunludur'),
-    dikimYonu: Yup.string().required('Dikim yönü zorunludur'),
-    suKaynagi: Yup.string().required('Su kaynağı zorunludur'),
-    damlamaSistemiAdeti: Yup.number().required('Damlama sistemi adeti zorunludur').min(0, 'Negatif olamaz'),
-    toprakYapisi: Yup.string().required('Toprak yapısı zorunludur'),
-    drenajSeviyesi: Yup.string().required('Drenaj seviyesi zorunludur'),
-    isitmaSistemi: Yup.string().required('Isıtma sistemi zorunludur'),
-    havalandirma: Yup.string().required('Havalandırma zorunludur'),
+    ada: Yup.string(),
+    parsel: Yup.string(),
+    mahalle: Yup.string(),
+    alanM2: Yup.number().min(1, 'En az 1 m² olmalıdır'),
+    urunIsmi: Yup.string(),
+    cesitIsmi: Yup.string(),
+    dikimTarihi: Yup.date(),
+    dikimYogunlugu: Yup.string(),
+    siraArasiMesafe: Yup.number().min(0, 'Negatif olamaz'),
+    setUstuMesafe: Yup.number().min(0, 'Negatif olamaz'),
+    siraType: Yup.string(),
+    dikimYonu: Yup.string(),
+    suKaynagi: Yup.string(),
+    damlamaSistemiAdeti: Yup.number().min(0, 'Negatif olamaz'),
+    damlamaDebisi: Yup.string(),
+    sulamaSekli: Yup.string(),
+    toprakYapisi: Yup.string(),
+    drenajSeviyesi: Yup.string(),
+    isitmaSistemi: Yup.string(),
+    havalandirma: Yup.string(),
     tulType: Yup.string().when('tulBilgisi', {
       is: true,
-      then: (schema) => schema.required('Tül tipi gereklidir'),
+      then: (schema) => schema,
       otherwise: (schema) => schema.nullable()
     }),
-    kulturelIslemler: Yup.string().required('Kültürel işlemler zorunludur'),
-    teknikDegerlendirme: Yup.string().required('Teknik değerlendirme zorunludur')
+    kulturelIslemler: Yup.string(),
+    teknikDegerlendirme: Yup.string()
   });
 
   // Initial values
@@ -89,6 +91,8 @@ const UretimAlanBilgisi: React.FC = () => {
     dikimYonu: editingArea?.dikimYonu || '',
     suKaynagi: editingArea?.suKaynagi || '',
     damlamaSistemiAdeti: editingArea?.damlamaSistemiAdeti || '',
+    damlamaDebisi: editingArea?.damlamaDebisi || '',
+    sulamaSekli: editingArea?.sulamaSekli || '',
     nemlendirmeSistemi: editingArea?.nemlendirmeSistemi || false,
     toprakYapisi: editingArea?.toprakYapisi || '',
     drenajSeviyesi: editingArea?.drenajSeviyesi || '',
@@ -151,6 +155,8 @@ const UretimAlanBilgisi: React.FC = () => {
         dikimYonu: values.dikimYonu as 'kuzey-guney' | 'dogu-bati',
         suKaynagi: String(values.suKaynagi),
         damlamaSistemiAdeti: Number(values.damlamaSistemiAdeti),
+        damlamaDebisi: String(values.damlamaDebisi),
+        sulamaSekli: String(values.sulamaSekli),
         nemlendirmeSistemi: Boolean(values.nemlendirmeSistemi),
         toprakYapisi: values.toprakYapisi as 'tasli' | 'kumlu' | 'tinli' | 'killi' | 'marnli' | 'humuslu' | 'kirecli',
         drenajSeviyesi: values.drenajSeviyesi as 'cok-iyi' | 'iyi' | 'orta' | 'kotu' | 'cok-kotu',
@@ -432,12 +438,12 @@ const UretimAlanBilgisi: React.FC = () => {
                 {/* Sera Tipi Bilgileri */}
                 <div>
                   <h3 className="text-lg font-semibold text-slate-800 mb-4 border-b border-gray-200 pb-2">
-                    🏭 Sera Tipi Bilgileri
+                    🏭 Üretim  Tipi Bilgileri
                   </h3>
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Sera Tipi <span className="text-red-500">*</span>
+                        Üretim Tipi
                       </label>
                       <Field as="select" name="seraType" className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
                         <option value="">Seçiniz...</option>
@@ -452,7 +458,7 @@ const UretimAlanBilgisi: React.FC = () => {
                       <>
                         <div>
                           <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Kaç Yıllık <span className="text-red-500">*</span>
+                            Kaç Yıllık
                           </label>
                           <Field
                             type="number"
@@ -465,7 +471,7 @@ const UretimAlanBilgisi: React.FC = () => {
 
                         <div>
                           <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Katman Tipi <span className="text-red-500">*</span>
+                            Katman Tipi
                           </label>
                           <Field as="select" name="katmanType" className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
                             <option value="">Seçiniz...</option>
@@ -487,7 +493,7 @@ const UretimAlanBilgisi: React.FC = () => {
                   <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Ada <span className="text-red-500">*</span>
+                        Ada
                       </label>
                       <Field
                         type="text"
@@ -500,7 +506,7 @@ const UretimAlanBilgisi: React.FC = () => {
 
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Parsel <span className="text-red-500">*</span>
+                        Parsel
                       </label>
                       <Field
                         type="text"
@@ -513,7 +519,7 @@ const UretimAlanBilgisi: React.FC = () => {
 
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Mahalle <span className="text-red-500">*</span>
+                        Mahalle
                       </label>
                       <Field
                         type="text"
@@ -526,7 +532,7 @@ const UretimAlanBilgisi: React.FC = () => {
 
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Alan (m²) <span className="text-red-500">*</span>
+                        Alan (m²)
                       </label>
                       <Field
                         type="number"
@@ -547,7 +553,7 @@ const UretimAlanBilgisi: React.FC = () => {
                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                      <div>
                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                         Ürün İsmi <span className="text-red-500">*</span>
+                         Ürün İsmi
                        </label>
                        <Field
                          type="text"
@@ -560,7 +566,7 @@ const UretimAlanBilgisi: React.FC = () => {
 
                      <div>
                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                         Çeşit İsmi <span className="text-red-500">*</span>
+                         Çeşit İsmi
                        </label>
                        <Field
                          type="text"
@@ -573,7 +579,7 @@ const UretimAlanBilgisi: React.FC = () => {
 
                      <div>
                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                         Dikim Tarihi <span className="text-red-500">*</span>
+                         Dikim Tarihi
                        </label>
                        <Field
                          type="date"
@@ -593,7 +599,7 @@ const UretimAlanBilgisi: React.FC = () => {
                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                      <div className="lg:col-span-2">
                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                         Dikim Yoğunluğu <span className="text-red-500">*</span>
+                         Dikim Yoğunluğu
                        </label>
                        <Field
                          type="text"
@@ -606,7 +612,7 @@ const UretimAlanBilgisi: React.FC = () => {
 
                      <div>
                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                         Sıra Arası Mesafe (cm) <span className="text-red-500">*</span>
+                         Sıra Arası Mesafe (cm)
                        </label>
                        <Field
                          type="number"
@@ -619,7 +625,7 @@ const UretimAlanBilgisi: React.FC = () => {
 
                      <div>
                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                         Set Üstü Mesafe (cm) <span className="text-red-500">*</span>
+                         Set Üstü Mesafe (cm)
                        </label>
                        <Field
                          type="number"
@@ -632,7 +638,7 @@ const UretimAlanBilgisi: React.FC = () => {
 
                      <div>
                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                         Sıra Tipi <span className="text-red-500">*</span>
+                         Sıra Tipi
                        </label>
                        <Field as="select" name="siraType" className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
                          <option value="">Seçiniz...</option>
@@ -644,7 +650,7 @@ const UretimAlanBilgisi: React.FC = () => {
 
                      <div>
                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                         Dikim Yönü <span className="text-red-500">*</span>
+                         Dikim Yönü
                        </label>
                        <Field as="select" name="dikimYonu" className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
                          <option value="">Seçiniz...</option>
@@ -664,7 +670,7 @@ const UretimAlanBilgisi: React.FC = () => {
                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                      <div>
                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                         Su Kaynağı <span className="text-red-500">*</span>
+                         Su Kaynağı
                        </label>
                        <Field
                          type="text"
@@ -677,7 +683,7 @@ const UretimAlanBilgisi: React.FC = () => {
 
                      <div>
                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                         Damlama Sistemi Adeti <span className="text-red-500">*</span>
+                         Damlama Sistemi Adeti
                        </label>
                        <Field
                          type="number"
@@ -686,6 +692,32 @@ const UretimAlanBilgisi: React.FC = () => {
                          placeholder="Örn: 4"
                        />
                        <ErrorMessage name="damlamaSistemiAdeti" component="div" className="text-red-500 text-xs mt-1" />
+                     </div>
+
+                     <div>
+                       <label className="block text-sm font-semibold text-gray-700 mb-2">
+                         Damlama Debisi
+                       </label>
+                       <Field
+                         type="text"
+                         name="damlamaDebisi"
+                         className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
+                         placeholder="Örn: 4 L/h, 8 L/h"
+                       />
+                       <ErrorMessage name="damlamaDebisi" component="div" className="text-red-500 text-xs mt-1" />
+                     </div>
+
+                     <div>
+                       <label className="block text-sm font-semibold text-gray-700 mb-2">
+                         Sulama Şekli
+                       </label>
+                       <Field
+                         type="text"
+                         name="sulamaSekli"
+                         className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
+                         placeholder="Örn: Manuel, Otomatik, Damla Sulama"
+                       />
+                       <ErrorMessage name="sulamaSekli" component="div" className="text-red-500 text-xs mt-1" />
                      </div>
 
                      <div>
@@ -714,7 +746,7 @@ const UretimAlanBilgisi: React.FC = () => {
                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                      <div>
                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                         Toprak Yapısı <span className="text-red-500">*</span>
+                         Toprak Yapısı
                        </label>
                        <Field as="select" name="toprakYapisi" className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
                          <option value="">Seçiniz...</option>
@@ -731,7 +763,7 @@ const UretimAlanBilgisi: React.FC = () => {
 
                      <div>
                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                         Drenaj Seviyesi / Su Tutma Kapasitesi <span className="text-red-500">*</span>
+                         Drenaj Seviyesi / Su Tutma Kapasitesi
                        </label>
                        <Field as="select" name="drenajSeviyesi" className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
                          <option value="">Seçiniz...</option>
@@ -754,7 +786,7 @@ const UretimAlanBilgisi: React.FC = () => {
                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                      <div>
                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                         Isıtma Sistemi <span className="text-red-500">*</span>
+                         Isıtma Sistemi
                        </label>
                        <Field
                          type="text"
@@ -767,7 +799,7 @@ const UretimAlanBilgisi: React.FC = () => {
 
                      <div>
                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                         Havalandırma <span className="text-red-500">*</span>
+                         Havalandırma
                        </label>
                        <Field as="select" name="havalandirma" className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
                          <option value="">Seçiniz...</option>
@@ -804,7 +836,7 @@ const UretimAlanBilgisi: React.FC = () => {
                      {values.tulBilgisi && (
                        <div className="lg:col-span-2">
                          <label className="block text-sm font-semibold text-gray-700 mb-2">
-                           Tül Tipi <span className="text-red-500">*</span>
+                           Tül Tipi
                          </label>
                          <Field as="select" name="tulType" className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
                            <option value="">Seçiniz...</option>
@@ -826,7 +858,7 @@ const UretimAlanBilgisi: React.FC = () => {
                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                      <div>
                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                         Kültürel İşlemleri Kim Yapacak <span className="text-red-500">*</span>
+                         Kültürel İşlemleri Kim Yapacak
                        </label>
                        <Field as="select" name="kulturelIslemler" className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200">
                          <option value="">Seçiniz...</option>
@@ -839,7 +871,7 @@ const UretimAlanBilgisi: React.FC = () => {
 
                      <div className="lg:col-span-2">
                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                         Teknik Ekip Değerlendirme Alanı <span className="text-red-500">*</span>
+                         Teknik Ekip Değerlendirme Alanı
                        </label>
                        <Field
                          as="textarea"

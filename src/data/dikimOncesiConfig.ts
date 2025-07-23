@@ -14,13 +14,13 @@ export const dikimOncesiConfig: ChecklistSection = {
           id: 'analiz-tarihi',
           label: 'Analiz Tarihi',
           type: 'date',
-          required: true
+          required: false
         },
         {
           id: 'ph-degeri',
           label: 'pH Değeri',
           type: 'number',
-          required: true,
+          required: false,
           validation: {
             min: 0,
             max: 14
@@ -30,7 +30,7 @@ export const dikimOncesiConfig: ChecklistSection = {
           id: 'organik-madde',
           label: 'Organik Madde (%)',
           type: 'number',
-          required: true,
+          required: false,
           validation: {
             min: 0,
             max: 100
@@ -53,7 +53,7 @@ export const dikimOncesiConfig: ChecklistSection = {
     },
     {
       id: 'sera-temizligi',
-      label: 'Sera temizliği tamamlandı',
+      label: 'Üretim Alanı Temizliği tamamlandı',
       completed: false,
       hasDetails: true,
       detailFields: [
@@ -61,18 +61,18 @@ export const dikimOncesiConfig: ChecklistSection = {
           id: 'temizlik-tarihi',
           label: 'Temizlik Tarihi',
           type: 'date',
-          required: true
+          required: false
         },
         {
           id: 'temizlik-turu',
           label: 'Temizlik Türü',
           type: 'select',
-          required: true,
+          required: false,
           options: ['Genel Temizlik', 'Dezenfeksiyon', 'Derinlemesine Temizlik']
         },
         {
           id: 'kullanilan-maddeler',
-          label: 'Kullanılan Temizlik Maddeleri',
+          label: 'Kullanılan Ürünler/Teknik Ekip Değerlendirme',
           type: 'textarea',
           required: false,
           placeholder: 'Kullanılan temizlik maddeleri ve miktarları...'
@@ -101,13 +101,13 @@ export const dikimOncesiConfig: ChecklistSection = {
           id: 'kontrol-tarihi',
           label: 'Kontrol Tarihi',
           type: 'date',
-          required: true
+          required: false
         },
         {
           id: 'sistem-durumu',
           label: 'Sistem Durumu',
           type: 'select',
-          required: true,
+          required: false,
           options: ['Mükemmel', 'İyi', 'Orta', 'Kötü', 'Arızalı']
         },
         {
@@ -153,21 +153,21 @@ export const dikimOncesiConfig: ChecklistSection = {
           id: 'plan-tarihi',
           label: 'Plan Hazırlama Tarihi',
           type: 'date',
-          required: true
+          required: false
         },
         {
           id: 'gubreleme-programi',
           label: 'Gübreleme Programı',
           type: 'select',
-          required: true,
-          options: ['Haftalık', '10 Günlük', '2 Haftalık', 'Aylık']
+          required: false,
+          options: ['Haftalık', '10 Günlük', '2 Haftalık', 'Aylık', 'Diğer']
         },
         {
           id: 'ana-gubre',
           label: 'Ana Gübre Türü',
           type: 'select',
-          required: true,
-          options: ['NPK', 'Organik', 'Kompost', 'Çiftlik Gübresi', 'Karma']
+          required: false,
+          options: ['NPK', 'Organik', 'Kompost', 'Çiftlik Gübresi', 'Karma', 'Diğer',"Mikrobiyal"]
         },
         {
           id: 'gubre-miktari',
@@ -197,27 +197,27 @@ export const dikimOncesiConfig: ChecklistSection = {
           id: 'secim-tarihi',
           label: 'Fide Seçim Tarihi',
           type: 'date',
-          required: true
+          required: false
         },
         {
           id: 'fide-turu',
           label: 'Fide Türü',
           type: 'select',
-          required: true,
+          required: false,
           options: ['Domates', 'Salatalık', 'Biber', 'Patlıcan', 'Diğer']
         },
         {
           id: 'fide-cesidi',
           label: 'Fide Çeşidi',
           type: 'text',
-          required: true,
+          required: false,
           placeholder: 'Örn: F1 Hibridi, Açık Tozlanan...'
         },
         {
           id: 'fide-sayisi',
           label: 'Fide Sayısı (adet)',
           type: 'number',
-          required: true,
+          required: false,
           validation: {
             min: 1
           }
@@ -237,7 +237,7 @@ export const dikimOncesiConfig: ChecklistSection = {
         },
         {
           id: 'fide-notlari',
-          label: 'Fide Notları',
+          label: 'Fide Notları/Teknik Ekip Değerlendirme',
           type: 'textarea',
           required: false,
           placeholder: 'Fide kalitesi, görünümü ile ilgili notlar...'

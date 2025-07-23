@@ -266,9 +266,6 @@ const Home = () => {
               >
                 🚀 Hemen Giriş Yapın
               </button>
-              <p className="text-gray-600 mt-4">
-                Demo hesap: <strong>demo@sera.com</strong> | Şifre: <strong>123456</strong>
-              </p>
             </div>
           </div>
         )}

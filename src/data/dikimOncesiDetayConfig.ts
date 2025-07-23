@@ -14,7 +14,7 @@ export const dikimOncesiDetayConfig: ChecklistSection = {
           id: 'solarizasyon-durum',
           label: 'Solarizasyon Durumu',
           type: 'select',
-          required: true,
+          required: false,
           options: ['Yapıldı', 'Yapılmadı']
         },
         {
@@ -46,7 +46,7 @@ export const dikimOncesiDetayConfig: ChecklistSection = {
           id: 'golge-durumu',
           label: 'Gölge Durumu',
           type: 'select',
-          required: true,
+          required: false,
           options: ['Var', 'Yok']
         }
       ]
@@ -61,14 +61,14 @@ export const dikimOncesiDetayConfig: ChecklistSection = {
           id: 'isleme-sekli',
           label: 'İşleme Şekli',
           type: 'select',
-          required: true,
+          required: false,
           options: ['Derin İşleme', 'Set Üstü İşleme']
         },
         {
           id: 'isleme-tarihi',
           label: 'İşleme Tarihi',
           type: 'date',
-          required: true
+          required: false
         },
         {
           id: 'kullanilan-ekipman',
@@ -89,27 +89,27 @@ export const dikimOncesiDetayConfig: ChecklistSection = {
           id: 'gubreleme-turu',
           label: 'Gübreleme Türü',
           type: 'select',
-          required: true,
+          required: false,
           options: ['Kimyasal Gübreleme', 'Organik Gübreleme']
         },
         {
           id: 'uygulama-zamani',
           label: 'Uygulama Zamanı',
           type: 'date',
-          required: true
+          required: false
         },
         {
           id: 'gubre-cesidi',
           label: 'Gübre Çeşidi',
           type: 'text',
-          required: true,
+          required: false,
           placeholder: 'NPK 15-15-15, çiftlik gübresi vb...'
         },
         {
           id: 'miktar',
           label: 'Uygulanan Miktar (kg/dekar)',
           type: 'number',
-          required: true,
+          required: false,
           validation: { min: 0 }
         }
       ]
@@ -124,7 +124,7 @@ export const dikimOncesiDetayConfig: ChecklistSection = {
           id: 'dezenfeksiyon-durum',
           label: 'Dezenfeksiyon Yapıldı mı?',
           type: 'select',
-          required: true,
+          required: false,
           options: ['Yapıldı', 'Yapılmadı']
         },
         {
@@ -156,7 +156,7 @@ export const dikimOncesiDetayConfig: ChecklistSection = {
           id: 'su-analizi-ec',
           label: 'Su Analizi EC Değeri',
           type: 'number',
-          required: true,
+          required: false,
           validation: { min: 0 },
           placeholder: 'mS/cm'
         },
@@ -164,7 +164,7 @@ export const dikimOncesiDetayConfig: ChecklistSection = {
           id: 'su-analizi-ph',
           label: 'Su Analizi pH Değeri',
           type: 'number',
-          required: true,
+          required: false,
           validation: { min: 0, max: 14 }
         },
         {
@@ -205,7 +205,7 @@ export const dikimOncesiDetayConfig: ChecklistSection = {
           id: 'damlama-sistemi-durum',
           label: 'Damlama Sistemi Genel Kontrolü',
           type: 'select',
-          required: true,
+          required: false,
           options: ['İyi', 'Orta', 'Kötü']
         },
         {
@@ -237,7 +237,7 @@ export const dikimOncesiDetayConfig: ChecklistSection = {
           id: 'mucadele-turu',
           label: 'Mücadele Türü',
           type: 'select',
-          required: true,
+          required: false,
           options: ['Kimyasal Mücadele', 'Biyolojik Mücadele', 'Kimyasal + Biyolojik Mücadele']
         },
         {
@@ -259,7 +259,7 @@ export const dikimOncesiDetayConfig: ChecklistSection = {
           id: 'tuzak-durumu',
           label: 'Tuzak Var mı?',
           type: 'select',
-          required: true,
+          required: false,
           options: ['Var', 'Yok']
         },
         {
@@ -292,21 +292,21 @@ export const dikimOncesiDetayConfig: ChecklistSection = {
           id: 'uretici-firma',
           label: 'Üretici Firma',
           type: 'text',
-          required: true,
+          required: false,
           placeholder: 'Fide üretici firmasının adı...'
         },
         {
           id: 'viol-turu',
           label: 'Viol Türü',
           type: 'text',
-          required: true,
+          required: false,
           placeholder: 'Viol türü ve özellikleri...'
         },
         {
           id: 'fide-cesidi',
           label: 'Fide Çeşidi',
           type: 'select',
-          required: true,
+          required: false,
           options: ['Biber', 'Domates']
         },
         {
@@ -322,21 +322,21 @@ export const dikimOncesiDetayConfig: ChecklistSection = {
           id: 'boy',
           label: 'Fide Boyu (cm)',
           type: 'number',
-          required: true,
+          required: false,
           validation: { min: 0 }
         },
         {
           id: 'cap',
           label: 'Fide Çapı (mm)',
           type: 'number',
-          required: true,
+          required: false,
           validation: { min: 0 }
         },
         {
           id: 'kok-orani',
           label: 'Kök Oranı',
           type: 'select',
-          required: true,
+          required: false,
           options: ['Çok İyi', 'İyi', 'Orta', 'Kötü', 'Çok Kötü']
         },
         {
@@ -349,14 +349,14 @@ export const dikimOncesiDetayConfig: ChecklistSection = {
           id: 'fide-sok-durumu',
           label: 'Fide Şok Durumu',
           type: 'select',
-          required: true,
+          required: false,
           options: ['Şoklı', 'Şoksuz']
         },
         {
           id: 'virus-varmi',
           label: 'Virüs Var mı?',
           type: 'select',
-          required: true,
+          required: false,
           options: ['Var', 'Yok']
         },
         {
@@ -371,7 +371,7 @@ export const dikimOncesiDetayConfig: ChecklistSection = {
           id: 'bakteri-varmi',
           label: 'Bakteri Var mı?',
           type: 'select',
-          required: true,
+          required: false,
           options: ['Var', 'Yok']
         },
         {
@@ -386,7 +386,7 @@ export const dikimOncesiDetayConfig: ChecklistSection = {
           id: 'insektisit-akarisit',
           label: 'İnsektisit/Akarisit Var mı?',
           type: 'select',
-          required: true,
+          required: false,
           options: ['Var', 'Yok']
         },
         {
@@ -409,13 +409,13 @@ export const dikimOncesiDetayConfig: ChecklistSection = {
           id: 'olcum-noktasi-olusturuldu',
           label: 'Ölçüm Noktası Oluşturuldu mu?',
           type: 'boolean',
-          required: true
+          required: false
         },
         {
           id: 'ciftci-uyarisi',
           label: 'Çiftçiye Uyarı Yapıldı mı?',
           type: 'boolean',
-          required: true
+          required: false
         },
         {
           id: 'uyari-detaylari',
@@ -438,14 +438,14 @@ export const dikimOncesiDetayConfig: ChecklistSection = {
           id: 'belirlenen-bitki-sayisi',
           label: 'Belirlenen Bitki Sayısı',
           type: 'number',
-          required: true,
+          required: false,
           validation: { min: 1 }
         },
         {
           id: 'tablet-fotografi',
           label: 'Tablet ile Direkt Fotoğraf',
           type: 'file',
-          required: true
+          required: false
         },
         {
           id: 'bitki-konumlari',
@@ -466,7 +466,7 @@ export const dikimOncesiDetayConfig: ChecklistSection = {
           id: 'genel-gorsel-1',
           label: 'Genel Görsel 1',
           type: 'file',
-          required: true
+          required: false
         },
         {
           id: 'genel-gorsel-2',
