@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import UreticiListesi from './UreticiListesi';
 import type { Producer } from '../types/producer';
 import { seraKontrolConfig } from '../data/seraKontrolConfig';
 import ChecklistItem from './ChecklistItem';
 import type { ChecklistItem as ChecklistItemType } from '../types/checklist';
+import { loadChecklistData, saveChecklistData, updateChecklistItem } from '../utils/firestoreUtils';
 
 interface SensorData {
   temperature: number;
@@ -13,45 +14,6 @@ interface SensorData {
   ph: number;
   ec: number;
 }
-
-const staticChecklist = [
-  {
-    title: '1) İklim kontrolü',
-    items: ['sıcaklık', 'nem', 'havalandırma']
-  },
-  {
-    title: '2) Su basıncı',
-    items: []
-  },
-  {
-    title: '3) Toprak analizi (foto eklenebilecek yer)',
-    items: ['boyut/foto']
-  },
-  {
-    title: '4) Kontrol bitkisi kontrolü',
-    items: ['kök', 'drenaj', 'yüzeyel kontrol', 'kök kontrol', 'gövde kontrol', 'genel kontrol']
-  },
-  {
-    title: '5) Sulama kontrolü',
-    items: ['damlama mesafe', 'su miktarı ayarlaması']
-  },
-  {
-    title: '6) Bitki gelişim dönemleri',
-    items: ['çıkış', 'yaprak', 'çiçeklenme', 'meyve tutumu', 'meyve olgunlaşma', 'meyve hasat']
-  },
-  {
-    title: '7) Zararlı kontrol',
-    items: ['beyaz sinek', 'trips', 'kırmızı örümcek', 'yeşil kurt', 'yaprak biti', 'biber gal sineği', 'samyeli akarı', 'kullanıcı ekle', 'resim ekle']
-  },
-  {
-    title: '8) Besin eksikliği kontrolü',
-    items: ['azot', 'fosfor', 'potasyum', 'magnezyum', 'kalsiyum', 'mangan', 'demir', 'bor', 'bakır', 'çinko', 'nikel']
-  },
-  {
-    title: '9) Sera kültürü - genel kontrol',
-    items: ['toplama', 'nemlendirme', 'budama', 'sera temizliği', '5 adet mavi', '5 adet sarı', '15 adet mavi', '15 adet sarı']
-  }
-];
 
 const SeraKontrol = () => {
   const [sensorData, setSensorData] = useState<SensorData>({
@@ -64,10 +26,14 @@ const SeraKontrol = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState(new Date());
   const [selectedProducer, setSelectedProducer] = useState<Producer | null>(null);
   const [currentStep, setCurrentStep] = useState<'select-producer' | 'checklist'>('select-producer');
   const [checklist, setChecklist] = useState<ChecklistItemType[]>(seraKontrolConfig.items);
+  const [originalChecklist, setOriginalChecklist] = useState<ChecklistItemType[]>(seraKontrolConfig.items);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [history, setHistory] = useState<any[]>([]); // Geçmiş değişiklikler için
 
   // Simulate real-time data updates
   useEffect(() => {
@@ -85,6 +51,47 @@ const SeraKontrol = () => {
 
     return () => clearInterval(interval);
   }, []);
+
+  // Checklist yüklemesi (üretici seçilince)
+  useEffect(() => {
+    const loadData = async () => {
+      if (!selectedProducer) return;
+      setLoading(true);
+      setError(null);
+      const dataKey = `sera-kontrol-${selectedProducer.id}`;
+      try {
+        const savedData = await loadChecklistData(dataKey);
+        if (savedData) {
+          setChecklist(
+            seraKontrolConfig.items.map(configItem => {
+              const savedItem = savedData.items.find(item => item.id === configItem.id);
+              return savedItem ? { ...configItem, ...savedItem } : configItem;
+            })
+          );
+          setOriginalChecklist(
+            seraKontrolConfig.items.map(configItem => {
+              const savedItem = savedData.items.find(item => item.id === configItem.id);
+              return savedItem ? { ...configItem, ...savedItem } : configItem;
+            })
+          );
+          setHistory(savedData.history || []);
+        } else {
+          await saveChecklistData(dataKey, { ...seraKontrolConfig });
+          setChecklist(seraKontrolConfig.items);
+          setOriginalChecklist(seraKontrolConfig.items);
+          setHistory([]);
+        }
+      } catch (err) {
+        setError('Checklist verisi yüklenemedi');
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (selectedProducer && currentStep === 'checklist') {
+      loadData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedProducer, currentStep]);
 
   const refreshData = async () => {
     setLoading(true);
@@ -165,10 +172,47 @@ const SeraKontrol = () => {
     { id: 'lighting', name: 'LED Aydınlatma', status: true, icon: '💡' }
   ];
 
-  const handleChecklistUpdate = (itemId: string, completed: boolean, data?: Record<string, string | number | boolean | string[]>) => {
+  const handleChecklistUpdate = async (itemId: string, completed: boolean, data?: Record<string, string | number | boolean | string[]>) => {
     setChecklist(prev => prev.map(item =>
       item.id === itemId ? { ...item, completed, data } : item
     ));
+    if (!selectedProducer) return;
+    const dataKey = `sera-kontrol-${selectedProducer.id}`;
+    try {
+      await updateChecklistItem(dataKey, itemId, completed, data);
+      setError(null);
+    } catch (err) {
+      setError('Checklist kaydedilemedi');
+    }
+  };
+
+  const handleSaveAll = async () => {
+    if (!selectedProducer) return;
+    setLoading(true);
+    setError(null);
+    setSaveSuccess(false);
+    const dataKey = `sera-kontrol-${selectedProducer.id}`;
+    try {
+      // Geçmişe ekle
+      const newHistory = [
+        ...history,
+        { date: new Date().toISOString(), items: checklist }
+      ];
+      await saveChecklistData(dataKey, { ...seraKontrolConfig, items: checklist, history: newHistory });
+      setOriginalChecklist(checklist);
+      setHistory(newHistory);
+      setSaveSuccess(true);
+    } catch (err) {
+      setError('Checklist kaydedilemedi');
+    } finally {
+      setLoading(false);
+      setTimeout(() => setSaveSuccess(false), 2000);
+    }
+  };
+  const handleCancel = () => {
+    setChecklist(originalChecklist);
+    setError(null);
+    setSaveSuccess(false);
   };
 
   // Producer Selection Step
@@ -211,15 +255,66 @@ const SeraKontrol = () => {
                 {selectedProducer.firstName} {selectedProducer.lastName} - Sera Kontrolü
               </h1>
             </div>
-            <div className="space-y-6">
-              {checklist.map((item) => (
-                <ChecklistItem
-                  key={item.id}
-                  item={item}
-                  onUpdate={handleChecklistUpdate}
-                />
-              ))}
-            </div>
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4">{error}</div>
+            )}
+            {saveSuccess && (
+              <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl mb-4">Başarıyla kaydedildi!</div>
+            )}
+            {loading ? (
+              <div className="flex justify-center items-center py-12">
+                <div className="animate-spin h-10 w-10 border-4 border-emerald-500 border-t-transparent rounded-full"></div>
+                <span className="ml-4 text-slate-600">Checklist yükleniyor...</span>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-6">
+                  {checklist.map((item) => (
+                    <ChecklistItem
+                      key={item.id}
+                      item={item}
+                      onUpdate={handleChecklistUpdate}
+                    />
+                  ))}
+                </div>
+                <div className="flex justify-end space-x-4 mt-8">
+                  <button
+                    onClick={handleCancel}
+                    className="px-6 py-2 rounded-xl border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 font-semibold"
+                    disabled={loading}
+                  >
+                    İptal
+                  </button>
+                  <button
+                    onClick={handleSaveAll}
+                    className="px-6 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-semibold hover:from-emerald-600 hover:to-blue-600 shadow-lg"
+                    disabled={loading}
+                  >
+                    Kaydet
+                  </button>
+                </div>
+                {/* Geçmiş değişiklikler */}
+                {history.length > 0 && (
+                  <div className="mt-10">
+                    <h2 className="text-lg font-bold text-slate-800 mb-2">Geçmiş Kayıtlar</h2>
+                    <ul className="space-y-2">
+                      {history.map((h, idx) => (
+                        <li key={idx} className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                          <div className="font-semibold text-slate-700 mb-1">{new Date(h.date).toLocaleString('tr-TR')}</div>
+                          <ul className="list-disc pl-6 text-slate-600 text-sm">
+                            {h.items.map((item: any) => (
+                              <li key={item.id}>
+                                {item.label}: {item.completed ? '✔️ Tamamlandı' : '⏳ Bekliyor'}
+                              </li>
+                            ))}
+                          </ul>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>

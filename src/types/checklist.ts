@@ -30,6 +30,7 @@ export interface ChecklistSection {
   id: string;
   title: string;
   items: ChecklistItem[];
+  history?: any[];
 }
 
 export interface ChecklistData {
