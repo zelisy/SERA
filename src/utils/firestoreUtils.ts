@@ -2,6 +2,7 @@ import { doc, setDoc, getDoc, updateDoc, serverTimestamp, collection, query, whe
 import { db } from '../firebase/config';
 import type { ChecklistSection, UretimAlani, HasatBilgisi } from '../types/checklist';
 import type { Producer } from '../types/producer';
+import type { Product } from '../types/product';
 
 // Existing Checklist Functions
 export const saveChecklistData = async (sectionId: string, data: ChecklistSection): Promise<void> => {
@@ -254,5 +255,114 @@ export const getProducerById = async (producerId: string): Promise<Producer | nu
   } catch (error) {
     console.error('Üretici yükleme hatası:', error);
     throw new Error('Üretici yüklenemedi');
+  }
+};
+
+// Üretici Bilgisi CRUD Functions
+export const saveProducer = async (producer: Omit<Producer, 'id' | 'createdAt'>): Promise<string> => {
+  try {
+    const docRef = doc(collection(db, 'producers'));
+    const cleanData = Object.fromEntries(
+      Object.entries({
+        ...producer,
+        id: docRef.id,
+        createdAt: new Date().toISOString(),
+      }).filter(([, value]) => value !== undefined)
+    );
+    await setDoc(docRef, cleanData);
+    return docRef.id;
+  } catch (error) {
+    console.error('Üretici kayıt hatası:', error);
+    throw new Error('Üretici kaydedilemedi');
+  }
+};
+
+export const updateProducer = async (id: string, producer: Partial<Producer>): Promise<void> => {
+  try {
+    const docRef = doc(db, 'producers', id);
+    const cleanData = Object.fromEntries(
+      Object.entries({
+        ...producer,
+        updatedAt: new Date().toISOString(),
+      }).filter(([, value]) => value !== undefined)
+    );
+    await updateDoc(docRef, cleanData);
+  } catch (error) {
+    console.error('Üretici güncelleme hatası:', error);
+    throw new Error('Üretici güncellenemedi');
+  }
+};
+
+export const deleteProducer = async (id: string): Promise<void> => {
+  try {
+    await deleteDoc(doc(db, 'producers', id));
+  } catch (error) {
+    console.error('Üretici silme hatası:', error);
+    throw new Error('Üretici silinemedi');
+  }
+};
+
+export const getAllProducers = async (): Promise<Producer[]> => {
+  try {
+    const querySnapshot = await getDocs(collection(db, 'producers'));
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Producer));
+  } catch (error) {
+    console.error('Tüm üreticiler yüklenemedi:', error);
+    throw new Error('Üreticiler yüklenemedi');
+  }
+};
+
+// Product CRUD Functions
+export const saveProduct = async (product: Omit<Product, 'id' | 'createdAt'> & { imageUrl?: string }): Promise<string> => {
+  try {
+    const docRef = doc(collection(db, 'products'));
+    const cleanData = Object.fromEntries(
+      Object.entries({
+        ...product,
+        id: docRef.id,
+        createdAt: new Date().toISOString(),
+        imageUrl: product.imageUrl || '',
+      }).filter(([, value]) => value !== undefined)
+    );
+    await setDoc(docRef, cleanData);
+    return docRef.id;
+  } catch (error) {
+    console.error('Ürün kayıt hatası:', error);
+    throw new Error('Ürün kaydedilemedi');
+  }
+};
+
+export const updateProduct = async (id: string, product: Partial<Product>): Promise<void> => {
+  try {
+    const docRef = doc(db, 'products', id);
+    const cleanData = Object.fromEntries(
+      Object.entries({
+        ...product,
+        updatedAt: new Date().toISOString(),
+      }).filter(([, value]) => value !== undefined)
+    );
+    await updateDoc(docRef, cleanData);
+  } catch (error) {
+    console.error('Ürün güncelleme hatası:', error);
+    throw new Error('Ürün güncellenemedi');
+  }
+};
+
+export const deleteProduct = async (id: string): Promise<void> => {
+  try {
+    await deleteDoc(doc(db, 'products', id));
+  } catch (error) {
+    console.error('Ürün silme hatası:', error);
+    throw new Error('Ürün silinemedi');
+  }
+};
+
+export const getAllProducts = async (): Promise<Product[]> => {
+  try {
+    const querySnapshot = await getDocs(collection(db, 'products'));
+    return querySnapshot.docs.map(doc => doc.data() as Product);
+  } catch (error) {
+    console.error('Tüm ürünler yükleme hatası:', error);
+    throw new Error('Ürünler yüklenemedi');
   }
 };

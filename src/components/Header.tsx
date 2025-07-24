@@ -28,6 +28,8 @@ const Header = () => {
   const navItems = [
     { path: '/', label: 'Anasayfa', icon: '🏠' },
     { path: '/about', label: 'Hakkımızda', icon: 'ℹ️' },
+    { path: '/products', label: 'Ürünlerimiz', icon: '🛒' },
+    { path: '/blog', label: 'Blog', icon: '📝' },
     { path: '/contact', label: 'İletişim', icon: '📞' },
   ];
 

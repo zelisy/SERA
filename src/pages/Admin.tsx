@@ -8,6 +8,138 @@ import HasatBilgisi from '../components/HasatBilgisi';
 import Rapor from '../components/Rapor';
 import { useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
+import { getAllProducers } from '../utils/firestoreUtils';
+import type { Producer } from '../types/producer';
+
+// DenemeComponent tanımı:
+const DenemeComponent: React.FC = () => {
+  const [producers, setProducers] = React.useState<Producer[]>([]);
+  const [selected, setSelected] = React.useState<Producer | null>(null);
+  const [form, setForm] = React.useState({
+    genelCalismak: '',
+    genelAmac: '',
+    ulke: '',
+    konum: '',
+    turler: '',
+    cesitlilik: '',
+    tedaviler: '',
+    tekrarlar: '',
+    tedaviBitkiSayisi: '',
+    mahsulDurumu: '',
+    goruntuler: [] as string[], // image urls
+  });
+  const [imageFiles, setImageFiles] = React.useState<File[]>([]);
+  const [message, setMessage] = React.useState('');
+
+  React.useEffect(() => {
+    getAllProducers().then(setProducers).catch(() => setProducers([]));
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setImageFiles(Array.from(e.target.files));
+      setForm({ ...form, goruntuler: Array.from(e.target.files).map(f => URL.createObjectURL(f)) });
+    }
+  };
+
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    setMessage('Kaydedildi (örnek, Firestore entegrasyonu eklenebilir)');
+    // Firestore'a kaydetmek için burada bir fonksiyon çağrılabilir
+  };
+
+  if (!selected) {
+    return (
+      <div className="max-w-3xl mx-auto bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8 mt-8">
+        <h2 className="text-xl font-bold mb-4">Üretici Seç</h2>
+        <ul className="space-y-2">
+          {producers.map((p) => (
+            <li key={p.id} className="flex items-center justify-between bg-slate-50 rounded p-3 border">
+              <span>{p.firstName} {p.lastName}</span>
+              <button className="bg-emerald-500 text-white px-4 py-1 rounded" onClick={() => setSelected(p)}>Seç</button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-3xl mx-auto bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8 mt-8">
+      <form className="space-y-8" onSubmit={handleSave}>
+        <button type="button" className="mb-4 text-emerald-600 underline" onClick={() => setSelected(null)}>← Başka üretici seç</button>
+        <h2 className="text-2xl font-bold mb-2">Genel Bilgi</h2>
+        <div className="bg-slate-50 rounded p-4 mb-4 space-y-2">
+          <div>
+            <label className="block font-semibold">Çalışmak</label>
+            <input name="genelCalismak" value={form.genelCalismak} onChange={handleChange} className="w-full p-2 rounded border" />
+          </div>
+          <div>
+            <label className="block font-semibold">Amaç</label>
+            <input name="genelAmac" value={form.genelAmac} onChange={handleChange} className="w-full p-2 rounded border" />
+          </div>
+        </div>
+        <h2 className="text-xl font-bold mb-2">Çalışma Yeri</h2>
+        <div className="bg-slate-50 rounded p-4 mb-4 space-y-2">
+          <div>
+            <label className="block font-semibold">Ülke</label>
+            <input name="ulke" value={form.ulke} onChange={handleChange} className="w-full p-2 rounded border" />
+          </div>
+          <div>
+            <label className="block font-semibold">Konum</label>
+            <input name="konum" value={form.konum} onChange={handleChange} className="w-full p-2 rounded border" />
+          </div>
+        </div>
+        <h2 className="text-xl font-bold mb-2">Mahsul Bilgileri</h2>
+        <div className="bg-slate-50 rounded p-4 mb-4 space-y-2">
+          <div>
+            <label className="block font-semibold">Türler</label>
+            <input name="turler" value={form.turler} onChange={handleChange} className="w-full p-2 rounded border" />
+          </div>
+          <div>
+            <label className="block font-semibold">Çeşitlilik</label>
+            <input name="cesitlilik" value={form.cesitlilik} onChange={handleChange} className="w-full p-2 rounded border" />
+          </div>
+        </div>
+        <h2 className="text-xl font-bold mb-2">Sonuçlar</h2>
+        <div className="bg-slate-50 rounded p-4 mb-4 space-y-2">
+          <div>
+            <label className="block font-semibold">Tedaviler</label>
+            <input name="tedaviler" value={form.tedaviler} onChange={handleChange} className="w-full p-2 rounded border" />
+          </div>
+          <div>
+            <label className="block font-semibold">Tekrarlar</label>
+            <input name="tekrarlar" value={form.tekrarlar} onChange={handleChange} className="w-full p-2 rounded border" />
+          </div>
+          <div>
+            <label className="block font-semibold">Tedavi başına bitki sayısı</label>
+            <input name="tedaviBitkiSayisi" value={form.tedaviBitkiSayisi} onChange={handleChange} className="w-full p-2 rounded border" />
+          </div>
+        </div>
+        <h2 className="text-xl font-bold mb-2">Mahsul Durumu</h2>
+        <div className="bg-slate-50 rounded p-4 mb-4">
+          <label className="block font-semibold">Mahsul durumu</label>
+          <textarea name="mahsulDurumu" value={form.mahsulDurumu} onChange={handleChange} className="w-full p-2 rounded border" rows={3} />
+        </div>
+        <h2 className="text-xl font-bold mb-2">Görüntüler</h2>
+        <div className="bg-slate-50 rounded p-4 mb-4">
+          <input type="file" multiple accept="image/*" onChange={handleImageChange} />
+          <div className="flex flex-wrap gap-4 mt-2">
+            {form.goruntuler.map((url, i) => (
+              <img key={i} src={url} alt={`görsel${i}`} className="w-32 h-32 object-cover rounded" />
+            ))}
+          </div>
+        </div>
+        <button type="submit" className="bg-emerald-500 text-white px-6 py-2 rounded-xl font-semibold hover:bg-emerald-600">Kaydet</button>
+        {message && <div className="text-center text-emerald-600 mt-2">{message}</div>}
+      </form>
+    </div>
+  );
+};
 
 const sidebarItems = [
   { id: 'producers', name: 'Üretici Listesi', icon: '👥' },
@@ -16,6 +148,7 @@ const sidebarItems = [
   { id: 'greenhouse', name: 'Sera Kontrol', icon: '🏠' },
   { id: 'harvest', name: 'Hasat Bilgisi', icon: '🌾' },
   { id: 'reports', name: 'Rapor', icon: '📊' },
+  { id: 'deneme', name: 'Deneme', icon: '🧪' },
 ];
 
 const sectionComponents: Record<string, ReactElement> = {
@@ -25,6 +158,7 @@ const sectionComponents: Record<string, ReactElement> = {
   'Sera Kontrol': <SeraKontrol />,
   'Hasat Bilgisi': <HasatBilgisi />,
   'Rapor': <Rapor />,
+  'Deneme': <DenemeComponent />,
 };
 
 const Admin = () => {
@@ -184,7 +318,7 @@ const Admin = () => {
                         className="w-full text-left px-4 py-2 hover:bg-emerald-50 transition-colors"
                         onClick={() => {
                           setSettingsMenuOpen(false);
-                          navigate('/admin-products');
+                          navigate('/admin/products');
                         }}
                       >
                         Ürün Yönetimi
