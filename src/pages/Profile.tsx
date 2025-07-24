@@ -62,7 +62,11 @@ const Profile: React.FC = () => {
       setNewPassword('');
     } catch (error: any) {
       console.error(error);
-      setMessage(error.message || 'Bir hata oluştu.');
+      if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+        setMessage('Şifreler yanlış.');
+      } else {
+        setMessage(error.message || 'Bir hata oluştu.');
+      }
     }
 
     setLoading(false);
