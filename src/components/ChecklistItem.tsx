@@ -14,44 +14,30 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate }) => {
   const [uploadingFiles, setUploadingFiles] = useState<Set<string>>(new Set());
 
   const createValidationSchema = (fields: FormField[]) => {
+    // Hiçbir alan zorunlu olmasın - tüm alanları optional yap
     const shape: Record<string, Yup.Schema> = {};
     
     fields.forEach(field => {
-      let schema: Yup.Schema = Yup.string();
+      let schema: Yup.Schema;
       
       switch (field.type) {
         case 'number':
-          schema = Yup.number();
-          if (field.validation?.min !== undefined) {
-            schema = (schema as Yup.NumberSchema).min(field.validation.min);
-          }
-          if (field.validation?.max !== undefined) {
-            schema = (schema as Yup.NumberSchema).max(field.validation.max);
-          }
+          schema = Yup.number().optional().nullable();
           break;
         case 'date':
-          schema = Yup.date();
+          schema = Yup.date().optional().nullable();
           break;
         case 'boolean':
-          schema = Yup.boolean();
+          schema = Yup.boolean().optional();
           break;
         case 'select':
-          schema = Yup.string().oneOf(field.options || []);
+          schema = Yup.string().optional();
           break;
         case 'file':
-          schema = Yup.string().url('Geçerli bir URL olmalıdır');
+          schema = Yup.string().optional();
           break;
         default:
-          if (field.validation?.pattern) {
-            schema = (schema as Yup.StringSchema).matches(
-              new RegExp(field.validation.pattern),
-              field.validation.message || 'Geçersiz format'
-            );
-          }
-      }
-      
-      if (field.required) {
-        schema = schema.required(`${field.label} zorunludur`);
+          schema = Yup.string().optional();
       }
       
       shape[field.id] = schema;
@@ -67,9 +53,13 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate }) => {
       if (Array.isArray(savedValue)) {
         values[field.id] = savedValue.join(', ');
       } else {
-        values[field.id] = savedValue || 
-          (field.type === 'boolean' ? false : 
-           field.type === 'number' ? 0 : '');
+        if (field.type === 'boolean') {
+          values[field.id] = savedValue || false;
+        } else if (field.type === 'number') {
+          values[field.id] = savedValue || '';
+        } else {
+          values[field.id] = savedValue || '';
+        }
       }
     });
     return values;
@@ -146,7 +136,7 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate }) => {
         return (
           <div key={field.id} className={fieldWidth}>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
-              {field.label} {field.required && <span className="text-red-500">*</span>}
+              {field.label}
             </label>
             <Field
               as="textarea"
@@ -164,7 +154,7 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate }) => {
         return (
           <div key={field.id} className={fieldWidth}>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
-              {field.label} {field.required && <span className="text-red-500">*</span>}
+              {field.label}
             </label>
             <Field as="select" {...commonProps} className={`${commonProps.className} bg-white`}>
               <option value="">Seçiniz...</option>
@@ -178,7 +168,7 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate }) => {
                 type="text"
                 className="mt-2 w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
                 placeholder="Lütfen belirtiniz..."
-                value={values[`${field.id}_diger`] || ''}
+                value={String(values[`${field.id}_diger`] || '')}
                 onChange={e => setFieldValue(`${field.id}_diger`, e.target.value)}
               />
             )}
@@ -199,7 +189,7 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate }) => {
               />
               <div className="flex-1">
                 <span className="text-sm lg:text-base font-semibold text-gray-700">
-                  {field.label} {field.required && <span className="text-red-500">*</span>}
+                  {field.label}
                 </span>
                 {field.placeholder && (
                   <p className="text-xs lg:text-sm text-gray-500 mt-1">{field.placeholder}</p>
@@ -216,7 +206,7 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate }) => {
         return (
           <div key={field.id} className={fieldWidth}>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
-              {field.label} {field.required && <span className="text-red-500">*</span>}
+              {field.label}
             </label>
             <div className="space-y-3">
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-emerald-400 transition-colors">
@@ -270,7 +260,7 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate }) => {
         return (
           <div key={field.id} className={fieldWidth}>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
-              {field.label} {field.required && <span className="text-red-500">*</span>}
+              {field.label}
             </label>
             <Field
               type={field.type}

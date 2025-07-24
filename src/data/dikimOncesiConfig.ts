@@ -20,21 +20,13 @@ export const dikimOncesiConfig: ChecklistSection = {
           id: 'ph-degeri',
           label: 'pH Değeri',
           type: 'number',
-          required: false,
-          validation: {
-            min: 0,
-            max: 14
-          }
+          required: false
         },
         {
           id: 'organik-madde',
           label: 'Organik Madde (%)',
           type: 'number',
-          required: false,
-          validation: {
-            min: 0,
-            max: 100
-          }
+          required: false
         },
         {
           id: 'analiz-raporu',
@@ -122,11 +114,7 @@ export const dikimOncesiConfig: ChecklistSection = {
           type: 'number',
           required: false,
           dependsOn: 'basinc-testi',
-          showWhen: true,
-          validation: {
-            min: 0,
-            max: 10
-          }
+          showWhen: true
         },
         {
           id: 'arizalar',
@@ -173,10 +161,7 @@ export const dikimOncesiConfig: ChecklistSection = {
           id: 'gubre-miktari',
           label: 'Gübre Miktarı (kg/dekar)',
           type: 'number',
-          required: false,
-          validation: {
-            min: 0
-          }
+          required: false
         },
         {
           id: 'plan-detaylari',
@@ -217,10 +202,7 @@ export const dikimOncesiConfig: ChecklistSection = {
           id: 'fide-sayisi',
           label: 'Fide Sayısı (adet)',
           type: 'number',
-          required: false,
-          validation: {
-            min: 1
-          }
+          required: false
         },
         {
           id: 'tedarikci',
