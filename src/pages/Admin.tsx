@@ -7,6 +7,7 @@ import SeraKontrol from '../components/SeraKontrol';
 import HasatBilgisi from '../components/HasatBilgisi';
 import Rapor from '../components/Rapor';
 import { useNavigate } from 'react-router-dom';
+import { useRef } from 'react';
 
 const sidebarItems = [
   { id: 'producers', name: 'Üretici Listesi', icon: '👥' },
@@ -30,6 +31,23 @@ const Admin = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('Üretici Listesi');
   const navigate = useNavigate();
+  const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
+  const settingsMenuRef = useRef<HTMLDivElement>(null);
+
+  // Menü dışına tıklayınca kapat
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (settingsMenuRef.current && !settingsMenuRef.current.contains(event.target as Node)) {
+        setSettingsMenuOpen(false);
+      }
+    }
+    if (settingsMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [settingsMenuOpen]);
 
   const handleLogout = () => {
     localStorage.removeItem('isLoggedIn');
@@ -135,23 +153,57 @@ const Admin = () => {
                 <p className="text-sm text-slate-500">Yönetim paneli</p>
               </div>
             </div>
-
-            <div className="flex items-center space-x-2 lg:space-x-4">
-              {/* Notifications */}
-              <button className="relative p-2 text-slate-400 hover:text-slate-600 transition-colors">
-                <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5-5 5-5m-12 12l-5-5 5-5" />
-                </svg>
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-400 rounded-full"></span>
-              </button>
-
-              {/* Settings */}
-              <button className="p-2 text-slate-400 hover:text-slate-600 transition-colors">
-                <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="relative">
+              <button
+                onClick={() => setSettingsMenuOpen((open) => !open)}
+                className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                aria-label="Ayarlar"
+                type="button"
+              >
+                <svg className="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </button>
+              {settingsMenuOpen && (
+                <div ref={settingsMenuRef} className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-50">
+                  <ul className="py-2">
+                    <li>
+                      <button
+                        className="w-full text-left px-4 py-2 hover:bg-emerald-50 transition-colors"
+                        onClick={() => {
+                          setSettingsMenuOpen(false);
+                          navigate('/messages');
+                        }}
+                      >
+                        Mesajlar
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        className="w-full text-left px-4 py-2 hover:bg-emerald-50 transition-colors"
+                        onClick={() => {
+                          setSettingsMenuOpen(false);
+                          navigate('/admin-products');
+                        }}
+                      >
+                        Ürün Yönetimi
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        className="w-full text-left px-4 py-2 hover:bg-emerald-50 transition-colors"
+                        onClick={() => {
+                          setSettingsMenuOpen(false);
+                          navigate('/profile');
+                        }}
+                      >
+                        Profil
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
         </header>

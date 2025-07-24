@@ -9,6 +9,8 @@ import Contact from './pages/Contact';
 import Admin from './pages/Admin';
 import DikimOncesiDonem from './components/DikimOncesiDonem';
 import DikimOncesiDetayDonem from './components/DikimOncesiDetayDonem';
+import Messages from './pages/Messages';
+import Profile from './pages/Profile';
 
 // Authentication kontrolü
 const isAuthenticated = () => {
@@ -48,6 +50,16 @@ function AppContent() {
           <Route path="/admin" element={
             <PrivateRoute>
               <Admin />
+            </PrivateRoute>
+          } />
+          <Route path="/messages" element={
+            <PrivateRoute>
+              <Messages />
+            </PrivateRoute>
+          } />
+          <Route path="/profile" element={
+            <PrivateRoute>
+              <Profile />
             </PrivateRoute>
           } />
         </Routes>
