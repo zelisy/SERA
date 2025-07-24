@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs, orderBy, query } from 'firebase/firestore';
+import { collection, getDocs, orderBy, query, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
 interface Message {
   id: string;
   name: string;
   email: string;
-  phone: string;
-  subject: string;
   message: string;
   createdAt?: any;
 }
@@ -15,54 +13,86 @@ interface Message {
 const Messages: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const fetchMessages = async () => {
+    setLoading(true);
+    try {
+      const q = query(collection(db, 'messages'), orderBy('createdAt', 'desc'));
+      const querySnapshot = await getDocs(q);
+      const msgs: Message[] = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Message[];
+      setMessages(msgs);
+    } catch (error) {
+      setError('Mesajlar yüklenemedi');
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    const fetchMessages = async () => {
-      setLoading(true);
-      try {
-        const q = query(collection(db, 'messages'), orderBy('createdAt', 'desc'));
-        const querySnapshot = await getDocs(q);
-        const msgs: Message[] = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Message[];
-        setMessages(msgs);
-      } catch (error) {
-        console.error('Mesajlar yüklenemedi:', error);
-      }
-      setLoading(false);
-    };
     fetchMessages();
   }, []);
 
+  const handleDelete = async (id: string) => {
+    setDeletingId(id);
+    setError(null);
+    setSuccess(null);
+    try {
+      await deleteDoc(doc(db, 'messages', id));
+      setSuccess('Mesaj silindi');
+      await fetchMessages();
+    } catch (err) {
+      setError('Mesaj silinemedi');
+    }
+    setDeletingId(null);
+  };
+
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-4">Gelen Mesajlar</h2>
-      {loading ? (
-        <div>Yükleniyor...</div>
-      ) : messages.length === 0 ? (
-        <div>Hiç mesaj yok.</div>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white border rounded-xl">
-            <thead>
-              <tr>
-                <th className="px-4 py-2 border">Ad Soyad</th>
-                <th className="px-4 py-2 border">E-posta</th>
-                <th className="px-4 py-2 border">Mesaj</th>
-                <th className="px-4 py-2 border">Tarih</th>
-              </tr>
-            </thead>
-            <tbody>
-              {messages.map(msg => (
-                <tr key={msg.id}>
-                  <td className="px-4 py-2 border">{msg.name}</td>
-                  <td className="px-4 py-2 border">{msg.email}</td>
-                  <td className="px-4 py-2 border">{msg.message}</td>
-                  <td className="px-4 py-2 border">{msg.createdAt ? new Date(msg.createdAt.seconds * 1000).toLocaleString() : ''}</td>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-slate-50 py-10">
+      <div className="max-w-4xl mx-auto bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8">
+        <h2 className="text-2xl font-bold text-slate-800 mb-6 text-center">Gelen Mesajlar</h2>
+        {error && <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700">{error}</div>}
+        {success && <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-xl text-green-700">{success}</div>}
+        {loading ? (
+          <div>Yükleniyor...</div>
+        ) : messages.length === 0 ? (
+          <div>Hiç mesaj yok.</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full bg-white rounded-xl shadow-lg border border-gray-100">
+              <thead className="bg-slate-50">
+                <tr>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Ad Soyad</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">E-posta</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Mesaj</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Tarih</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Sil</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </thead>
+              <tbody>
+                {messages.map(msg => (
+                  <tr key={msg.id}>
+                    <td className="px-6 py-4 border-b border-gray-100">{msg.name}</td>
+                    <td className="px-6 py-4 border-b border-gray-100">{msg.email}</td>
+                    <td className="px-6 py-4 border-b border-gray-100">{msg.message}</td>
+                    <td className="px-6 py-4 border-b border-gray-100">{msg.createdAt ? new Date(msg.createdAt.seconds * 1000).toLocaleString() : ''}</td>
+                    <td className="px-6 py-4 border-b border-gray-100">
+                      <button
+                        onClick={() => handleDelete(msg.id)}
+                        disabled={deletingId === msg.id}
+                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-sm font-semibold transition-all duration-200 disabled:opacity-50"
+                      >
+                        {deletingId === msg.id ? 'Siliniyor...' : 'Sil'}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

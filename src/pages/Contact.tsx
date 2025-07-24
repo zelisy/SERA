@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../firebase/config';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -10,6 +12,7 @@ const Contact = () => {
   });
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const contactInfo = [
     {
@@ -42,13 +45,18 @@ const Contact = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
-    // Simulate form submission
-    setTimeout(() => {
-      setLoading(false);
+    setError(null);
+    try {
+      await addDoc(collection(db, 'messages'), {
+        ...formData,
+        createdAt: serverTimestamp(),
+      });
       setSubmitted(true);
       setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
-    }, 2000);
+    } catch (err) {
+      setError('Mesaj gönderilemedi. Lütfen tekrar deneyin.');
+    }
+    setLoading(false);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -227,6 +235,10 @@ const Contact = () => {
                     required
                   />
                 </div>
+
+                {error && (
+                  <p className="text-red-500 text-sm">{error}</p>
+                )}
 
                 <button
                   type="submit"
