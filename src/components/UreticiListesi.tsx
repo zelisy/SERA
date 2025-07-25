@@ -36,7 +36,8 @@ const UreticiListesi: React.FC<UreticiListesiProps> = ({
     address: '',
     gender: '',
     experienceYear: '',
-    registerDate: ''
+    registerDate: '',
+    birthDate: '' // yeni alan
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -58,10 +59,10 @@ const UreticiListesi: React.FC<UreticiListesiProps> = ({
   }, [sortKey, sortDir]);
 
   const handleAdd = async () => {
-    if (!newProducer.firstName || !newProducer.lastName || !newProducer.tcNo || !newProducer.phone || !newProducer.address || !newProducer.gender || !newProducer.experienceYear || !newProducer.registerDate) return;
+    if (!newProducer.firstName || !newProducer.lastName || !newProducer.tcNo || !newProducer.phone || !newProducer.address || !newProducer.gender || !newProducer.experienceYear || !newProducer.registerDate || !newProducer.birthDate) return;
     try {
       await addDoc(collection(db, 'producers'), newProducer);
-      setNewProducer({ firstName: '', lastName: '', tcNo: '', phone: '', address: '', gender: '', experienceYear: '', registerDate: '' });
+      setNewProducer({ firstName: '', lastName: '', tcNo: '', phone: '', address: '', gender: '', experienceYear: '', registerDate: '', birthDate: '' });
       setShowAdd(false);
     } catch {
       setError('Ekleme başarısız.');
@@ -172,6 +173,10 @@ const UreticiListesi: React.FC<UreticiListesiProps> = ({
           <p className="text-slate-600 mt-1">
             {selectionMode ? 'İşlem yapmak için bir üretici seçin' : 'Kayıtlı üreticiler ve bilgileri'}
           </p>
+          {/* Toplam üretici sayısı */}
+          {!selectionMode && (
+            <p className="text-emerald-700 font-semibold mt-2">Toplam Üretici: {producers.length}</p>
+          )}
         </div>
         
         {!selectionMode && (
@@ -298,6 +303,13 @@ const UreticiListesi: React.FC<UreticiListesiProps> = ({
               placeholder="Kayıt Tarihi"
               value={newProducer.registerDate}
               onChange={e => setNewProducer({ ...newProducer, registerDate: e.target.value })}
+              className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
+            />
+            <input
+              type="date"
+              placeholder="Doğum Günü"
+              value={newProducer.birthDate || ''}
+              onChange={e => setNewProducer({ ...newProducer, birthDate: e.target.value })}
               className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
             />
           </div>

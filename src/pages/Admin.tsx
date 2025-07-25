@@ -13,6 +13,8 @@ import type { Producer } from '../types/producer';
 import { doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { uploadToCloudinary } from '../utils/cloudinaryUtils';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 
 // DenemeComponent tanımı:
 const DenemeComponent: React.FC = () => {
@@ -453,6 +455,14 @@ const Admin = () => {
   const navigate = useNavigate();
   const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
   const settingsMenuRef = useRef<HTMLDivElement>(null);
+  const auth = getAuth();
+  const [user, setUser] = React.useState<User | null>(auth.currentUser);
+  React.useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+    });
+    return () => unsubscribe();
+  }, [auth]);
 
   // Menü dışına tıklayınca kapat
   React.useEffect(() => {
@@ -534,15 +544,6 @@ const Admin = () => {
 
         {/* User Section */}
         <div className="p-4 border-t border-gray-100">
-          <div className="flex items-center space-x-3 mb-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-slate-400 to-slate-600 rounded-lg flex items-center justify-center">
-              <span className="text-white text-sm font-semibold">A</span>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-slate-800">Admin User</p>
-              <p className="text-xs text-slate-500">admin@sera.com</p>
-            </div>
-          </div>
           <button
             onClick={handleLogout}
             className="w-full flex items-center justify-center space-x-2 px-4 py-2 text-sm text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
