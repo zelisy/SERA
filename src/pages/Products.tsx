@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { getAllProducts } from '../utils/firestoreUtils';
 import type { Product } from '../types/product';
+import { useNavigate } from 'react-router-dom';
 
 const Products: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -24,6 +26,9 @@ const Products: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-slate-50 py-10">
       <div className="max-w-5xl mx-auto bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8">
+        <button onClick={() => navigate(-1)} className="mb-6 bg-gradient-to-r from-gray-300 to-gray-400 text-gray-800 font-semibold py-2 px-6 rounded-xl shadow hover:from-gray-400 hover:to-gray-500 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400">
+          ← Geri
+        </button>
         <h2 className="text-2xl font-bold text-slate-800 mb-6 text-center">Ürünlerimiz</h2>
         {loading ? (
           <p className="text-center text-slate-600">Yükleniyor...</p>

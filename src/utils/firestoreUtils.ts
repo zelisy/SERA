@@ -366,3 +366,67 @@ export const getAllProducts = async (): Promise<Product[]> => {
     throw new Error('Ürünler yüklenemedi');
   }
 };
+
+// Deneme ekranı için bağımsız üretici fonksiyonları
+export const saveDenemeProducer = async (producer: { firstName: string; lastName: string }): Promise<string> => {
+  try {
+    const docRef = doc(collection(db, 'denemeProducers'));
+    await setDoc(docRef, {
+      ...producer,
+      id: docRef.id,
+      createdAt: new Date().toISOString(),
+    });
+    return docRef.id;
+  } catch (error) {
+    console.error('Deneme üretici kayıt hatası:', error);
+    throw new Error('Deneme üretici kaydedilemedi');
+  }
+};
+
+export const getAllDenemeProducers = async (): Promise<{id: string, firstName: string, lastName: string}[]> => {
+  try {
+    const querySnapshot = await getDocs(collection(db, 'denemeProducers'));
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as {id: string, firstName: string, lastName: string}));
+  } catch (error) {
+    console.error('Tüm deneme üreticileri yüklenemedi:', error);
+    throw new Error('Deneme üreticiler yüklenemedi');
+  }
+};
+
+export const deleteDenemeProducer = async (id: string): Promise<void> => {
+  try {
+    await deleteDoc(doc(db, 'denemeProducers', id));
+  } catch (error) {
+    console.error('Deneme üretici silme hatası:', error);
+    throw new Error('Deneme üretici silinemedi');
+  }
+};
+
+export const saveDenemeForm = async (form: any): Promise<string> => {
+  try {
+    const docRef = doc(collection(db, 'denemeForms'));
+    const cleanData = Object.fromEntries(
+      Object.entries({
+        ...form,
+        id: docRef.id,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }).filter(([, value]) => value !== undefined)
+    );
+    await setDoc(docRef, cleanData);
+    return docRef.id;
+  } catch (error) {
+    console.error('Deneme formu kayıt hatası:', error);
+    throw new Error('Deneme formu kaydedilemedi');
+  }
+};
+
+export const getAllDenemeForms = async (): Promise<any[]> => {
+  try {
+    const querySnapshot = await getDocs(collection(db, 'denemeForms'));
+    return querySnapshot.docs.map(doc => doc.data() as any);
+  } catch (error) {
+    console.error('Tüm deneme formları yükleme hatası:', error);
+    throw new Error('Deneme formları yüklenemedi');
+  }
+};

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { collection, getDocs, orderBy, query, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase/config';
+import { useNavigate } from 'react-router-dom';
 
 interface Message {
   id: string;
@@ -16,6 +17,7 @@ const Messages: React.FC = () => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const fetchMessages = async () => {
     setLoading(true);
@@ -51,6 +53,9 @@ const Messages: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-slate-50 py-10">
       <div className="max-w-4xl mx-auto bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8">
+        <button onClick={() => navigate(-1)} className="mb-6 bg-gradient-to-r from-gray-300 to-gray-400 text-gray-800 font-semibold py-2 px-6 rounded-xl shadow hover:from-gray-400 hover:to-gray-500 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400">
+          ← Geri
+        </button>
         <h2 className="text-2xl font-bold text-slate-800 mb-6 text-center">Gelen Mesajlar</h2>
         {error && <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700">{error}</div>}
         {success && <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-xl text-green-700">{success}</div>}

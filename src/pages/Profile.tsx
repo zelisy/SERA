@@ -8,6 +8,7 @@ import {
   type User
 } from 'firebase/auth';
 import { auth } from '../firebase/config';
+import { useNavigate } from 'react-router-dom';
 
 const Profile: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -17,6 +18,7 @@ const Profile: React.FC = () => {
   const [newPassword, setNewPassword] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   // Kullanıcıyı izleme
   useEffect(() => {
@@ -75,6 +77,9 @@ const Profile: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-slate-50 py-10">
       <div className="max-w-md mx-auto bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8">
+        <button onClick={() => navigate(-1)} className="mb-6 bg-gradient-to-r from-gray-300 to-gray-400 text-gray-800 font-semibold py-2 px-6 rounded-xl shadow hover:from-gray-400 hover:to-gray-500 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400">
+          ← Geri
+        </button>
         <h2 className="text-2xl font-bold text-slate-800 mb-6 text-center">Profil Bilgileri</h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>

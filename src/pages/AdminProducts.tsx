@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { saveProduct, getAllProducts, deleteProduct, updateProduct } from '../utils/firestoreUtils';
 import type { Product } from '../types/product';
+import { useNavigate } from 'react-router-dom';
 
 const AdminProducts: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
@@ -9,6 +10,7 @@ const AdminProducts: React.FC = () => {
   const [message, setMessage] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
   const [editId, setEditId] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const fetchProducts = async () => {
     try {
@@ -87,6 +89,9 @@ const AdminProducts: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-slate-50 py-10">
       <div className="max-w-4xl mx-auto bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8">
+        <button onClick={() => navigate(-1)} className="mb-6 bg-gradient-to-r from-gray-300 to-gray-400 text-gray-800 font-semibold py-2 px-6 rounded-xl shadow hover:from-gray-400 hover:to-gray-500 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400">
+          ← Geri
+        </button>
         <h2 className="text-2xl font-bold text-slate-800 mb-6 text-center">Ürün Yönetimi</h2>
         <p className="text-slate-700 text-center mb-8">Buradan ürün ekleyebilir, güncelleyebilir ve silebilirsiniz.</p>
         <div className="flex justify-center mb-6">
