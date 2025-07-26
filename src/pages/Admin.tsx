@@ -508,7 +508,7 @@ const Admin = () => {
               <span className="text-white text-lg font-bold">S</span>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-800">SERA TAKİP</h1>
+                              <h1 className="text-xl font-bold text-slate-800">AGROVİA</h1>
               <p className="text-sm text-slate-500">Admin Panel</p>
             </div>
           </div>

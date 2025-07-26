@@ -4,11 +4,7 @@ import { Link } from 'react-router-dom';
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
-  const footerLinks = [
-    { label: 'Gizlilik Politikası', href: '/privacy' },
-    { label: 'Kullanım Şartları', href: '/terms' },
-    { label: 'Destek', href: '/support' },
-  ];
+
 
   const socialLinks = [
     { icon: '📧', label: 'Email', href: 'mailto:info@sera.com' },
@@ -19,31 +15,31 @@ const Footer = () => {
   return (
     <footer className="bg-white border-t border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Main Footer Content */}
-        <div className="py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
+                {/* Main Footer Content */}
+        <div className="py-6 grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Brand Section */}
           <div className="md:col-span-2">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-xl flex items-center justify-center">
-                <span className="text-white text-lg font-bold">S</span>
+            <div className="flex items-center space-x-3 mb-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-lg flex items-center justify-center">
+                <span className="text-white text-sm font-bold">S</span>
               </div>
-              <h3 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                SERA TAKİP
+              <h3 className="text-lg font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                AGROVİA
               </h3>
             </div>
-            <p className="text-slate-600 text-sm leading-relaxed max-w-md">
+            <p className="text-slate-600 text-xs leading-relaxed max-w-sm">
               Modern tarım ve seracılık uygulamalarında verimliliği artırmak için geliştirilmiş 
-              akıllı takip sistemi. Geleceğin tarımını bugün deneyimleyin.
+              akıllı takip sistemi.
             </p>
-            <div className="mt-6 flex space-x-4">
+            <div className="mt-3 flex space-x-3">
               {socialLinks.map((social, index) => (
                 <a
                   key={index}
                   href={social.href}
-                  className="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-lg flex items-center justify-center transition-colors group"
+                  className="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-lg flex items-center justify-center transition-colors group"
                   title={social.label}
                 >
-                  <span className="text-slate-600 group-hover:text-slate-800 transition-colors">
+                  <span className="text-slate-600 group-hover:text-slate-800 transition-colors text-sm">
                     {social.icon}
                   </span>
                 </a>
@@ -53,12 +49,12 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-slate-800 font-semibold mb-4">Hızlı Linkler</h4>
-            <ul className="space-y-3">
+            <h4 className="text-slate-800 font-semibold mb-3 text-sm">Hızlı Linkler</h4>
+            <ul className="space-y-2">
               <li>
                 <Link 
                   to="/" 
-                  className="text-slate-600 hover:text-emerald-600 text-sm transition-colors"
+                  className="text-slate-600 hover:text-emerald-600 text-xs transition-colors"
                 >
                   Anasayfa
                 </Link>
@@ -66,7 +62,7 @@ const Footer = () => {
               <li>
                 <Link 
                   to="/about" 
-                  className="text-slate-600 hover:text-emerald-600 text-sm transition-colors"
+                  className="text-slate-600 hover:text-emerald-600 text-xs transition-colors"
                 >
                   Hakkımızda
                 </Link>
@@ -74,7 +70,7 @@ const Footer = () => {
               <li>
                 <Link 
                   to="/contact" 
-                  className="text-slate-600 hover:text-emerald-600 text-sm transition-colors"
+                  className="text-slate-600 hover:text-emerald-600 text-xs transition-colors"
                 >
                   İletişim
                 </Link>
@@ -82,7 +78,7 @@ const Footer = () => {
               <li>
                 <Link 
                   to="/dikim-oncesi-detay" 
-                  className="text-slate-600 hover:text-emerald-600 text-sm transition-colors"
+                  className="text-slate-600 hover:text-emerald-600 text-xs transition-colors"
                 >
                   Checklist
                 </Link>
@@ -90,34 +86,19 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Legal Links */}
-          <div>
-            <h4 className="text-slate-800 font-semibold mb-4">Yasal</h4>
-            <ul className="space-y-3">
-              {footerLinks.map((link, index) => (
-                <li key={index}>
-                  <a 
-                    href={link.href}
-                    className="text-slate-600 hover:text-emerald-600 text-sm transition-colors"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
+          
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-gray-100 py-6">
+        <div className="border-t border-gray-100 py-4">
           <div className="flex flex-col sm:flex-row items-center justify-between">
-            <p className="text-slate-500 text-sm">
-              © {currentYear} SERA TAKİP. Tüm hakları saklıdır.
+            <p className="text-slate-500 text-xs">
+              © {currentYear} AGROVİA. TÜM HAKLARI GİZLİDİR.
             </p>
-            <div className="mt-4 sm:mt-0 flex items-center space-x-4">
+            <div className="mt-2 sm:mt-0 flex items-center space-x-3">
               <span className="text-slate-400 text-xs">v1.0.0</span>
               <div className="flex items-center space-x-1">
-                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
                 <span className="text-slate-500 text-xs">Sistem Aktif</span>
               </div>
             </div>

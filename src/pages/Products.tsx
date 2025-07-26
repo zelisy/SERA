@@ -30,7 +30,7 @@ const Products: React.FC = () => {
       <div className="absolute inset-0">
         <img 
           src={arkaplanImage} 
-          alt="Sera Takip Sistemi Arkaplan"
+          alt="AGROVİA Sistemi Arkaplan"
           className="w-full h-full object-cover"
           style={{ minHeight: '100vh' }}
         />

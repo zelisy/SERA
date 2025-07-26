@@ -298,20 +298,28 @@ const UreticiListesi: React.FC<UreticiListesiProps> = ({
               className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
               min={0}
             />
-            <input
-              type="date"
-              placeholder="Kayıt Tarihi"
-              value={newProducer.registerDate}
-              onChange={e => setNewProducer({ ...newProducer, registerDate: e.target.value })}
-              className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
-            />
-            <input
-              type="date"
-              placeholder="Doğum Günü"
-              value={newProducer.birthDate || ''}
-              onChange={e => setNewProducer({ ...newProducer, birthDate: e.target.value })}
-              className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
-            />
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Sisteme Kayıt Tarihi
+              </label>
+              <input
+                type="date"
+                value={newProducer.registerDate}
+                onChange={e => setNewProducer({ ...newProducer, registerDate: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Doğum Tarihi
+              </label>
+              <input
+                type="date"
+                value={newProducer.birthDate || ''}
+                onChange={e => setNewProducer({ ...newProducer, birthDate: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200"
+              />
+            </div>
           </div>
           
           <div className="flex flex-col sm:flex-row gap-3 mt-6">

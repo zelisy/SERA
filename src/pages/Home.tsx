@@ -24,7 +24,7 @@ const Home = () => {
       <div className="absolute inset-0">
         <img 
           src={arkaplanImage} 
-          alt="Sera Takip Sistemi Arkaplan"
+          alt="AGROVİA Sistemi Arkaplan"
           className="w-full h-full object-cover"
           style={{ minHeight: '100vh' }}
           onLoad={() => console.log('Arkaplan resmi başarıyla yüklendi')}
@@ -43,7 +43,7 @@ const Home = () => {
         <div className="min-h-screen flex items-center justify-center px-4">
           <div className="text-center text-white max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-              SERA TAKİP 
+              AGROVİA 
               <span className="block text-emerald-400">SİSTEMİ</span>
             </h1>
             <p className="text-xl md:text-3xl mb-8 text-gray-200 font-light leading-relaxed">

@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import logoImage from '../assets/logo.avif';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ const Header = () => {
     { path: '/', label: 'Anasayfa', icon: '🏠' },
     { path: '/about', label: 'Hakkımızda', icon: 'ℹ️' },
     { path: '/products', label: 'Ürünlerimiz', icon: '🛒' },
-    { path: '/blog', label: 'Blog', icon: '📝' },
+    { path: '/blog', label: 'Bloglarımız', icon: '📝' },
     { path: '/contact', label: 'İletişim', icon: '📞' },
   ];
 
@@ -57,17 +58,21 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105">
-              <span className="text-white text-lg font-bold">S</span>
-            </div>
-            <div className="hidden sm:block">
-              <h1 className={`text-xl font-bold ${
-                isHomePage 
-                  ? 'text-white' 
-                  : 'bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent'
-              }`}>
-                SERA TAKİP
-              </h1>
+            <div className="flex items-center space-x-3">
+              <img 
+                src={logoImage} 
+                alt="AGROVİA Logo" 
+                className="w-10 h-10 object-cover rounded-xl transition-transform group-hover:scale-105"
+              />
+              <div className="hidden sm:block">
+                <h1 className={`text-xl font-bold ${
+                  isHomePage 
+                    ? 'text-white' 
+                    : 'bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent'
+                }`}>
+                  AGROVİA
+                </h1>
+              </div>
             </div>
           </Link>
 
