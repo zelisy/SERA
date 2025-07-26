@@ -4,6 +4,11 @@ import type { Product } from '../types/product';
 import { useNavigate } from 'react-router-dom';
 import arkaplanImage from '../assets/arkaplan.jpg';
 
+// Authentication kontrolü
+const isAuthenticated = () => {
+  return !!localStorage.getItem('isLoggedIn');
+};
+
 const Products: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,9 +48,19 @@ const Products: React.FC = () => {
         <div className="pt-20 pb-16">
           <div className="max-w-5xl mx-auto px-4">
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700 p-8">
-              <button onClick={() => navigate(-1)} className="mb-6 bg-gradient-to-r from-gray-600 to-gray-700 text-white font-semibold py-2 px-6 rounded-xl shadow hover:from-gray-700 hover:to-gray-800 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400">
-                ← Geri
-              </button>
+              <div className="flex justify-between items-center mb-6">
+                <button onClick={() => navigate(-1)} className="bg-gradient-to-r from-gray-600 to-gray-700 text-white font-semibold py-2 px-6 rounded-xl shadow hover:from-gray-700 hover:to-gray-800 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400">
+                  ← Geri
+                </button>
+                {isAuthenticated() && (
+                  <button 
+                    onClick={() => navigate('/admin/products')} 
+                    className="bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-semibold py-2 px-6 rounded-xl shadow hover:from-emerald-600 hover:to-blue-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                  >
+                    🛠️ Ürün Yönetimi
+                  </button>
+                )}
+              </div>
               <h2 className="text-2xl font-bold text-white mb-6 text-center">Ürünlerimiz</h2>
               {loading ? (
                 <p className="text-center text-gray-300">Yükleniyor...</p>
