@@ -48,8 +48,15 @@ const Header = () => {
     setMobileMenuOpen(false);
   };
 
+  // Anasayfada farklı stil uygula
+  const isHomePage = location.pathname === '/';
+
   return (
-    <header className="bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100 sticky top-0 z-40">
+    <header className={`${
+      isHomePage 
+        ? 'bg-black/50 backdrop-blur-md border-b border-white/10' 
+        : 'bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100'
+    } sticky top-0 z-40 transition-all duration-300`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -58,7 +65,11 @@ const Header = () => {
               <span className="text-white text-lg font-bold">S</span>
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+              <h1 className={`text-xl font-bold ${
+                isHomePage 
+                  ? 'text-white' 
+                  : 'bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent'
+              }`}>
                 SERA TAKİP
               </h1>
             </div>
@@ -73,8 +84,12 @@ const Header = () => {
                 className={`
                   flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
                   ${location.pathname === item.path
-                    ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
-                    : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50'
+                    ? isHomePage 
+                      ? 'bg-white/20 text-white border border-white/30'
+                      : 'bg-emerald-50 text-emerald-600 border border-emerald-200'
+                    : isHomePage
+                      ? 'text-white/80 hover:text-white hover:bg-white/10'
+                      : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50'
                   }
                 `}
               >
@@ -88,7 +103,11 @@ const Header = () => {
           <div className="hidden md:flex items-center space-x-4 relative">
             <button
               onClick={handleAuthClick}
-              className="flex items-center space-x-2 bg-gradient-to-r from-emerald-500 to-blue-500 text-white px-6 py-2 rounded-xl font-medium hover:from-emerald-600 hover:to-blue-600 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+              className={`flex items-center space-x-2 font-medium px-6 py-2 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl ${
+                isHomePage
+                  ? 'bg-white/20 text-white border border-white/30 hover:bg-white/30'
+                  : 'bg-gradient-to-r from-emerald-500 to-blue-500 text-white hover:from-emerald-600 hover:to-blue-600'
+              }`}
             >
               <span>{isLoggedIn ? '⚙️' : '🔐'}</span>
               <span>{isLoggedIn ? 'Admin Panel' : 'Giriş Yap'}</span>
@@ -98,11 +117,15 @@ const Header = () => {
               <div className="relative">
                 <button
                   onClick={() => setSettingsMenuOpen((open) => !open)}
-                  className="ml-2 p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  className={`ml-2 p-2 rounded-full transition-colors ${
+                    isHomePage 
+                      ? 'hover:bg-white/20 text-white' 
+                      : 'hover:bg-gray-100 text-slate-600'
+                  }`}
                   aria-label="Ayarlar"
                   type="button"
                 >
-                  <svg className="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
@@ -117,7 +140,7 @@ const Header = () => {
                               setSettingsMenuOpen(false);
                               navigate(item.path);
                             }}
-                            className="w-full text-left px-4 py-2 hover:bg-emerald-50 transition-colors"
+                            className="w-full text-left px-4 py-2 hover:bg-emerald-50 transition-colors text-slate-700"
                           >
                             {item.label}
                           </button>
@@ -133,10 +156,14 @@ const Header = () => {
           {/* Mobile Menu Toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className={`md:hidden p-2 rounded-lg transition-colors ${
+              isHomePage 
+                ? 'hover:bg-white/20 text-white' 
+                : 'hover:bg-gray-100 text-slate-600'
+            }`}
           >
             <svg 
-              className={`w-6 h-6 text-slate-600 transition-transform duration-200 ${mobileMenuOpen ? 'rotate-45' : ''}`}
+              className={`w-6 h-6 transition-transform duration-200 ${mobileMenuOpen ? 'rotate-45' : ''}`}
               fill="none" 
               stroke="currentColor" 
               viewBox="0 0 24 24"
@@ -155,7 +182,9 @@ const Header = () => {
           md:hidden transition-all duration-300 ease-in-out overflow-hidden
           ${mobileMenuOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'}
         `}>
-          <div className="py-4 space-y-2 border-t border-gray-100">
+          <div className={`py-4 space-y-2 ${
+            isHomePage ? 'border-t border-white/20' : 'border-t border-gray-100'
+          }`}>
             {navItems.map((item) => (
               <Link
                 key={item.path}
@@ -164,8 +193,12 @@ const Header = () => {
                 className={`
                   flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium transition-all duration-200
                   ${location.pathname === item.path
-                    ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
-                    : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50'
+                    ? isHomePage 
+                      ? 'bg-white/20 text-white border border-white/30'
+                      : 'bg-emerald-50 text-emerald-600 border border-emerald-200'
+                    : isHomePage
+                      ? 'text-white/80 hover:text-white hover:bg-white/10'
+                      : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50'
                   }
                 `}
               >
@@ -174,10 +207,16 @@ const Header = () => {
               </Link>
             ))}
 
-            <div className="pt-2 border-t border-gray-100">
+            <div className={`pt-2 ${
+              isHomePage ? 'border-t border-white/20' : 'border-t border-gray-100'
+            }`}>
               <button
                 onClick={handleAuthClick}
-                className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-emerald-500 to-blue-500 text-white px-6 py-3 rounded-xl font-medium hover:from-emerald-600 hover:to-blue-600 transition-all duration-200 shadow-lg"
+                className={`w-full flex items-center justify-center space-x-2 font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-lg ${
+                  isHomePage
+                    ? 'bg-white/20 text-white border border-white/30 hover:bg-white/30'
+                    : 'bg-gradient-to-r from-emerald-500 to-blue-500 text-white hover:from-emerald-600 hover:to-blue-600'
+                }`}
               >
                 <span>{isLoggedIn ? '⚙️' : '🔐'}</span>
                 <span>{isLoggedIn ? 'Admin Panel' : 'Giriş Yap'}</span>
