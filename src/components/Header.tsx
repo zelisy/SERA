@@ -8,30 +8,39 @@ const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
   const settingsMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
   const isLoggedIn = !!localStorage.getItem('isLoggedIn');
 
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
+      // Settings menu için dışarı tıklama kontrolü
       if (settingsMenuRef.current && !settingsMenuRef.current.contains(event.target as Node)) {
         setSettingsMenuOpen(false);
       }
+      
+      // Mobile menu için dışarı tıklama kontrolü
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+        setMobileMenuOpen(false);
+      }
     }
-    if (settingsMenuOpen) {
+    
+    if (settingsMenuOpen || mobileMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     } else {
       document.removeEventListener('mousedown', handleClickOutside);
     }
+    
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [settingsMenuOpen]);
+  }, [settingsMenuOpen, mobileMenuOpen]);
 
   const navItems = [
-    { path: '/', label: 'Anasayfa', icon: '🏠' },
-    { path: '/about', label: 'Hakkımızda', icon: 'ℹ️' },
-    { path: '/products', label: 'Ürünlerimiz', icon: '🛒' },
-    { path: '/blog', label: 'Bloglarımız', icon: '📝' },
-    { path: '/contact', label: 'İletişim', icon: '📞' },
+    { path: '/', label: 'Anasayfa' },
+    { path: '/about', label: 'Hakkımızda' },
+    { path: '/products', label: 'Ürünlerimiz' },
+    { path: '/blog', label: 'Bloglarımız' },
+    { path: '/contact', label: 'İletişim' },
   ];
 
   const settingsItems = [
@@ -49,8 +58,9 @@ const Header = () => {
     setMobileMenuOpen(false);
   };
 
-  // Anasayfada farklı stil uygula
+  // Anasayfada ve belirtilen sayfalarda farklı stil uygula
   const isHomePage = location.pathname === '/';
+  const isWhiteTextPage = ['/', '/about', '/products', '/blog', '/contact', '/login'].includes(location.pathname);
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-black/60 text-white backdrop-blur-sm shadow-md">
@@ -66,7 +76,7 @@ const Header = () => {
               />
               <div className="hidden sm:block">
                 <h1 className={`text-xl font-bold ${
-                  isHomePage 
+                  isWhiteTextPage 
                     ? 'text-white' 
                     : 'bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent'
                 }`}>
@@ -83,19 +93,18 @@ const Header = () => {
                 key={item.path}
                 to={item.path}
                 className={`
-                  flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
+                  px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
                   ${location.pathname === item.path
-                    ? isHomePage 
+                    ? isWhiteTextPage 
                       ? 'bg-white/20 text-white border border-white/30'
                       : 'bg-emerald-50 text-emerald-600 border border-emerald-200'
-                    : isHomePage
+                    : isWhiteTextPage
                       ? 'text-white/80 hover:text-white hover:bg-white/10'
                       : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50'
                   }
                 `}
               >
-                <span className="text-base">{item.icon}</span>
-                <span>{item.label}</span>
+                {item.label}
               </Link>
             ))}
           </nav>
@@ -105,7 +114,7 @@ const Header = () => {
             <button
               onClick={handleAuthClick}
               className={`flex items-center space-x-2 font-medium px-6 py-2 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl ${
-                isHomePage
+                isWhiteTextPage
                   ? 'bg-white/20 text-white border border-white/30 hover:bg-white/30'
                   : 'bg-gradient-to-r from-emerald-500 to-blue-500 text-white hover:from-emerald-600 hover:to-blue-600'
               }`}
@@ -119,7 +128,7 @@ const Header = () => {
                 <button
                   onClick={() => setSettingsMenuOpen((open) => !open)}
                   className={`ml-2 p-2 rounded-full transition-colors ${
-                    isHomePage 
+                    isWhiteTextPage 
                       ? 'hover:bg-white/20 text-white' 
                       : 'hover:bg-gray-100 text-slate-600'
                   }`}
@@ -158,7 +167,7 @@ const Header = () => {
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className={`md:hidden p-2 rounded-lg transition-colors ${
-              isHomePage 
+              isWhiteTextPage 
                 ? 'hover:bg-white/20 text-white' 
                 : 'hover:bg-gray-100 text-slate-600'
             }`}
@@ -179,12 +188,15 @@ const Header = () => {
         </div>
 
         {/* Mobile Menu */}
-        <div className={`
-          md:hidden transition-all duration-300 ease-in-out overflow-hidden
-          ${mobileMenuOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'}
-        `}>
+        <div 
+          ref={mobileMenuRef}
+          className={`
+            md:hidden transition-all duration-300 ease-in-out overflow-hidden
+            ${mobileMenuOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'}
+          `}
+        >
           <div className={`py-4 space-y-2 ${
-            isHomePage ? 'border-t border-white/20' : 'border-t border-gray-100'
+            isWhiteTextPage ? 'border-t border-white/20' : 'border-t border-gray-100'
           }`}>
             {navItems.map((item) => (
               <Link
@@ -192,29 +204,28 @@ const Header = () => {
                 to={item.path}
                 onClick={() => setMobileMenuOpen(false)}
                 className={`
-                  flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium transition-all duration-200
+                  px-4 py-3 rounded-lg text-base font-medium transition-all duration-200
                   ${location.pathname === item.path
-                    ? isHomePage 
+                    ? isWhiteTextPage 
                       ? 'bg-white/20 text-white border border-white/30'
                       : 'bg-emerald-50 text-emerald-600 border border-emerald-200'
-                    : isHomePage
+                    : isWhiteTextPage
                       ? 'text-white/80 hover:text-white hover:bg-white/10'
                       : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50'
                   }
                 `}
               >
-                <span className="text-lg">{item.icon}</span>
-                <span>{item.label}</span>
+                {item.label}
               </Link>
             ))}
 
             <div className={`pt-2 ${
-              isHomePage ? 'border-t border-white/20' : 'border-t border-gray-100'
+              isWhiteTextPage ? 'border-t border-white/20' : 'border-t border-gray-100'
             }`}>
               <button
                 onClick={handleAuthClick}
                 className={`w-full flex items-center justify-center space-x-2 font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-lg ${
-                  isHomePage
+                  isWhiteTextPage
                     ? 'bg-white/20 text-white border border-white/30 hover:bg-white/30'
                     : 'bg-gradient-to-r from-emerald-500 to-blue-500 text-white hover:from-emerald-600 hover:to-blue-600'
                 }`}

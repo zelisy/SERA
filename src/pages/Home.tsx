@@ -1,13 +1,31 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import arkaplanImage from '../assets/arkaplan.jpg';
+import { getAllProducts } from '../utils/firestoreUtils';
+import type { Product } from '../types/product';
 
 const Home = () => {
   const navigate = useNavigate();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const isAuthenticated = () => {
     return !!localStorage.getItem('isLoggedIn');
   };
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await getAllProducts();
+        setProducts(data);
+      } catch (err) {
+        console.error('Ürünler yüklenemedi:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   const handleFeatureClick = (route: string) => {
     if (isAuthenticated()) {
@@ -197,45 +215,65 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Technology Section */}
-        <div className="bg-black py-20">
-          <div className="max-w-6xl mx-auto px-4 text-center">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Modern <span className="text-emerald-400">Teknoloji</span>
-            </h2>
-            <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
-              En güncel teknolojiler ile güvenli, hızlı ve kullanıcı dostu deneyim
-            </p>
-            
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
-              <div className="text-center group hover:scale-105 transition-transform duration-300">
-                <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">⚡</div>
-                <div className="text-white font-semibold">React + TypeScript</div>
-              </div>
-              <div className="text-center group hover:scale-105 transition-transform duration-300">
-                <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">🔥</div>
-                <div className="text-white font-semibold">Firebase Firestore</div>
-              </div>
-              <div className="text-center group hover:scale-105 transition-transform duration-300">
-                <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">☁️</div>
-                <div className="text-white font-semibold">Cloudinary</div>
-              </div>
-              <div className="text-center group hover:scale-105 transition-transform duration-300">
-                <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">🎨</div>
-                <div className="text-white font-semibold">Tailwind CSS</div>
-              </div>
-              <div className="text-center group hover:scale-105 transition-transform duration-300">
-                <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">📱</div>
-                <div className="text-white font-semibold">Responsive</div>
-              </div>
+        {/* Products Section */}
+        <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 py-8 md:py-12">
+          <div className="max-w-4xl mx-auto px-4">
+            <div className="text-center mb-6 md:mb-8">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 md:mb-6">
+                <span className="text-emerald-400">Ürünlerimiz</span>
+              </h2>
+              <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
+                Kaliteli sera ürünleri ve ekipmanları
+              </p>
             </div>
 
-            <div className="mt-12">
+            {loading ? (
+              <div className="text-center">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-400"></div>
+                <p className="text-gray-300 mt-4">Ürünler yükleniyor...</p>
+              </div>
+            ) : products.length === 0 ? (
+              <div className="text-center">
+                <p className="text-gray-300 text-lg">Henüz ürün eklenmedi.</p>
+                <button 
+                  onClick={() => navigate('/products')}
+                  className="mt-4 bg-emerald-500 hover:bg-emerald-400 text-black font-semibold py-3 px-8 rounded-full transition-all duration-300 transform hover:scale-105 shadow-xl"
+                >
+                  Ürünler Sayfasına Git
+                </button>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <div className="flex space-x-4 md:space-x-6 pb-4" style={{ minWidth: 'max-content' }}>
+                                     {products.map(product => (
+                                          <div key={product.id} className="bg-slate-800/60 backdrop-blur-sm rounded-2xl shadow-xl border border-slate-600 p-3 md:p-4 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 flex-shrink-0" style={{ width: '220px', minWidth: '220px' }}>
+                       {product.imageUrl && (
+                         <div className="mb-2 md:mb-3">
+                           <img 
+                             src={product.imageUrl} 
+                             alt={product.name} 
+                             className="w-full h-28 md:h-36 object-cover rounded-xl shadow-lg"
+                           />
+                         </div>
+                       )}
+                                             <h3 className="text-base md:text-lg font-bold text-white mb-1 md:mb-2">{product.name}</h3>
+                       <p className="text-gray-300 mb-2 md:mb-3 text-xs md:text-sm leading-relaxed line-clamp-2">{product.description}</p>
+                                              <div className="flex items-center justify-between">
+                          <div className="text-emerald-400 font-bold text-lg md:text-xl">₺{product.price}</div>
+                          <div className="text-xs text-gray-400">{new Date(product.createdAt).toLocaleDateString('tr-TR')}</div>
+                        </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+                         <div className="text-center mt-8">
               <button 
-                onClick={() => navigate('/about')}
+                onClick={() => navigate('/products')}
                 className="bg-emerald-500 hover:bg-emerald-400 text-black font-semibold py-4 px-12 rounded-full transition-all duration-300 transform hover:scale-105 shadow-xl text-lg border-2 border-emerald-500 hover:border-emerald-400"
               >
-                Detaylı Bilgi
+                Tüm Ürünleri Gör
               </button>
             </div>
           </div>

@@ -93,7 +93,7 @@ const Footer = () => {
         <div className="border-t border-gray-100 py-4">
           <div className="flex flex-col sm:flex-row items-center justify-between">
             <p className="text-slate-500 text-xs">
-              © {currentYear} AGROVİA. TÜM HAKLARI GİZLİDİR.
+              © {currentYear} AGROVİA. TÜM HAKLARI SAKLIDIR.
             </p>
             <div className="mt-2 sm:mt-0 flex items-center space-x-3">
               <span className="text-slate-400 text-xs">v1.0.0</span>

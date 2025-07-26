@@ -248,135 +248,160 @@ const DenemeComponent: React.FC = () => {
             </button>
           </div>
         </div>
-        <form className="space-y-8" onSubmit={handleSave}>
-          <h2 className="text-2xl font-bold mb-2">Genel Bilgi</h2>
-          <div className="bg-slate-50 rounded-2xl shadow border p-4 mb-4 space-y-2">
-            <div>
-              <label className="block font-semibold">Çalışmak</label>
-              <input name="genelCalismak" value={form.genelCalismak} onChange={handleChange} className="w-full p-2 rounded border" />
-            </div>
-            <div>
-              <label className="block font-semibold">Amaç</label>
-              <input name="genelAmac" value={form.genelAmac} onChange={handleChange} className="w-full p-2 rounded border" />
-            </div>
-          </div>
-          <h2 className="text-xl font-bold mb-2">Çalışma Yeri</h2>
-          <div className="bg-slate-50 rounded-2xl shadow border p-4 mb-4 space-y-2">
-            <div>
-              <label className="block font-semibold">Ülke</label>
-              <select name="ulke" value={form.ulke} onChange={handleChange} className="w-full p-2 rounded border">
-                <option value="">Ülke Seçiniz</option>
-                <option value="Türkiye">Türkiye</option>
-                <option value="Almanya">Almanya</option>
-                <option value="Fransa">Fransa</option>
-                <option value="İtalya">İtalya</option>
-                <option value="İspanya">İspanya</option>
-                <option value="Ukrayna">Ukrayna</option>
-                <option value="ABD">ABD</option>
-                <option value="İngiltere">İngiltere</option>
-                <option value="Rusya">Rusya</option>
-                <option value="Çin">Çin</option>
-                <option value="Japonya">Japonya</option>
-                <option value="Hollanda">Hollanda</option>
-                <option value="Brezilya">Brezilya</option>
-                <option value="Kanada">Kanada</option>
-                <option value="Avustralya">Avustralya</option>
-                <option value="Meksika">Meksika</option>
-                <option value="Güney Kore">Güney Kore</option>
-                <option value="Hindistan">Hindistan</option>
-                <option value="Diğer">Diğer</option>
-              </select>
-            </div>
-            <div>
-              <label className="block font-semibold">Konum</label>
-              <input name="konum" value={form.konum} onChange={handleChange} className="w-full p-2 rounded border" />
+        <form className="space-y-6 md:space-y-8" onSubmit={handleSave}>
+          <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">Genel Bilgi</h2>
+          <div className="bg-slate-50 rounded-xl shadow border p-3 md:p-4 mb-3 md:mb-4 space-y-3 md:space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+              <div>
+                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Çalışmak</label>
+                <input name="genelCalismak" value={form.genelCalismak} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+              </div>
+              <div>
+                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Amaç</label>
+                <input name="genelAmac" value={form.genelAmac} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+              </div>
             </div>
           </div>
-          <h2 className="text-xl font-bold mb-2">Mahsul Bilgileri</h2>
-          <div className="bg-slate-50 rounded-2xl shadow border p-4 mb-4 space-y-2">
-            <div>
-              <label className="block font-semibold">Türler</label>
-              <input name="turler" value={form.turler} onChange={handleChange} className="w-full p-2 rounded border" />
-            </div>
-            <div>
-              <label className="block font-semibold">Çeşitlilik</label>
-              <input name="cesitlilik" value={form.cesitlilik} onChange={handleChange} className="w-full p-2 rounded border" />
-            </div>
-          </div>
-          <h2 className="text-xl font-bold mb-2">Sonuçlar</h2>
-          <div className="bg-slate-50 rounded-2xl shadow border p-4 mb-4 space-y-2">
-            <div>
-              <label className="block font-semibold">Tedaviler</label>
-              <input name="tedaviler" value={form.tedaviler} onChange={handleChange} className="w-full p-2 rounded border" />
-            </div>
-            <div>
-              <label className="block font-semibold">Tekrarlar</label>
-              <input name="tekrarlar" value={form.tekrarlar} onChange={handleChange} className="w-full p-2 rounded border" />
-            </div>
-            <div>
-              <label className="block font-semibold">Tedavi başına bitki sayısı</label>
-              <input name="tedaviBitkiSayisi" type="number" value={form.tedaviBitkiSayisi} onChange={handleChange} className="w-full p-2 rounded border" min="0" />
-            </div>
-          </div>
-          <h2 className="text-xl font-bold mb-2">Mahsul Durumu</h2>
-          <div className="bg-slate-50 rounded-2xl shadow border p-4 mb-4 space-y-4">
-            <div>
-              <label className="block font-semibold">Mahsul durumu</label>
-              <textarea name="mahsulDurumu" value={form.mahsulDurumu} onChange={handleChange} className="w-full p-2 rounded border" rows={3} />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-1">Evrim</h3>
-              <textarea name="evrim" value={form.evrim} onChange={handleChange} className="w-full p-2 rounded border" rows={2} placeholder="Evrim bilgisini giriniz..." />
+          <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">Çalışma Yeri</h2>
+          <div className="bg-slate-50 rounded-xl shadow border p-3 md:p-4 mb-3 md:mb-4 space-y-3 md:space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+              <div>
+                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Ülke</label>
+                <select name="ulke" value={form.ulke} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                  <option value="">Ülke Seçiniz</option>
+                  <option value="Türkiye">Türkiye</option>
+                  <option value="Almanya">Almanya</option>
+                  <option value="Fransa">Fransa</option>
+                  <option value="İtalya">İtalya</option>
+                  <option value="İspanya">İspanya</option>
+                  <option value="Ukrayna">Ukrayna</option>
+                  <option value="ABD">ABD</option>
+                  <option value="İngiltere">İngiltere</option>
+                  <option value="Rusya">Rusya</option>
+                  <option value="Çin">Çin</option>
+                  <option value="Japonya">Japonya</option>
+                  <option value="Hollanda">Hollanda</option>
+                  <option value="Brezilya">Brezilya</option>
+                  <option value="Kanada">Kanada</option>
+                  <option value="Avustralya">Avustralya</option>
+                  <option value="Meksika">Meksika</option>
+                  <option value="Güney Kore">Güney Kore</option>
+                  <option value="Hindistan">Hindistan</option>
+                  <option value="Diğer">Diğer</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Konum</label>
+                <input name="konum" value={form.konum} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+              </div>
             </div>
           </div>
-          <h2 className="text-xl font-bold mb-2">Görüntüler</h2>
-          <div className="bg-slate-50 rounded-2xl shadow border p-4 mb-4">
-            <label htmlFor="deneme-goruntu-input" className="inline-block cursor-pointer bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-semibold py-2 px-6 rounded-xl shadow-lg hover:from-emerald-600 hover:to-blue-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400">
-              📷 Fotoğraf Seç
-            </label>
-            <input id="deneme-goruntu-input" type="file" multiple accept="image/*" onChange={handleImageChange} className="hidden" />
-            <div className="flex flex-row flex-wrap gap-4 mt-2">
+          <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">Mahsul Bilgileri</h2>
+          <div className="bg-slate-50 rounded-xl shadow border p-3 md:p-4 mb-3 md:mb-4 space-y-3 md:space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+              <div>
+                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Türler</label>
+                <input name="turler" value={form.turler} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+              </div>
+              <div>
+                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Çeşitlilik</label>
+                <input name="cesitlilik" value={form.cesitlilik} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+              </div>
+            </div>
+          </div>
+          <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">Sonuçlar</h2>
+          <div className="bg-slate-50 rounded-xl shadow border p-3 md:p-4 mb-3 md:mb-4 space-y-3 md:space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+              <div>
+                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Tedaviler</label>
+                <input name="tedaviler" value={form.tedaviler} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+              </div>
+              <div>
+                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Tekrarlar</label>
+                <input name="tekrarlar" value={form.tekrarlar} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+              </div>
+              <div className="md:col-span-2 lg:col-span-1">
+                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Tedavi başına bitki sayısı</label>
+                <input name="tedaviBitkiSayisi" type="number" value={form.tedaviBitkiSayisi} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-emerald-500 focus:border-transparent" min="0" />
+              </div>
+            </div>
+          </div>
+          <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">Mahsul Durumu</h2>
+          <div className="bg-slate-50 rounded-xl shadow border p-3 md:p-4 mb-3 md:mb-4 space-y-4">
+            <div>
+              <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Mahsul durumu</label>
+              <textarea name="mahsulDurumu" value={form.mahsulDurumu} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none" rows={3} />
+            </div>
+            <div>
+              <h3 className="text-base md:text-lg font-semibold mb-1 md:mb-2">Evrim</h3>
+              <textarea name="evrim" value={form.evrim} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none" rows={2} placeholder="Evrim bilgisini giriniz..." />
+            </div>
+          </div>
+          <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">Görüntüler</h2>
+          <div className="bg-slate-50 rounded-xl shadow border p-3 md:p-4 mb-3 md:mb-4">
+            <div className="flex flex-col items-center">
+              <label htmlFor="deneme-goruntu-input" className="inline-block cursor-pointer bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-semibold py-2 md:py-3 px-4 md:px-6 rounded-xl shadow-lg hover:from-emerald-600 hover:to-blue-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm md:text-base">
+                📷 Fotoğraf Seç
+              </label>
+              <input id="deneme-goruntu-input" type="file" multiple accept="image/*" onChange={handleImageChange} className="hidden" />
+              <p className="text-xs text-gray-500 mt-2 text-center">Birden fazla fotoğraf seçebilirsiniz</p>
+            </div>
+            <div className="flex flex-row flex-wrap gap-2 md:gap-4 mt-3 md:mt-4">
               {form.goruntuler.map((url, i) => (
-                <img key={i} src={url} alt={`görsel${i}`} className="w-32 h-32 object-cover rounded shadow cursor-pointer" onClick={e => { e.stopPropagation(); setImageModalImages(form.goruntuler); setImageModalIndex(i); setImageModalOpen(true); }} />
+                <img key={i} src={url} alt={`görsel${i}`} className="w-20 h-20 md:w-32 md:h-32 object-cover rounded-lg shadow cursor-pointer hover:scale-105 transition-transform duration-200" onClick={e => { e.stopPropagation(); setImageModalImages(form.goruntuler); setImageModalIndex(i); setImageModalOpen(true); }} />
               ))}
             </div>
           </div>
-          <button type="submit" className="bg-gradient-to-r from-emerald-500 to-blue-500 text-white px-6 py-2 rounded-xl font-semibold shadow-lg hover:from-emerald-600 hover:to-blue-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400">Kaydet</button>
-          {message && <div className="text-center text-emerald-600 mt-2">{message}</div>}
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
+            <button type="submit" className="flex-1 sm:flex-none bg-gradient-to-r from-emerald-500 to-blue-500 text-white px-4 md:px-6 py-3 md:py-4 rounded-xl font-semibold shadow-lg hover:from-emerald-600 hover:to-blue-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm md:text-base">
+              💾 Kaydet
+            </button>
+          </div>
+          {message && <div className="text-center text-emerald-600 mt-3 text-sm md:text-base">{message}</div>}
         </form>
         {/* Kayıtlı Deneme Formları Listesi */}
-        <div className="mt-8">
-          <h2 className="text-xl font-bold mb-4">Kayıtlı Deneme Formları</h2>
-          {savedForms.length === 0 && <div className="text-slate-500">Henüz kayıt yok.</div>}
-          <ul className="space-y-4">
+        <div className="mt-6 md:mt-8">
+          <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">Kayıtlı Deneme Formları</h2>
+          {savedForms.length === 0 && <div className="text-slate-500 text-center py-8">Henüz kayıt yok.</div>}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
             {savedForms.map((item, idx) => (
-              <li key={idx} className="bg-white rounded-xl shadow border p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 cursor-pointer hover:bg-emerald-50 transition" onClick={() => { setModalOpen(true); setModalData(item); }}>
-                <div>
-                  <div className="font-semibold text-emerald-700">{item.producer?.firstName} {item.producer?.lastName}</div>
-                  <div className="text-sm text-slate-600">Amaç: {item.genelAmac}</div>
-                  <div className="text-sm text-slate-600">Mahsul Durumu: {item.mahsulDurumu}</div>
-                  <div className="text-sm text-slate-600">Evrim: {item.evrim}</div>
-                  <div className="flex flex-row flex-wrap gap-2 mt-2">
-                    {item.goruntuler?.map((url: string, i: number) => (
-                      <img key={i} src={url} alt={`görsel${i}`} className="w-16 h-16 object-cover rounded" />
-                    ))}
+              <div key={idx} className="bg-white rounded-xl shadow border p-3 md:p-4 cursor-pointer hover:bg-emerald-50 transition-all duration-200 hover:shadow-lg" onClick={() => { setModalOpen(true); setModalData(item); }}>
+                <div className="space-y-2 md:space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="font-semibold text-emerald-700 text-sm md:text-base">{item.producer?.firstName} {item.producer?.lastName}</div>
+                    <div className="flex gap-1 md:gap-2" onClick={e => e.stopPropagation()}>
+                      <button className="bg-gradient-to-r from-emerald-500 to-blue-500 text-white px-2 md:px-3 py-1 md:py-2 rounded-lg shadow hover:from-emerald-600 hover:to-blue-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 text-xs md:text-sm" onClick={() => handleEdit(idx)}>✏️</button>
+                      <button className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-2 md:px-3 py-1 md:py-2 rounded-lg shadow hover:from-red-600 hover:to-pink-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-400 text-xs md:text-sm" onClick={() => handleDelete(idx)}>🗑️</button>
+                    </div>
                   </div>
+                  <div className="text-xs md:text-sm text-slate-600 space-y-1">
+                    <div><span className="font-medium">Amaç:</span> {item.genelAmac?.substring(0, 50)}...</div>
+                    <div><span className="font-medium">Mahsul:</span> {item.mahsulDurumu?.substring(0, 40)}...</div>
+                  </div>
+                  {item.goruntuler?.length > 0 && (
+                    <div className="flex flex-row flex-wrap gap-1 md:gap-2 mt-2">
+                      {item.goruntuler.slice(0, 3).map((url: string, i: number) => (
+                        <img key={i} src={url} alt={`görsel${i}`} className="w-12 h-12 md:w-16 md:h-16 object-cover rounded-lg" />
+                      ))}
+                      {item.goruntuler.length > 3 && (
+                        <div className="w-12 h-12 md:w-16 md:h-16 bg-gray-200 rounded-lg flex items-center justify-center text-xs text-gray-500">
+                          +{item.goruntuler.length - 3}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <div className="flex gap-2" onClick={e => e.stopPropagation()}>
-                  <button className="bg-gradient-to-r from-emerald-500 to-blue-500 text-white px-4 py-1 rounded shadow hover:from-emerald-600 hover:to-blue-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400" onClick={() => handleEdit(idx)}>Düzenle</button>
-                  <button className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1 rounded shadow hover:from-red-600 hover:to-pink-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-400" onClick={() => handleDelete(idx)}>Sil</button>
-                </div>
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
         {/* Detaylı Pop-up Modal */}
         {modalOpen && modalData && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-8 relative animate-fade-in">
-              <button className="absolute top-4 right-4 text-2xl text-gray-400 hover:text-emerald-600" onClick={() => setModalOpen(false)}>&times;</button>
-              <h2 className="text-2xl font-bold mb-4 text-emerald-700">Deneme Formu Detayı</h2>
-              <div className="space-y-2 mb-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+            <div className="bg-white rounded-xl shadow-2xl max-w-sm md:max-w-2xl w-full p-4 md:p-8 relative animate-fade-in max-h-[90vh] overflow-y-auto">
+              <button className="absolute top-2 md:top-4 right-2 md:right-4 text-xl md:text-2xl text-gray-400 hover:text-emerald-600 z-10" onClick={() => setModalOpen(false)}>&times;</button>
+              <h2 className="text-lg md:text-2xl font-bold mb-3 md:mb-4 text-emerald-700 pr-8">Deneme Formu Detayı</h2>
+              <div className="space-y-2 md:space-y-3 mb-4 text-sm md:text-base">
                 <div><span className="font-semibold">Üretici:</span> {modalData.producer?.firstName} {modalData.producer?.lastName}</div>
                 <div><span className="font-semibold">Çalışmak:</span> {modalData.genelCalismak}</div>
                 <div><span className="font-semibold">Amaç:</span> {modalData.genelAmac}</div>
@@ -391,14 +416,14 @@ const DenemeComponent: React.FC = () => {
                 <div><span className="font-semibold">Evrim:</span> {modalData.evrim}</div>
               </div>
               <div>
-                <div className="font-semibold mb-2">Görüntüler:</div>
-                <div className="flex flex-row flex-wrap gap-3">
+                <div className="font-semibold mb-2 md:mb-3">Görüntüler:</div>
+                <div className="flex flex-row flex-wrap gap-2 md:gap-3">
                   {modalData.goruntuler?.length > 0 ? (
                     modalData.goruntuler.map((url: string, i: number) => (
-                      <img key={i} src={url} alt={`görsel${i}`} className="w-32 h-32 object-cover rounded shadow cursor-pointer" onClick={e => { e.stopPropagation(); setImageModalImages(modalData.goruntuler); setImageModalIndex(i); setImageModalOpen(true); }} />
+                      <img key={i} src={url} alt={`görsel${i}`} className="w-20 h-20 md:w-32 md:h-32 object-cover rounded-lg shadow cursor-pointer hover:scale-105 transition-transform duration-200" onClick={e => { e.stopPropagation(); setImageModalImages(modalData.goruntuler); setImageModalIndex(i); setImageModalOpen(true); }} />
                     ))
                   ) : (
-                    <span className="text-slate-400">Görsel yok</span>
+                    <span className="text-slate-400 text-sm md:text-base">Görsel yok</span>
                   )}
                 </div>
               </div>
@@ -407,20 +432,20 @@ const DenemeComponent: React.FC = () => {
         )}
         {/* Görsel Carousel Lightbox Modal */}
         {imageModalOpen && imageModalImages.length > 0 && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={() => setImageModalOpen(false)}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => setImageModalOpen(false)}>
             <div className="relative flex items-center justify-center w-full h-full" onClick={e => e.stopPropagation()}>
               <button
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-4xl text-white bg-black/40 rounded-full px-3 py-1 hover:bg-black/70 z-10"
+                className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 text-2xl md:text-4xl text-white bg-black/40 rounded-full px-2 md:px-3 py-1 hover:bg-black/70 z-10 min-w-[44px] min-h-[44px] flex items-center justify-center"
                 onClick={e => { e.stopPropagation(); setImageModalIndex((prev) => (prev - 1 + imageModalImages.length) % imageModalImages.length); }}
                 disabled={imageModalImages.length < 2}
               >&#8592;</button>
-              <img src={imageModalImages[imageModalIndex]} alt="Büyük görsel" className="max-w-3xl max-h-[80vh] rounded-xl shadow-2xl border-4 border-white" />
+              <img src={imageModalImages[imageModalIndex]} alt="Büyük görsel" className="max-w-full max-h-[80vh] rounded-xl shadow-2xl border-2 md:border-4 border-white" />
               <button
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-4xl text-white bg-black/40 rounded-full px-3 py-1 hover:bg-black/70 z-10"
+                className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 text-2xl md:text-4xl text-white bg-black/40 rounded-full px-2 md:px-3 py-1 hover:bg-black/70 z-10 min-w-[44px] min-h-[44px] flex items-center justify-center"
                 onClick={e => { e.stopPropagation(); setImageModalIndex((prev) => (prev + 1) % imageModalImages.length); }}
                 disabled={imageModalImages.length < 2}
               >&#8594;</button>
-              <button className="absolute top-8 right-8 text-4xl text-white bg-black/40 rounded-full px-3 py-1 hover:bg-black/70" onClick={() => setImageModalOpen(false)}>&times;</button>
+              <button className="absolute top-2 md:top-8 right-2 md:right-8 text-2xl md:text-4xl text-white bg-black/40 rounded-full px-2 md:px-3 py-1 hover:bg-black/70 min-w-[44px] min-h-[44px] flex items-center justify-center" onClick={() => setImageModalOpen(false)}>&times;</button>
             </div>
           </div>
         )}

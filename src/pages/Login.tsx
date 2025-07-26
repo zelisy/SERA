@@ -99,7 +99,7 @@ const Login: React.FC = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 placeholder-gray-400 text-white"
-                    placeholder="admin@agrovia.com"
+                    placeholder="E-posta adresinizi girin"
                     required
                   />
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3">
@@ -177,14 +177,7 @@ const Login: React.FC = () => {
               </button>
             </form>
 
-            {/* Demo Account Info */}
-            <div className="mt-6 p-4 bg-gray-700/30 rounded-xl border border-gray-600">
-              <h3 className="text-sm font-semibold text-gray-300 mb-2">Demo Hesap Bilgileri</h3>
-              <div className="text-xs text-gray-400 space-y-1">
-                <p><strong>E-posta:</strong> admin@agrovia.com</p>
-                <p><strong>Şifre:</strong> admin123</p>
-              </div>
-            </div>
+
           </div>
 
           {/* Footer */}
