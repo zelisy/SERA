@@ -502,14 +502,14 @@ const Admin = () => {
         flex flex-col
       `}>
         {/* Logo Section */}
-        <div className="p-6 border-b border-gray-100">
+        <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-emerald-50 to-blue-50">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-xl flex items-center justify-center">
-              <span className="text-white text-lg font-bold">S</span>
+            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform duration-300">
+              <span className="text-white text-xl font-bold">A</span>
             </div>
             <div>
-                              <h1 className="text-xl font-bold text-slate-800">AGROVİA</h1>
-              <p className="text-sm text-slate-500">Admin Panel</p>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">AGROVİA</h1>
+              <p className="text-sm text-emerald-600 font-medium">Admin Panel</p>
             </div>
           </div>
         </div>
@@ -525,30 +525,43 @@ const Admin = () => {
                   setSidebarOpen(false);
                 }}
                 className={`
-                  w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200
+                  w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300
                   ${activeSection === item.name 
-                    ? 'bg-gradient-to-r from-emerald-50 to-blue-50 text-emerald-600 border border-emerald-200' 
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800'
+                    ? 'bg-gradient-to-r from-emerald-500 to-blue-500 text-white shadow-lg transform scale-105 border-2 border-emerald-400' 
+                    : 'text-slate-600 hover:bg-gradient-to-r hover:from-emerald-100 hover:to-blue-100 hover:text-emerald-700 hover:shadow-md hover:transform hover:scale-102'
                   }
-                  group relative
+                  group relative overflow-hidden
                 `}
               >
-                <span className="text-xl flex-shrink-0">{item.icon}</span>
-                <span className="font-medium text-left truncate">
+                <div className={`
+                  absolute inset-0 bg-gradient-to-r from-emerald-400/20 to-blue-400/20 
+                  ${activeSection === item.name ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}
+                  transition-opacity duration-300
+                `}></div>
+                <span className={`
+                  text-xl flex-shrink-0 relative z-10
+                  ${activeSection === item.name ? 'animate-pulse' : 'group-hover:animate-bounce'}
+                `}>
+                  {item.icon}
+                </span>
+                <span className="font-semibold text-left truncate relative z-10">
                   {item.name}
                 </span>
+                {activeSection === item.name && (
+                  <div className="absolute right-2 w-2 h-2 bg-white rounded-full animate-ping"></div>
+                )}
               </button>
             ))}
           </nav>
         </div>
 
         {/* User Section */}
-        <div className="p-4 border-t border-gray-100">
+        <div className="p-4 border-t border-gray-100 bg-gradient-to-r from-red-50 to-orange-50">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center space-x-2 px-4 py-2 text-sm text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+            className="w-full flex items-center justify-center space-x-2 px-4 py-3 text-sm font-medium text-red-600 hover:text-white hover:bg-gradient-to-r hover:from-red-500 hover:to-orange-500 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
           >
-            <span>🚪</span>
+            <span className="text-lg">🚪</span>
             <span>Çıkış Yap</span>
           </button>
         </div>
@@ -557,31 +570,31 @@ const Admin = () => {
       {/* Main Content */}
       <div className="lg:ml-64 min-h-screen">
         {/* Top Header */}
-        <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-30">
+        <header className="bg-gradient-to-r from-emerald-50 to-blue-50 shadow-lg border-b border-emerald-200 sticky top-0 z-30">
           <div className="flex items-center justify-between px-4 lg:px-6 py-4">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                className="lg:hidden p-2 rounded-lg hover:bg-emerald-100 transition-colors"
               >
-                <svg className="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
               
               <div>
-                <h2 className="text-lg lg:text-xl font-semibold text-slate-800">{activeSection}</h2>
-                <p className="text-sm text-slate-500">Yönetim paneli</p>
+                <h2 className="text-lg lg:text-xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">{activeSection}</h2>
+                <p className="text-sm text-emerald-600 font-medium">Yönetim paneli</p>
               </div>
             </div>
             <div className="relative">
               <button
                 onClick={() => setSettingsMenuOpen((open) => !open)}
-                className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                className="p-2 rounded-full hover:bg-emerald-100 transition-colors transform hover:scale-110"
                 aria-label="Ayarlar"
                 type="button"
               >
-                <svg className="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
