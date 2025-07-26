@@ -12,7 +12,8 @@ import DikimOncesiDetayDonem from './components/DikimOncesiDetayDonem';
 import Messages from './pages/Messages';
 import Profile from './pages/Profile';
 import Products from './pages/Products';
-import Blog from './pages/Blog';
+import BlogPage from './pages/Blog';
+import BlogManagement from './pages/BlogManagement';
 import AdminProducts from './pages/AdminProducts';
 
 // Authentication kontrolü
@@ -39,7 +40,7 @@ function AppContent() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
           <Route path="/products" element={<Products />} />
-          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog" element={<BlogPage />} />
           
           {/* Protected Routes - Giriş Gerekli */}
           <Route path="/dikim-oncesi" element={
@@ -55,6 +56,11 @@ function AppContent() {
           <Route path="/admin" element={
             <PrivateRoute>
               <Admin />
+            </PrivateRoute>
+          } />
+          <Route path="/blog-management" element={
+            <PrivateRoute>
+              <BlogManagement />
             </PrivateRoute>
           } />
           <Route path="/admin/products" element={

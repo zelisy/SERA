@@ -654,6 +654,17 @@ const Admin = () => {
                         className="w-full text-left px-4 py-2 hover:bg-emerald-50 transition-colors"
                         onClick={() => {
                           setSettingsMenuOpen(false);
+                          navigate('/blog-management');
+                        }}
+                      >
+                        Blog Yönetimi
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        className="w-full text-left px-4 py-2 hover:bg-emerald-50 transition-colors"
+                        onClick={() => {
+                          setSettingsMenuOpen(false);
                           navigate('/profile');
                         }}
                       >

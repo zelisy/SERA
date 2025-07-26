@@ -26,6 +26,9 @@ const HasatBilgisiComponent = () => {
   const [isExportingPDF, setIsExportingPDF] = useState(false);
   // Yeni: Üretici bilgilerini cache'leyecek state
   const [producerMap, setProducerMap] = useState<Record<string, Producer>>({});
+  // Filtreleme state'leri
+  const [selectedSeason, setSelectedSeason] = useState<string>('');
+  const [filteredRecords, setFilteredRecords] = useState<HasatBilgisi[]>([]);
 
   // Validation Schema
   const validationSchema = Yup.object({
@@ -90,11 +93,39 @@ const HasatBilgisiComponent = () => {
     try {
       const kayitlar = await getHasatBilgileriByProducer(selectedProducer.id);
       setHasatKayitlari(kayitlar);
+      setFilteredRecords(kayitlar); // Başlangıçta tüm kayıtları göster
     } catch (err) {
       setError('Hasat kayıtları yüklenemedi');
     } finally {
       setLoading(false);
     }
+  };
+
+  // Filtreleme fonksiyonu - otomatik çalışır
+  const applyFilters = () => {
+    let filtered = hasatKayitlari;
+    
+    if (selectedSeason) {
+      filtered = filtered.filter(record => record.donem === selectedSeason);
+    }
+    
+    setFilteredRecords(filtered);
+  };
+
+  // Filtreler değiştiğinde otomatik uygula
+  useEffect(() => {
+    applyFilters();
+  }, [selectedSeason, hasatKayitlari]);
+
+  // Filtreleri temizle
+  const clearFilters = () => {
+    setSelectedSeason('');
+    setFilteredRecords(hasatKayitlari);
+  };
+
+  // Benzersiz sezon listesini al
+  const getUniqueSeasons = () => {
+    return Array.from(new Set(hasatKayitlari.map(record => record.donem))).sort();
   };
 
   const handleProducerSelect = (producer: Producer) => {
@@ -209,21 +240,65 @@ const HasatBilgisiComponent = () => {
     setIsExportingPDF(true);
     const input = document.getElementById('hasat-pdf-table');
     if (!input) return;
-    const html2canvas = (await import('html2canvas')).default;
-    const jsPDF = (await import('jspdf')).default;
-    await new Promise(resolve => setTimeout(resolve, 100)); // render flush
-    html2canvas(input, { scale: 2 } as any).then((canvas: any) => {
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('l', 'mm', 'a4');
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      const pdfWidth = pageWidth;
-      const pdfHeight = (imgHeight * pdfWidth) / imgWidth;
-      pdf.addImage(imgData, 'PNG', 0, 10, pdfWidth, pdfHeight);
-      pdf.save('hasat_bilgileri.pdf');
+    
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      const jsPDF = (await import('jspdf')).default;
+      
+      await new Promise(resolve => setTimeout(resolve, 100)); // render flush
+      
+      html2canvas(input, { scale: 2 } as any).then((canvas: any) => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('l', 'mm', 'a4');
+        
+        // PDF başlığı ekle
+        pdf.setFontSize(16);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Hasat Bilgileri Raporu', 20, 20);
+        
+                 // Filtre bilgilerini ekle
+         pdf.setFontSize(10);
+         pdf.setFont('helvetica', 'normal');
+         let yPosition = 30;
+         
+         if (selectedSeason) {
+           pdf.text('Filtreler:', 20, yPosition);
+           yPosition += 5;
+           pdf.text(`Sezon: ${selectedSeason}`, 25, yPosition);
+           yPosition += 10;
+         }
+        
+        // Üretici bilgisi
+        if (selectedProducer) {
+          pdf.text(`Üretici: ${selectedProducer.firstName} ${selectedProducer.lastName}`, 20, yPosition);
+          yPosition += 5;
+        }
+        
+        // Tarih
+        pdf.text(`Rapor Tarihi: ${new Date().toLocaleDateString('tr-TR')}`, 20, yPosition);
+        yPosition += 10;
+        
+        // Tablo
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const imgWidth = canvas.width;
+        const imgHeight = canvas.height;
+        const pdfWidth = pageWidth - 40; // Kenar boşlukları
+        const pdfHeight = (imgHeight * pdfWidth) / imgWidth;
+        
+        pdf.addImage(imgData, 'PNG', 20, yPosition, pdfWidth, pdfHeight);
+        
+                 // Dosya adı oluştur
+         let fileName = 'hasat_bilgileri';
+         if (selectedSeason) fileName += `_${selectedSeason}`;
+         fileName += '.pdf';
+        
+        pdf.save(fileName);
+        setIsExportingPDF(false);
+      });
+    } catch (error) {
+      console.error('PDF export hatası:', error);
       setIsExportingPDF(false);
-    });
+    }
   };
 
   // Producer Selection Step
@@ -232,11 +307,36 @@ const HasatBilgisiComponent = () => {
       <div className="min-h-screen bg-gray-50">
         <div className="p-4 lg:p-6">
           <div className="max-w-7xl mx-auto">
-            <div className="mb-6">
-              <h1 className="text-2xl font-bold text-slate-800">Hasat Bilgileri</h1>
-              <p className="text-slate-600 mt-1">Hasat kayıtlarını görüntülemek için önce bir üretici seçin</p>
+            {/* Header */}
+            <div className="mb-6 text-center">
+              <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-2">
+                Hasat Bilgileri Sistemi
+              </h1>
+              <p className="text-slate-600 text-lg">
+                Hasat bilgilerini görüntülemek için önce bir üretici seçin
+              </p>
             </div>
 
+            {/* Progress Steps */}
+            <div className="mb-8 max-w-md mx-auto">
+              <div className="flex items-center">
+                <div className="flex items-center text-emerald-600">
+                  <div className="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                    1
+                  </div>
+                  <span className="ml-2 font-medium">Üretici Seç</span>
+                </div>
+                <div className="flex-1 mx-4 h-1 bg-gray-200 rounded"></div>
+                <div className="flex items-center text-gray-400">
+                  <div className="w-8 h-8 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-sm font-bold">
+                    2
+                  </div>
+                  <span className="ml-2">Hasat Bilgileri</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Producer Selection */}
             <UreticiListesi
               selectionMode={true}
               onSelect={handleProducerSelect}
@@ -250,8 +350,8 @@ const HasatBilgisiComponent = () => {
 
   // Records List Step
   if (currentStep === 'list') {
-    const groupedRecords = groupByPeriod(hasatKayitlari);
-    const allTotals = calculateTotals(hasatKayitlari);
+    const groupedRecords = groupByPeriod(filteredRecords);
+    const allTotals = calculateTotals(filteredRecords);
 
     return (
       <div className="min-h-screen bg-gray-50">
@@ -267,9 +367,9 @@ const HasatBilgisiComponent = () => {
                   ← Geri
                 </button>
                 <div>
-                                  <h1 className="text-2xl font-bold text-slate-800">
-                  {selectedProducer?.firstName} {selectedProducer?.lastName} - Hasat Bilgileri
-                </h1>
+                  <h1 className="text-2xl font-bold text-slate-800">
+                    {selectedProducer?.firstName} {selectedProducer?.lastName} - Hasat Bilgileri
+                  </h1>
                   <p className="text-slate-600 mt-1">Dönemsel hasat kayıtları ve analizi</p>
                 </div>
               </div>
@@ -283,6 +383,25 @@ const HasatBilgisiComponent = () => {
               >
                 + Yeni Kayıt Ekle
               </button>
+            </div>
+
+            {/* Progress Steps */}
+            <div className="max-w-md mx-auto">
+              <div className="flex items-center">
+                <div className="flex items-center text-emerald-600">
+                  <div className="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                    1
+                  </div>
+                  <span className="ml-2 font-medium">Üretici Seç</span>
+                </div>
+                <div className="flex-1 mx-4 h-1 bg-emerald-500 rounded"></div>
+                <div className="flex items-center text-emerald-600">
+                  <div className="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                    2
+                  </div>
+                  <span className="ml-2 font-medium">Hasat Bilgileri</span>
+                </div>
+              </div>
             </div>
 
             {error && (
@@ -350,13 +469,60 @@ const HasatBilgisiComponent = () => {
               </div>
             </div>
 
+            {/* Filtreleme Bölümü */}
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-6">
+              <h3 className="text-lg font-semibold text-slate-800 mb-4">🔍 Filtreleme</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Sezon Filtresi */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Sezon</label>
+                  <select
+                    value={selectedSeason}
+                    onChange={(e) => setSelectedSeason(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  >
+                    <option value="">Tüm Sezonlar</option>
+                    {getUniqueSeasons().map(season => (
+                      <option key={season} value={season}>{season}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Filtre Butonları */}
+                <div className="flex items-end">
+                  <button
+                    onClick={clearFilters}
+                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Filtreleri Temizle
+                  </button>
+                </div>
+              </div>
+              
+              {/* Filtreleme Sonuçları */}
+              {filteredRecords.length !== hasatKayitlari.length && (
+                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-700">
+                    <strong>{filteredRecords.length}</strong> kayıt gösteriliyor 
+                    (toplam {hasatKayitlari.length} kayıttan)
+                  </p>
+                </div>
+              )}
+            </div>
+
             {/* PDF'e Aktar Butonu */}
-            <div className="flex justify-end mb-4">
+            <div className="flex justify-between items-center mb-4">
+              <div className="text-sm text-slate-600">
+                {filteredRecords.length > 0 && (
+                  <span>Filtrelenmiş kayıtların PDF'ini alabilirsiniz</span>
+                )}
+              </div>
               <button
                 onClick={exportToPDF}
-                className="bg-gradient-to-r from-emerald-500 to-blue-500 text-white px-6 py-2 rounded-xl font-semibold hover:from-emerald-600 hover:to-blue-600 transition-all duration-200 shadow-lg hover:shadow-xl"
+                disabled={filteredRecords.length === 0}
+                className="bg-gradient-to-r from-emerald-500 to-blue-500 text-white px-6 py-2 rounded-xl font-semibold hover:from-emerald-600 hover:to-blue-600 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                PDF'e Aktar
+                {isExportingPDF ? 'PDF Hazırlanıyor...' : 'PDF\'e Aktar'}
               </button>
             </div>
             {/* PDF için kapsayıcı */}
@@ -382,7 +548,7 @@ const HasatBilgisiComponent = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {hasatKayitlari.map((record) => (
+                      {filteredRecords.map((record) => (
                         <tr key={record.id} className="hover:bg-slate-50 transition-colors">
                           <td className="px-4 py-3">
                             {producerMap[record.producerId]?.firstName} {producerMap[record.producerId]?.lastName}
@@ -425,10 +591,10 @@ const HasatBilgisiComponent = () => {
                         <td className="px-4 py-3 text-slate-800">Toplam</td>
                         <td className="px-4 py-3"></td>
                         <td className="px-4 py-3"></td>
-                        <td className="px-4 py-3 text-slate-800">{hasatKayitlari.reduce((sum, r) => sum + Number(r.kasaAdeti), 0)}</td>
-                        <td className="px-4 py-3 text-slate-800">{hasatKayitlari.reduce((sum, r) => sum + (Number(r.tonajDa) * Number(r.kacDa) * 1000), 0).toLocaleString()} kg</td>
+                        <td className="px-4 py-3 text-slate-800">{filteredRecords.reduce((sum, r) => sum + Number(r.kasaAdeti), 0)}</td>
+                        <td className="px-4 py-3 text-slate-800">{filteredRecords.reduce((sum, r) => sum + (Number(r.tonajDa) * Number(r.kacDa) * 1000), 0).toLocaleString()} kg</td>
                         <td className="px-4 py-3 text-slate-800">-</td>
-                        <td className="px-4 py-3 text-emerald-600">₺{hasatKayitlari.reduce((sum, r) => sum + Number(r.kazanc), 0).toLocaleString()}</td>
+                        <td className="px-4 py-3 text-emerald-600">₺{filteredRecords.reduce((sum, r) => sum + Number(r.kazanc), 0).toLocaleString()}</td>
                         { !isExportingPDF && <td className="px-4 py-3"></td> }
                         { !isExportingPDF && <td className="px-4 py-3"></td> }
                       </tr>

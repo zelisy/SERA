@@ -46,6 +46,7 @@ const Header = () => {
   const settingsItems = [
     { label: 'Mesajlar', path: '/messages' },
     { label: 'Ürün Yönetimi', path: '/products' },
+    { label: 'Blog Yönetimi', path: '/blog-management' },
     { label: 'Profil', path: '/profile' },
   ];
 

@@ -175,8 +175,8 @@ export const dikimOncesiDetayConfig: ChecklistSection = {
         },
         {
           id: 'toprak-analizi-sonuc',
-          label: 'Toprak Analizi Sonucu',
-          type: 'file',
+          label: 'Toprak Analizi Sonucu Fotoğrafları',
+          type: 'multiple-files',
           required: false,
           dependsOn: 'toprak-analizi-yapildi',
           showWhen: true
@@ -219,8 +219,8 @@ export const dikimOncesiDetayConfig: ChecklistSection = {
         },
         {
           id: 'sistem-fotografi',
-          label: 'Sistem Fotoğrafı',
-          type: 'file',
+          label: 'Sistem Fotoğrafları',
+          type: 'multiple-files',
           required: false,
           dependsOn: 'damlama-sistemi-durum',
           showWhen: 'Kötü'
@@ -443,8 +443,8 @@ export const dikimOncesiDetayConfig: ChecklistSection = {
         },
         {
           id: 'tablet-fotografi',
-          label: 'Tablet ile Direkt Fotoğraf',
-          type: 'file',
+          label: 'Tablet ile Direkt Fotoğraflar',
+          type: 'multiple-files',
           required: false
         },
         {
@@ -463,33 +463,15 @@ export const dikimOncesiDetayConfig: ChecklistSection = {
       hasDetails: true,
       detailFields: [
         {
-          id: 'genel-gorsel-1',
-          label: 'Genel Görsel 1',
-          type: 'file',
+          id: 'genel-gorseller',
+          label: 'Genel Görseller',
+          type: 'multiple-files',
           required: false
         },
         {
-          id: 'genel-gorsel-2',
-          label: 'Genel Görsel 2',
-          type: 'file',
-          required: false
-        },
-        {
-          id: 'genel-gorsel-3',
-          label: 'Genel Görsel 3',
-          type: 'file',
-          required: false
-        },
-        {
-          id: 'yakindan-gorsel-1',
-          label: 'Yakından Görsel 1',
-          type: 'file',
-          required: false
-        },
-        {
-          id: 'yakindan-gorsel-2',
-          label: 'Yakından Görsel 2',
-          type: 'file',
+          id: 'yakindan-gorseller',
+          label: 'Yakından Görseller',
+          type: 'multiple-files',
           required: false
         },
         {

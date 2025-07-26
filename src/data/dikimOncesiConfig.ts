@@ -30,8 +30,8 @@ export const dikimOncesiConfig: ChecklistSection = {
         },
         {
           id: 'analiz-raporu',
-          label: 'Analiz Raporu Fotoğrafı',
-          type: 'file',
+          label: 'Analiz Raporu Fotoğrafları',
+          type: 'multiple-files',
           required: false
         },
         {
@@ -71,14 +71,14 @@ export const dikimOncesiConfig: ChecklistSection = {
         },
         {
           id: 'temizlik-oncesi-foto',
-          label: 'Temizlik Öncesi Fotoğraf',
-          type: 'file',
+          label: 'Temizlik Öncesi Fotoğraflar',
+          type: 'multiple-files',
           required: false
         },
         {
           id: 'temizlik-sonrasi-foto',
-          label: 'Temizlik Sonrası Fotoğraf',
-          type: 'file',
+          label: 'Temizlik Sonrası Fotoğraflar',
+          type: 'multiple-files',
           required: false
         }
       ]
@@ -125,8 +125,8 @@ export const dikimOncesiConfig: ChecklistSection = {
         },
         {
           id: 'sistem-foto',
-          label: 'Sistem Fotoğrafı',
-          type: 'file',
+          label: 'Sistem Fotoğrafları',
+          type: 'multiple-files',
           required: false
         }
       ]
@@ -213,8 +213,8 @@ export const dikimOncesiConfig: ChecklistSection = {
         },
         {
           id: 'fide-foto',
-          label: 'Fide Fotoğrafı',
-          type: 'file',
+          label: 'Fide Fotoğrafları',
+          type: 'multiple-files',
           required: false
         },
         {

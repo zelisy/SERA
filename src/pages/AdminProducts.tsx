@@ -4,7 +4,7 @@ import type { Product } from '../types/product';
 import { useNavigate } from 'react-router-dom';
 
 const AdminProducts: React.FC = () => {
-  const [showForm, setShowForm] = useState(false);
+  const [showForm, setShowForm] = useState(true);
   const [form, setForm] = useState({ name: '', description: '', price: '', imageUrl: '' });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
