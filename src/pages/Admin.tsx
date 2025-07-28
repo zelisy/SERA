@@ -16,6 +16,217 @@ import { uploadToCloudinary } from '../utils/cloudinaryUtils';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import type { User } from 'firebase/auth';
 
+// ReçeteComponent tanımı:
+const ReceteComponent: React.FC = () => {
+  const [form, setForm] = React.useState({
+    hastaAdi: '',
+    hastaSoyadi: '',
+    hastaTelefon: '',
+    hastaAdres: '',
+    hastalikTani: '',
+    ilaclar: '',
+    dozlar: '',
+    kullanimSekli: '',
+    sure: '',
+    notlar: '',
+    tarih: new Date().toISOString().split('T')[0],
+  });
+  const [savedReceteler, setSavedReceteler] = React.useState<any[]>([]);
+  const [message, setMessage] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+  const [editIndex, setEditIndex] = React.useState<number | null>(null);
+  const [modalOpen, setModalOpen] = React.useState(false);
+  const [modalData, setModalData] = React.useState<any | null>(null);
+
+  React.useEffect(() => {
+    // Reçete verilerini Firestore'dan çek
+    // getAllReceteler().then(setSavedReceteler).catch(() => setSavedReceteler([]));
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<any>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      // await saveRecete(form);
+      setMessage('Reçete kaydedildi');
+      setForm({
+        hastaAdi: '',
+        hastaSoyadi: '',
+        hastaTelefon: '',
+        hastaAdres: '',
+        hastalikTani: '',
+        ilaclar: '',
+        dozlar: '',
+        kullanimSekli: '',
+        sure: '',
+        notlar: '',
+        tarih: new Date().toISOString().split('T')[0],
+      });
+      setEditIndex(null);
+      // getAllReceteler().then(setSavedReceteler);
+    } catch (error) {
+      setMessage('Reçete kaydedilemedi!');
+    }
+    setLoading(false);
+  };
+
+  const handleEdit = (idx: number) => {
+    const item = savedReceteler[idx];
+    setForm({ ...item });
+    setEditIndex(idx);
+    setMessage('Düzenleme modunda');
+  };
+
+  const handleDelete = async (idx: number) => {
+    if (window.confirm('Bu reçeteyi silmek istediğinize emin misiniz?')) {
+      // await deleteRecete(savedReceteler[idx].id);
+      setSavedReceteler(prev => prev.filter((_, i) => i !== idx));
+      setMessage('Reçete silindi');
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="p-4 lg:p-6 space-y-6">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-500 rounded-xl flex items-center justify-center">
+              <span className="text-white text-xl">💊</span>
+            </div>
+            <div>
+              <h1 className="text-xl lg:text-2xl font-bold text-slate-800">
+                Reçete Yönetimi
+              </h1>
+              <p className="text-slate-600">Hasta reçetelerini yönetin</p>
+            </div>
+          </div>
+        </div>
+
+        <form className="space-y-6 md:space-y-8" onSubmit={handleSave}>
+          <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">Hasta Bilgileri</h2>
+          <div className="bg-slate-50 rounded-xl shadow border p-3 md:p-4 mb-3 md:mb-4 space-y-3 md:space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+              <div>
+                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Hasta Adı</label>
+                <input name="hastaAdi" value={form.hastaAdi} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent" required />
+              </div>
+              <div>
+                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Hasta Soyadı</label>
+                <input name="hastaSoyadi" value={form.hastaSoyadi} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent" required />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+              <div>
+                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Telefon</label>
+                <input name="hastaTelefon" value={form.hastaTelefon} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+              </div>
+              <div>
+                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Tarih</label>
+                <input name="tarih" type="date" value={form.tarih} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent" required />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Adres</label>
+              <textarea name="hastaAdres" value={form.hastaAdres} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none" rows={2} />
+            </div>
+          </div>
+
+          <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">Hastalık ve Tedavi</h2>
+          <div className="bg-slate-50 rounded-xl shadow border p-3 md:p-4 mb-3 md:mb-4 space-y-3 md:space-y-4">
+            <div>
+              <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Hastalık Tanısı</label>
+              <textarea name="hastalikTani" value={form.hastalikTani} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none" rows={3} required />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+              <div>
+                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">İlaçlar</label>
+                <textarea name="ilaclar" value={form.ilaclar} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none" rows={3} required />
+              </div>
+              <div>
+                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Dozlar</label>
+                <textarea name="dozlar" value={form.dozlar} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none" rows={3} required />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+              <div>
+                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Kullanım Şekli</label>
+                <textarea name="kullanimSekli" value={form.kullanimSekli} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none" rows={2} />
+              </div>
+              <div>
+                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Süre</label>
+                <input name="sure" value={form.sure} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="Örn: 7 gün" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Notlar</label>
+              <textarea name="notlar" value={form.notlar} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none" rows={3} placeholder="Ek notlar..." />
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
+            <button type="submit" className="flex-1 sm:flex-none bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 md:px-6 py-3 md:py-4 rounded-xl font-semibold shadow-lg hover:from-purple-600 hover:to-pink-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm md:text-base">
+              💾 {editIndex !== null ? 'Güncelle' : 'Kaydet'}
+            </button>
+          </div>
+          {message && <div className="text-center text-purple-600 mt-3 text-sm md:text-base">{message}</div>}
+        </form>
+
+        {/* Kayıtlı Reçeteler Listesi */}
+        <div className="mt-6 md:mt-8">
+          <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">Kayıtlı Reçeteler</h2>
+          {savedReceteler.length === 0 && <div className="text-slate-500 text-center py-8">Henüz reçete kaydı yok.</div>}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+            {savedReceteler.map((item, idx) => (
+              <div key={idx} className="bg-white rounded-xl shadow border p-3 md:p-4 cursor-pointer hover:bg-purple-50 transition-all duration-200 hover:shadow-lg" onClick={() => { setModalOpen(true); setModalData(item); }}>
+                <div className="space-y-2 md:space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="font-semibold text-purple-700 text-sm md:text-base">{item.hastaAdi} {item.hastaSoyadi}</div>
+                    <div className="flex gap-1 md:gap-2" onClick={e => e.stopPropagation()}>
+                      <button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 md:px-3 py-1 md:py-2 rounded-lg shadow hover:from-purple-600 hover:to-pink-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-400 text-xs md:text-sm" onClick={() => handleEdit(idx)}>✏️</button>
+                      <button className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-2 md:px-3 py-1 md:py-2 rounded-lg shadow hover:from-red-600 hover:to-pink-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-400 text-xs md:text-sm" onClick={() => handleDelete(idx)}>🗑️</button>
+                    </div>
+                  </div>
+                  <div className="text-xs md:text-sm text-slate-600 space-y-1">
+                    <div><span className="font-medium">Tarih:</span> {item.tarih}</div>
+                    <div><span className="font-medium">Tanı:</span> {item.hastalikTani?.substring(0, 40)}...</div>
+                    <div><span className="font-medium">Telefon:</span> {item.hastaTelefon}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Detaylı Pop-up Modal */}
+        {modalOpen && modalData && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+            <div className="bg-white rounded-xl shadow-2xl max-w-sm md:max-w-2xl w-full p-4 md:p-8 relative animate-fade-in max-h-[90vh] overflow-y-auto">
+              <button className="absolute top-2 md:top-4 right-2 md:right-4 text-xl md:text-2xl text-gray-400 hover:text-purple-600 z-10" onClick={() => setModalOpen(false)}>&times;</button>
+              <h2 className="text-lg md:text-2xl font-bold mb-3 md:mb-4 text-purple-700 pr-8">Reçete Detayı</h2>
+              <div className="space-y-2 md:space-y-3 mb-4 text-sm md:text-base">
+                <div><span className="font-semibold">Hasta:</span> {modalData.hastaAdi} {modalData.hastaSoyadi}</div>
+                <div><span className="font-semibold">Telefon:</span> {modalData.hastaTelefon}</div>
+                <div><span className="font-semibold">Adres:</span> {modalData.hastaAdres}</div>
+                <div><span className="font-semibold">Tarih:</span> {modalData.tarih}</div>
+                <div><span className="font-semibold">Hastalık Tanısı:</span> {modalData.hastalikTani}</div>
+                <div><span className="font-semibold">İlaçlar:</span> {modalData.ilaclar}</div>
+                <div><span className="font-semibold">Dozlar:</span> {modalData.dozlar}</div>
+                <div><span className="font-semibold">Kullanım Şekli:</span> {modalData.kullanimSekli}</div>
+                <div><span className="font-semibold">Süre:</span> {modalData.sure}</div>
+                <div><span className="font-semibold">Notlar:</span> {modalData.notlar}</div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // DenemeComponent tanımı:
 const DenemeComponent: React.FC = () => {
   const [producers, setProducers] = React.useState<{id: string, firstName: string, lastName: string}[]>([]);
@@ -461,6 +672,7 @@ const sidebarItems = [
   { id: 'greenhouse', name: 'Sera Kontrol', icon: '🏠' },
   { id: 'harvest', name: 'Hasat Bilgisi', icon: '🌾' },
   { id: 'reports', name: 'Rapor', icon: '📊' },
+  { id: 'recete', name: 'Reçete', icon: '💊' },
   { id: 'deneme', name: 'Deneme', icon: '🧪' },
 ];
 
@@ -471,6 +683,7 @@ const sectionComponents: Record<string, ReactElement> = {
   'Sera Kontrol': <SeraKontrol />,
   'Hasat Bilgisi': <HasatBilgisi />,
   'Rapor': <Rapor />,
+  'Reçete': <ReceteComponent />,
   'Deneme': <DenemeComponent />,
 };
 

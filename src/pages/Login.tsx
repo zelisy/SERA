@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import { useNavigate, Link } from 'react-router-dom';
-import arkaplanImage from '../assets/arkaplan.jpg';
+import arkaplanImage from '../assets/arkaplan1.jpg';
 import logoImage from '../assets/logo.avif';
 
 const Login: React.FC = () => {

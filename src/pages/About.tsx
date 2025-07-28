@@ -1,5 +1,5 @@
 import React from 'react';
-import arkaplanImage from '../assets/arkaplan.jpg';
+import arkaplanImage from '../assets/arkaplan1.jpg';
 
 const About = () => {
   const features = [

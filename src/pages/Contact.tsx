@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase/config';
-import arkaplanImage from '../assets/arkaplan.jpg';
+import arkaplanImage from '../assets/arkaplan1.jpg';
 
 const Contact = () => {
   const [formData, setFormData] = useState({

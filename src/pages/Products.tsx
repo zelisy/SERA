@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getAllProducts } from '../utils/firestoreUtils';
 import type { Product } from '../types/product';
 import { useNavigate } from 'react-router-dom';
-import arkaplanImage from '../assets/arkaplan.jpg';
+import arkaplanImage from '../assets/arkaplan1.jpg';
 
 // Authentication kontrolü
 const isAuthenticated = () => {

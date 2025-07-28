@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import arkaplanImage from '../assets/arkaplan.jpg';
+import arkaplanImage from '../assets/arkaplan1.jpg';
 import { getPublishedBlogs, getFeaturedBlogs, getBlogById, incrementBlogViewCount } from '../utils/blogUtils';
 import type { Blog } from '../types/blog';
 
