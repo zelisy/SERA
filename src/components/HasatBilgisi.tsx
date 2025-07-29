@@ -525,8 +525,104 @@ const HasatBilgisiComponent = () => {
                 {isExportingPDF ? 'PDF Hazırlanıyor...' : 'PDF\'e Aktar'}
               </button>
             </div>
+
+            {/* Kayıtlar Listesi */}
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden mb-8">
+              <div className="p-6 border-b border-gray-100">
+                <h2 className="text-xl font-bold text-slate-800">📋 Hasat Kayıtları</h2>
+                <p className="text-slate-600 mt-1">Tüm hasat kayıtlarını görüntüleyin ve yönetin</p>
+              </div>
+              
+              {filteredRecords.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="text-6xl mb-4">🌾</div>
+                  <h3 className="text-lg font-semibold text-slate-700 mb-2">Henüz hasat kaydı yok</h3>
+                  <p className="text-slate-600 mb-4">İlk hasat kaydınızı oluşturmak için "Yeni Kayıt Ekle" butonuna tıklayın.</p>
+                  <button
+                    onClick={() => {
+                      setEditingHasat(null);
+                      setCurrentStep('form');
+                    }}
+                    className="bg-gradient-to-r from-emerald-500 to-green-600 text-white px-6 py-3 rounded-xl hover:from-emerald-600 hover:to-green-700 transition-all duration-200 shadow-lg"
+                  >
+                    + İlk Hasat Kaydını Oluştur
+                  </button>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-slate-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Üretici</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Hasat Tarihi</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Sezon</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Kasa Adeti</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Kg</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Fiyat</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Kazanç</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Hal Fişi Foto</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">İşlemler</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {filteredRecords.map((record) => (
+                        <tr key={record.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="px-4 py-3">
+                            {producerMap[record.producerId]?.firstName} {producerMap[record.producerId]?.lastName}
+                          </td>
+                          <td className="px-4 py-3">{new Date(record.dikimTarihi).toLocaleDateString('tr-TR')}</td>
+                          <td className="px-4 py-3">{record.donem}</td>
+                          <td className="px-4 py-3">{record.kasaAdeti ? String(record.kasaAdeti) : ''}</td>
+                          <td className="px-4 py-3">{(Number(record.tonajDa) * Number(record.kacDa) * 1000).toLocaleString()} kg</td>
+                          <td className="px-4 py-3">₺{record.ortalamaFiyat ? String(record.ortalamaFiyat) : ''}</td>
+                          <td className="px-4 py-3 font-bold text-emerald-600">₺{record.kazanc ? Number(record.kazanc).toLocaleString() : ''}</td>
+                          <td className="px-4 py-3">
+                            {record.halFisiUrl ? (
+                              <a href={record.halFisiUrl} target="_blank" rel="noopener noreferrer">
+                                <img src={record.halFisiUrl} alt="Hal Fişi" className="w-16 h-16 object-cover rounded border" />
+                              </a>
+                            ) : (
+                              <span className="text-gray-400">-</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => handleEdit(record)}
+                                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                              >
+                                ✏️ Düzenle
+                              </button>
+                              <button
+                                onClick={() => handleDelete(record.id)}
+                                className="text-red-600 hover:text-red-800 text-sm font-medium"
+                              >
+                                🗑️ Sil
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      {/* Toplamlar satırı */}
+                      <tr className="bg-gray-50 font-semibold">
+                        <td className="px-4 py-3 text-slate-800">Toplam</td>
+                        <td className="px-4 py-3"></td>
+                        <td className="px-4 py-3"></td>
+                        <td className="px-4 py-3 text-slate-800">{filteredRecords.reduce((sum, r) => sum + Number(r.kasaAdeti), 0)}</td>
+                        <td className="px-4 py-3 text-slate-800">{filteredRecords.reduce((sum, r) => sum + (Number(r.tonajDa) * Number(r.kacDa) * 1000), 0).toLocaleString()} kg</td>
+                        <td className="px-4 py-3 text-slate-800">-</td>
+                        <td className="px-4 py-3 text-emerald-600">₺{filteredRecords.reduce((sum, r) => sum + Number(r.kazanc), 0).toLocaleString()}</td>
+                        <td className="px-4 py-3"></td>
+                        <td className="px-4 py-3"></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
             {/* PDF için kapsayıcı */}
-            <div id="hasat-pdf-table">
+            <div id="hasat-pdf-table" className="hidden">
               {/* Tek tablo, sezon ayrımı olmadan */}
               <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden mb-8">
                 <div className="p-6 border-b border-gray-100">
@@ -543,8 +639,6 @@ const HasatBilgisiComponent = () => {
                         <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Kg</th>
                         <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Fiyat</th>
                         <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Kazanç</th>
-                        { !isExportingPDF && <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Hal Fişi Foto</th> }
-                        { !isExportingPDF && <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">İşlemler</th> }
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -559,31 +653,6 @@ const HasatBilgisiComponent = () => {
                           <td className="px-4 py-3">{(Number(record.tonajDa) * Number(record.kacDa) * 1000).toLocaleString()} kg</td>
                           <td className="px-4 py-3">₺{record.ortalamaFiyat ? String(record.ortalamaFiyat) : ''}</td>
                           <td className="px-4 py-3 font-bold text-emerald-600">₺{record.kazanc ? Number(record.kazanc).toLocaleString() : ''}</td>
-                          { !isExportingPDF && (
-                            <td className="px-4 py-3">
-                              {record.halFisiUrl ? (
-                                <a href={record.halFisiUrl} target="_blank" rel="noopener noreferrer">
-                                  <img src={record.halFisiUrl} alt="Hal Fişi" className="w-16 h-16 object-cover rounded border" />
-                                </a>
-                              ) : (
-                                <span className="text-gray-400">-</span>
-                              )}
-                            </td>
-                          )}
-                          { !isExportingPDF && (
-                            <td className="px-4 py-3">
-                              <div className="flex space-x-2">
-                                <button
-                                  onClick={() => handleEdit(record)}
-                                  className="text-blue-600 hover:text-blue-800 text-sm"
-                                >Düzenle</button>
-                                <button
-                                  onClick={() => handleDelete(record.id)}
-                                  className="text-red-600 hover:text-red-800 text-sm"
-                                >Sil</button>
-                              </div>
-                            </td>
-                          )}
                         </tr>
                       ))}
                       {/* Toplamlar satırı */}
@@ -595,8 +664,6 @@ const HasatBilgisiComponent = () => {
                         <td className="px-4 py-3 text-slate-800">{filteredRecords.reduce((sum, r) => sum + (Number(r.tonajDa) * Number(r.kacDa) * 1000), 0).toLocaleString()} kg</td>
                         <td className="px-4 py-3 text-slate-800">-</td>
                         <td className="px-4 py-3 text-emerald-600">₺{filteredRecords.reduce((sum, r) => sum + Number(r.kazanc), 0).toLocaleString()}</td>
-                        { !isExportingPDF && <td className="px-4 py-3"></td> }
-                        { !isExportingPDF && <td className="px-4 py-3"></td> }
                       </tr>
                     </tbody>
                   </table>

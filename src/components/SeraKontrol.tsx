@@ -11,12 +11,15 @@ const SeraKontrol = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedProducer, setSelectedProducer] = useState<Producer | null>(null);
-  const [currentStep, setCurrentStep] = useState<'select-producer' | 'checklist'>('select-producer');
+  const [currentStep, setCurrentStep] = useState<'select-producer' | 'list' | 'checklist'>('select-producer');
   const [checklist, setChecklist] = useState<ChecklistItemType[]>(seraKontrolConfig.items);
   const [originalChecklist, setOriginalChecklist] = useState<ChecklistItemType[]>(seraKontrolConfig.items);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [history, setHistory] = useState<any[]>([]);
   const [selectedHistoryIdx, setSelectedHistoryIdx] = useState<number | null>(null);
+  const [savedRecords, setSavedRecords] = useState<any[]>([]);
+  const [editingRecord, setEditingRecord] = useState<any | null>(null);
+  const [showForm, setShowForm] = useState(false);
 
   // Checklist yüklemesi (üretici seçilince)
   useEffect(() => {
@@ -58,6 +61,25 @@ const SeraKontrol = () => {
     }
   }, [selectedProducer, currentStep]);
 
+  // Kayıtlı kayıtları yükle
+  useEffect(() => {
+    if (selectedProducer) {
+      loadSavedRecords();
+    }
+  }, [selectedProducer]);
+
+  const loadSavedRecords = async () => {
+    if (!selectedProducer) return;
+    
+    try {
+      // Burada Firestore'dan kayıtlı kayıtları çekebilirsiniz
+      // Şimdilik history'yi kullanıyoruz
+      setSavedRecords(history);
+    } catch (err) {
+      setError('Kayıtlı kayıtlar yüklenemedi');
+    }
+  };
+
   const handleChecklistUpdate = async (itemId: string, completed: boolean, data?: Record<string, string | number | boolean | string[]>) => {
     setChecklist(prev => prev.map(item =>
       item.id === itemId ? { ...item, completed, data } : item
@@ -78,14 +100,41 @@ const SeraKontrol = () => {
     setError(null);
     const dataKey = `sera-kontrol-${selectedProducer.id}`;
     try {
-      const newHistory = [
-        ...history,
-        { date: new Date().toISOString(), items: checklist }
-      ];
-      await saveChecklistData(dataKey, { ...seraKontrolConfig, items: checklist, history: newHistory });
+      if (editingRecord) {
+        // Düzenleme modunda - mevcut kaydı güncelle
+        const updatedHistory = history.map((record, idx) => {
+          if (record.date === editingRecord.date) {
+            return { ...record, items: checklist, date: new Date().toISOString() };
+          }
+          return record;
+        });
+        
+        await saveChecklistData(dataKey, { ...seraKontrolConfig, items: checklist, history: updatedHistory });
+        setHistory(updatedHistory);
+        setSavedRecords(updatedHistory);
+        setEditingRecord(null);
+      } else {
+        // Yeni kayıt oluştur
+        const newHistory = [
+          ...history,
+          { date: new Date().toISOString(), items: checklist }
+        ];
+        await saveChecklistData(dataKey, { ...seraKontrolConfig, items: checklist, history: newHistory });
+        setHistory(newHistory);
+        setSavedRecords(newHistory);
+      }
+      
       setOriginalChecklist(checklist);
-      setHistory(newHistory);
       setSaveSuccess(true);
+      setShowForm(false);
+      setCurrentStep('list');
+      // Formu tamamen temizle
+      const cleanChecklist = seraKontrolConfig.items.map(item => ({
+        ...item,
+        completed: false,
+        data: {}
+      }));
+      setChecklist(cleanChecklist);
     } catch (err) {
       setError('Checklist kaydedilemedi');
     } finally {
@@ -95,7 +144,18 @@ const SeraKontrol = () => {
   };
 
   const handleCancel = () => {
-    setChecklist(originalChecklist);
+    if (editingRecord) {
+      // Düzenleme modunda ise orijinal veriyi geri yükle
+      setChecklist(originalChecklist);
+    } else {
+      // Yeni kayıt modunda ise formu temizle
+      const cleanChecklist = seraKontrolConfig.items.map(item => ({
+        ...item,
+        completed: false,
+        data: {}
+      }));
+      setChecklist(cleanChecklist);
+    }
     setError(null);
     setSaveSuccess(false);
   };
@@ -106,12 +166,20 @@ const SeraKontrol = () => {
     const dataKey = `sera-kontrol-${selectedProducer.id}`;
     const newHistory = history.filter((_, i) => i !== idx);
     setHistory(newHistory);
+    setSavedRecords(newHistory);
     setSelectedHistoryIdx(null);
     try {
       await saveChecklistData(dataKey, { ...seraKontrolConfig, items: checklist, history: newHistory });
     } catch (err) {
       setError('Geçmiş kaydı silinemedi');
     }
+  };
+
+  const handleEditRecord = (record: any) => {
+    setEditingRecord(record);
+    setChecklist(record.items);
+    setShowForm(true);
+    setCurrentStep('checklist');
   };
 
   const getCompletionStats = () => {
@@ -124,13 +192,22 @@ const SeraKontrol = () => {
   const resetSelection = () => {
     setSelectedProducer(null);
     setCurrentStep('select-producer');
-    setChecklist(seraKontrolConfig.items);
+    // Formu tamamen temizle
+    const cleanChecklist = seraKontrolConfig.items.map(item => ({
+      ...item,
+      completed: false,
+      data: {}
+    }));
+    setChecklist(cleanChecklist);
     setError(null);
+    setSavedRecords([]);
+    setEditingRecord(null);
+    setShowForm(false);
   };
 
   const handleProducerSelect = (producer: Producer) => {
     setSelectedProducer(producer);
-    setCurrentStep('checklist');
+    setCurrentStep('list');
   };
 
   // Producer Selection Step
@@ -178,8 +255,158 @@ const SeraKontrol = () => {
     );
   }
 
-  // Checklist Step
-  if (currentStep === 'checklist' && selectedProducer) {
+  // Records List Step
+  if (currentStep === 'list') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="p-4 lg:p-6 space-y-6">
+          {/* Header with Producer Info */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex items-center space-x-4 mb-4 lg:mb-0">
+                <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-xl flex items-center justify-center">
+                  <span className="text-white text-xl">🏠</span>
+                </div>
+                <div>
+                  <h1 className="text-xl lg:text-2xl font-bold text-slate-800">
+                    Sera Kontrol - {selectedProducer?.firstName} {selectedProducer?.lastName}
+                  </h1>
+                  <p className="text-slate-600">
+                    TC: {selectedProducer?.tcNo} | Tel: {selectedProducer?.phone}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={() => {
+                    setShowForm(true);
+                    setEditingRecord(null);
+                    // Tamamen temiz bir checklist oluştur
+                    const cleanChecklist = seraKontrolConfig.items.map(item => ({
+                      ...item,
+                      completed: false,
+                      data: {}
+                    }));
+                    setChecklist(cleanChecklist);
+                    setCurrentStep('checklist');
+                  }}
+                  className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-xl hover:from-emerald-600 hover:to-blue-600 transition-colors font-medium"
+                >
+                  + Yeni Kayıt Ekle
+                </button>
+                <button
+                  onClick={resetSelection}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
+                >
+                  👤 Üretici Değiştir
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+              <div className="flex items-center space-x-2">
+                <span className="text-red-500">⚠️</span>
+                <span className="text-red-700">{error}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Saved Records List */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+            <h2 className="text-xl font-bold text-slate-800 mb-6">📋 Kayıtlı Sera Kontrol Kayıtları</h2>
+            
+            {savedRecords.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">🏠</div>
+                <h3 className="text-lg font-semibold text-slate-700 mb-2">Henüz kayıt yok</h3>
+                <p className="text-slate-600 mb-4">İlk sera kontrol kaydınızı oluşturmak için "Yeni Kayıt Ekle" butonuna tıklayın.</p>
+                <button
+                  onClick={() => {
+                    setShowForm(true);
+                    setEditingRecord(null);
+                    // Tamamen temiz bir checklist oluştur
+                    const cleanChecklist = seraKontrolConfig.items.map(item => ({
+                      ...item,
+                      completed: false,
+                      data: {}
+                    }));
+                    setChecklist(cleanChecklist);
+                    setCurrentStep('checklist');
+                  }}
+                  className="bg-gradient-to-r from-emerald-500 to-blue-500 text-white px-6 py-3 rounded-xl hover:from-emerald-600 hover:to-blue-600 transition-all duration-200 shadow-lg"
+                >
+                  + İlk Kaydı Oluştur
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {savedRecords.map((record, idx) => {
+                  const completedCount = record.items.filter((item: any) => item.completed).length;
+                  const totalCount = record.items.length;
+                  const percent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+                  
+                  return (
+                    <div key={idx} className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="text-sm text-slate-600">
+                          {new Date(record.date).toLocaleDateString('tr-TR')}
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleEditRecord(record)}
+                            className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-colors"
+                            title="Düzenle"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            onClick={() => handleDeleteHistory(idx)}
+                            className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-colors"
+                            title="Sil"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div className="mb-3">
+                        <div className="flex items-center justify-between text-sm mb-1">
+                          <span>İlerleme</span>
+                          <span className="font-semibold">{percent}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className={`h-2 rounded-full transition-all duration-300 ${
+                              percent === 100 
+                                ? 'bg-gradient-to-r from-emerald-400 to-green-500' 
+                                : 'bg-gradient-to-r from-emerald-400 to-blue-500'
+                            }`}
+                            style={{ width: `${percent}%` }}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="text-xs text-slate-500 space-y-1">
+                        <div>Tamamlanan: {completedCount}/{totalCount}</div>
+                        <div>Saat: {new Date(record.date).toLocaleTimeString('tr-TR')}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Checklist Step (Form)
+  if (showForm) {
     const stats = getCompletionStats();
     
     return (
@@ -194,38 +421,24 @@ const SeraKontrol = () => {
                 </div>
                 <div>
                   <h1 className="text-xl lg:text-2xl font-bold text-slate-800">
-                    Sera Kontrol - {selectedProducer.firstName} {selectedProducer.lastName}
+                    {editingRecord ? 'Sera Kontrol Kaydını Düzenle' : 'Yeni Sera Kontrol Kaydı'} - {selectedProducer?.firstName} {selectedProducer?.lastName}
                   </h1>
                   <p className="text-slate-600">
-                    TC: {selectedProducer.tcNo} | Tel: {selectedProducer.phone}
+                    TC: {selectedProducer?.tcNo} | Tel: {selectedProducer?.phone}
                   </p>
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
-                  onClick={resetSelection}
+                  onClick={() => {
+                    setShowForm(false);
+                    setCurrentStep('list');
+                  }}
                   className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
                 >
-                  👤 Üretici Değiştir
+                  ← Listeye Dön
                 </button>
-                
-                {/* Progress Steps - Mobile */}
-                <div className="flex items-center text-sm">
-                  <div className="flex items-center text-emerald-600">
-                    <div className="w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                      ✓
-                    </div>
-                    <span className="ml-2 hidden sm:inline">Üretici Seçildi</span>
-                  </div>
-                  <div className="flex-1 mx-3 h-0.5 bg-emerald-200 rounded"></div>
-                  <div className="flex items-center text-emerald-600">
-                    <div className="w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                      2
-                    </div>
-                    <span className="ml-2 hidden sm:inline">Kontrol</span>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -238,7 +451,7 @@ const SeraKontrol = () => {
                   İlerleme: {stats.completedItems}/{stats.totalItems} görev tamamlandı
                 </h3>
                 <p className="text-slate-600 text-sm">
-                  {selectedProducer.firstName} {selectedProducer.lastName} için sera kontrol durumu
+                  {selectedProducer?.firstName} {selectedProducer?.lastName} için sera kontrol durumu
                 </p>
               </div>
               <div className="mt-4 lg:mt-0">
@@ -266,7 +479,7 @@ const SeraKontrol = () => {
                 <div className="flex items-center space-x-2">
                   <span className="text-emerald-600 text-xl">🎉</span>
                   <span className="text-emerald-800 font-medium">
-                    Tebrikler! {selectedProducer.firstName} {selectedProducer.lastName} için tüm sera kontrolleri tamamlandı!
+                    Tebrikler! {selectedProducer?.firstName} {selectedProducer?.lastName} için tüm sera kontrolleri tamamlandı!
                   </span>
                 </div>
               </div>
@@ -318,7 +531,10 @@ const SeraKontrol = () => {
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
-                  onClick={handleCancel}
+                  onClick={() => {
+                    handleCancel();
+                    setCurrentStep('list');
+                  }}
                   className="flex-1 sm:flex-none px-6 py-3 rounded-xl border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 font-semibold transition-colors"
                   disabled={loading}
                 >
@@ -337,162 +553,11 @@ const SeraKontrol = () => {
                   ) : (
                     <div className="flex items-center justify-center space-x-2">
                       <span>💾</span>
-                      <span>Kaydet</span>
+                      <span>{editingRecord ? 'Güncelle' : 'Kaydet'}</span>
                     </div>
                   )}
                 </button>
               </div>
-
-              {/* History Section */}
-              {history.length > 0 && (
-                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-                  <h2 className="text-xl font-bold text-slate-800 mb-6">📋 Geçmiş Kayıtlar</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
-                    {history.map((h, idx) => {
-                      const completedCount = h.items.filter((item: any) => item.completed).length;
-                      const totalCount = h.items.length;
-                      const percent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
-                      
-                      return (
-                        <div key={idx} className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
-                          <div className="flex items-center justify-between mb-2">
-                            <button
-                              onClick={() => setSelectedHistoryIdx(idx)}
-                              className={`text-sm font-medium transition-colors ${
-                                selectedHistoryIdx === idx 
-                                  ? 'text-emerald-600' 
-                                  : 'text-slate-600 hover:text-slate-800'
-                              }`}
-                            >
-                              {new Date(h.date).toLocaleDateString('tr-TR')}
-                            </button>
-                            <button
-                              onClick={() => handleDeleteHistory(idx)}
-                              className="p-1 rounded-full bg-red-100 hover:bg-red-200 text-red-600 text-xs"
-                              title="Kaydı Sil"
-                            >
-                              🗑️
-                            </button>
-                          </div>
-                          <div className="text-xs text-slate-500">
-                            {new Date(h.date).toLocaleTimeString('tr-TR')}
-                          </div>
-                          <div className="mt-2">
-                            <div className="flex items-center justify-between text-xs mb-1">
-                              <span>İlerleme</span>
-                              <span className="font-semibold">{percent}%</span>
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-1">
-                              <div
-                                className="bg-emerald-500 h-1 rounded-full"
-                                style={{ width: `${percent}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  
-                  {selectedHistoryIdx !== null && history[selectedHistoryIdx] && (
-                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
-                      <h3 className="font-semibold text-slate-700 mb-4">
-                        {new Date(history[selectedHistoryIdx].date).toLocaleString('tr-TR')} - Detaylar
-                      </h3>
-                      <div className="space-y-4">
-                        {history[selectedHistoryIdx].items.map((item: any) => (
-                          <div key={item.id} className="border border-gray-200 rounded-lg p-4 bg-white">
-                            <div className="flex items-center space-x-2 mb-3">
-                              <span className={`w-4 h-4 rounded-full flex items-center justify-center ${
-                                item.completed ? 'bg-emerald-500' : 'bg-gray-300'
-                              }`}>
-                                {item.completed && (
-                                  <span className="text-white text-xs">✓</span>
-                                )}
-                              </span>
-                              <span className={`text-sm font-semibold ${
-                                item.completed ? 'text-emerald-700' : 'text-gray-600'
-                              }`}>
-                                {item.label}
-                              </span>
-                            </div>
-                            
-                            {/* Detay bilgileri göster */}
-                            {item.data && Object.keys(item.data).length > 0 && (
-                              <div className="ml-6 space-y-2">
-                                {Object.entries(item.data).map(([key, value]) => {
-                                  // Pest control ve development stage için özel gösterim
-                                  if (typeof value === 'object' && value !== null && 'selected' in value) {
-                                    const selectedValue = value as { selected: boolean; photo?: string; note?: string };
-                                    if (selectedValue.selected) {
-                                      return (
-                                        <div key={key} className="flex items-center space-x-2 text-sm text-emerald-600">
-                                          <span>✓</span>
-                                          <span>Seçildi</span>
-                                          {selectedValue.photo && (
-                                            <span className="text-blue-600">(Fotoğraf yüklendi)</span>
-                                          )}
-                                          {selectedValue.note && (
-                                            <span className="text-gray-600">- {selectedValue.note}</span>
-                                          )}
-                                        </div>
-                                      );
-                                    }
-                                    return null;
-                                  }
-                                  
-                                  // Boolean değerler için
-                                  if (typeof value === 'boolean') {
-                                    return (
-                                      <div key={key} className="flex items-center space-x-2 text-sm">
-                                        <span className={value ? 'text-emerald-600' : 'text-gray-400'}>
-                                          {value ? '✓' : '✗'}
-                                        </span>
-                                        <span className={value ? 'text-emerald-700' : 'text-gray-500'}>
-                                          {value ? 'Evet' : 'Hayır'}
-                                        </span>
-                                      </div>
-                                    );
-                                  }
-                                  
-                                  // String değerler için
-                                  if (typeof value === 'string' && value.trim() !== '') {
-                                    return (
-                                      <div key={key} className="text-sm text-gray-600">
-                                        <span className="font-medium">{key}:</span> {value}
-                                      </div>
-                                    );
-                                  }
-                                  
-                                  // Number değerler için
-                                  if (typeof value === 'number') {
-                                    return (
-                                      <div key={key} className="text-sm text-gray-600">
-                                        <span className="font-medium">{key}:</span> {value}
-                                      </div>
-                                    );
-                                  }
-                                  
-                                  // Array değerler için (çoklu fotoğraflar)
-                                  if (Array.isArray(value) && value.length > 0) {
-                                    return (
-                                      <div key={key} className="text-sm text-gray-600">
-                                        <span className="font-medium">{key}:</span> {value.length} fotoğraf yüklendi
-                                      </div>
-                                    );
-                                  }
-                                  
-                                  return null;
-                                })}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
             </>
           )}
         </div>
