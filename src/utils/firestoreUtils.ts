@@ -34,13 +34,13 @@ export const loadChecklistData = async (sectionId: string): Promise<ChecklistSec
 };
 
 export const updateChecklistItem = async (
-  sectionId: string,
-  itemId: string,
-  completed: boolean,
-  data?: Record<string, string | number | boolean | string[]>
-): Promise<void> => {
+  collectionName: string, 
+  itemId: string, 
+  completed: boolean, 
+  data?: Record<string, string | number | boolean | string[] | { selected: boolean; photo: string; } | { selected: boolean; note: string; }>
+) => {
   try {
-    const docRef = doc(db, 'checklists', sectionId);
+    const docRef = doc(db, 'checklists', collectionName);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {

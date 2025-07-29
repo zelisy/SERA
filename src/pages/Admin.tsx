@@ -9,12 +9,10 @@ import Rapor from '../components/Rapor';
 import { useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
 import { saveDenemeProducer, getAllDenemeProducers, deleteDenemeProducer, saveDenemeForm, getAllDenemeForms } from '../utils/firestoreUtils';
-import type { Producer } from '../types/producer';
 import { doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { uploadToCloudinary } from '../utils/cloudinaryUtils';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import type { User } from 'firebase/auth';
 
 // ReçeteComponent tanımı:
 const ReceteComponent: React.FC = () => {
@@ -107,6 +105,11 @@ const ReceteComponent: React.FC = () => {
         </div>
 
         <form className="space-y-6 md:space-y-8" onSubmit={handleSave}>
+          {loading && (
+            <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
+              Kaydediliyor...
+            </div>
+          )}
           <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">Hasta Bilgileri</h2>
           <div className="bg-slate-50 rounded-xl shadow border p-3 md:p-4 mb-3 md:mb-4 space-y-3 md:space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
@@ -460,6 +463,11 @@ const DenemeComponent: React.FC = () => {
           </div>
         </div>
         <form className="space-y-6 md:space-y-8" onSubmit={handleSave}>
+          {loading && (
+            <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
+              Kaydediliyor...
+            </div>
+          )}
           <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">Genel Bilgi</h2>
           <div className="bg-slate-50 rounded-xl shadow border p-3 md:p-4 mb-3 md:mb-4 space-y-3 md:space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
@@ -694,10 +702,9 @@ const Admin = () => {
   const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
   const settingsMenuRef = useRef<HTMLDivElement>(null);
   const auth = getAuth();
-  const [user, setUser] = React.useState<User | null>(auth.currentUser);
   React.useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser);
+    const unsubscribe = onAuthStateChanged(auth, (_firebaseUser) => {
+      // Auth state monitoring can be added here if needed
     });
     return () => unsubscribe();
   }, [auth]);
