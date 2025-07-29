@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { FaChartLine, FaTable, FaFilePdf, FaFilter, FaSync, FaTimes } from 'react-icons/fa';
 import type { ReportFilters as ReportFiltersType, ReportData } from '../types/reports';
 import { getDefaultFilters, generateReportData } from '../utils/reportUtils';
 
 // Components
-import ReportFiltersComponent from './reports/ReportFilters';
+import React from 'react';
+const ReportFiltersComponent = React.lazy(() => import('./reports/ReportFilters'));
 import ReportSummary from './reports/ReportSummary';
 import ReportCharts from './reports/ReportCharts';
 import ReportTable from './reports/ReportTable';
@@ -135,13 +136,15 @@ const Rapor = () => {
               </button>
             </div>
             <div className="p-4">
-              <ReportFiltersComponent
-                filters={filters}
-                onFiltersChange={setFilters}
-                onGenerateReport={handleGenerateReport}
-                isLoading={isLoading}
-                isMobile={true}
-              />
+              <React.Suspense fallback={<div>Loading filters...</div>}>
+                <ReportFiltersComponent
+                  filters={filters}
+                  onFiltersChange={setFilters}
+                  onGenerateReport={handleGenerateReport}
+                  isLoading={isLoading}
+                  isMobile={true}
+                />
+              </React.Suspense>
             </div>
           </div>
         </div>
@@ -273,13 +276,15 @@ const Rapor = () => {
           {/* Desktop Sidebar Filters */}
           <div className="hidden lg:block lg:w-80 xl:w-96">
             <div className="sticky top-6">
-              <ReportFiltersComponent
-                filters={filters}
-                onFiltersChange={setFilters}
-                onGenerateReport={handleGenerateReport}
-                isLoading={isLoading}
-                isMobile={false}
-              />
+              <React.Suspense fallback={<div>Loading filters...</div>}>
+                <ReportFiltersComponent
+                  filters={filters}
+                  onFiltersChange={setFilters}
+                  onGenerateReport={handleGenerateReport}
+                  isLoading={isLoading}
+                  isMobile={false}
+                />
+              </React.Suspense>
             </div>
           </div>
 

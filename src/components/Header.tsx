@@ -60,7 +60,6 @@ const Header = () => {
   };
 
   // Anasayfada ve belirtilen sayfalarda farklı stil uygula
-  const isHomePage = location.pathname === '/';
   const isWhiteTextPage = ['/', '/about', '/products', '/blog', '/contact', '/login'].includes(location.pathname);
 
   return (

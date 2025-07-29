@@ -74,7 +74,7 @@ const DikimOncesiDonem: React.FC = () => {
   const handleItemUpdate = async (
     itemId: string, 
     completed: boolean, 
-    data?: Record<string, string | number | boolean | string[]>
+    data?: Record<string, string | number | boolean | string[] | { selected: boolean; photo: string; } | { selected: boolean; note: string; }>
   ) => {
     if (!selectedProducer) return;
 

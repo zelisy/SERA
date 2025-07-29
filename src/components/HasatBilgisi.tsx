@@ -216,16 +216,6 @@ const HasatBilgisiComponent = () => {
   };
 
   // Group records by period
-  const groupByPeriod = (records: HasatBilgisi[]) => {
-    return records.reduce((acc, record) => {
-      if (!acc[record.donem]) {
-        acc[record.donem] = [];
-      }
-      acc[record.donem].push(record);
-      return acc;
-    }, {} as Record<string, HasatBilgisi[]>);
-  };
-
   const calculateTotals = (records: HasatBilgisi[]) => {
     return records.reduce((totals, record) => ({
       totalTonaj: totals.totalTonaj + record.tonajDa * record.kacDa,
@@ -350,7 +340,6 @@ const HasatBilgisiComponent = () => {
 
   // Records List Step
   if (currentStep === 'list') {
-    const groupedRecords = groupByPeriod(filteredRecords);
     const allTotals = calculateTotals(filteredRecords);
 
     return (

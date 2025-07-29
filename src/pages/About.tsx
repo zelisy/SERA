@@ -1,4 +1,3 @@
-import React from 'react';
 import arkaplanImage from '../assets/arkaplan1.jpg';
 
 const About = () => {

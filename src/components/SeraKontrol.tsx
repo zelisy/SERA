@@ -16,7 +16,6 @@ const SeraKontrol = () => {
   const [originalChecklist, setOriginalChecklist] = useState<ChecklistItemType[]>(seraKontrolConfig.items);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [history, setHistory] = useState<any[]>([]);
-  const [selectedHistoryIdx, setSelectedHistoryIdx] = useState<number | null>(null);
   const [savedRecords, setSavedRecords] = useState<any[]>([]);
   const [editingRecord, setEditingRecord] = useState<any | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -80,7 +79,11 @@ const SeraKontrol = () => {
     }
   };
 
-  const handleChecklistUpdate = async (itemId: string, completed: boolean, data?: Record<string, string | number | boolean | string[]>) => {
+  const handleChecklistUpdate = async (
+    itemId: string,
+    completed: boolean,
+    data?: Record<string | number, string | number | boolean | string[] | { selected: boolean; photo: string; } | { selected: boolean; note: string; }>
+  ): Promise<void> => {
     setChecklist(prev => prev.map(item =>
       item.id === itemId ? { ...item, completed, data } : item
     ));
@@ -102,7 +105,7 @@ const SeraKontrol = () => {
     try {
       if (editingRecord) {
         // Düzenleme modunda - mevcut kaydı güncelle
-        const updatedHistory = history.map((record, idx) => {
+        const updatedHistory = history.map(record => {
           if (record.date === editingRecord.date) {
             return { ...record, items: checklist, date: new Date().toISOString() };
           }
@@ -167,7 +170,6 @@ const SeraKontrol = () => {
     const newHistory = history.filter((_, i) => i !== idx);
     setHistory(newHistory);
     setSavedRecords(newHistory);
-    setSelectedHistoryIdx(null);
     try {
       await saveChecklistData(dataKey, { ...seraKontrolConfig, items: checklist, history: newHistory });
     } catch (err) {
@@ -519,7 +521,7 @@ const SeraKontrol = () => {
               
               {/* Checklist Items */}
               <div className="space-y-4">
-                {checklist.map((item, index) => (
+                {checklist.map((item) => (
                   <ChecklistItem
                     key={item.id}
                     item={item}
