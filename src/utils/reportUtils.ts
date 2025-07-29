@@ -333,7 +333,7 @@ export const generateReportData = async (filters: ReportFilters): Promise<Report
     const financialSummary = calculateFinancialSummary(kpis, cropAnalyses, filters);
     
     // Trend analizleri
-    const trends = calculateTrends(kpis, timeSeriesData);
+    const trends = calculateTrends(timeSeriesData);
 
     return {
       filters,
@@ -498,7 +498,7 @@ const calculateFinancialSummary = (
   };
 };
 
-const calculateTrends = (kpis: KPIMetrics, timeSeriesData: TimeSeriesData[]): TrendAnalysis[] => {
+const calculateTrends = (timeSeriesData: TimeSeriesData[]): TrendAnalysis[] => {
   const trends: TrendAnalysis[] = [];
   
   if (timeSeriesData.length >= 2) {

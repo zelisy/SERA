@@ -341,7 +341,7 @@ const ReportTable: React.FC<ReportTableProps> = ({
             </tr>
           </thead>
           <tbody>
-            {currentData.map((item, index) => (
+            {currentData.map((item) => (
               <tr key={item.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                 <td className="py-3 px-4">
                   <input

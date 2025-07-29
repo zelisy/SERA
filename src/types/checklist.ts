@@ -23,7 +23,7 @@ export interface ChecklistItem {
   completed: boolean;
   hasDetails: boolean;
   detailFields?: FormField[];
-  data?: Record<string, string | number | boolean | string[]>;
+  data?: Record<string, string | number | boolean | string[] | { selected: boolean; photo: string; } | { selected: boolean; note: string; }>;
 }
 
 export interface ChecklistSection {

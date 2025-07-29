@@ -58,7 +58,11 @@ const SeraKontrol = () => {
     }
   }, [selectedProducer, currentStep]);
 
-  const handleChecklistUpdate = async (itemId: string, completed: boolean, data?: Record<string, string | number | boolean | string[]>) => {
+  const handleChecklistUpdate = async (
+    itemId: string, 
+    completed: boolean, 
+    data?: Record<string, string | number | boolean | string[] | { selected: boolean; photo: string; } | { selected: boolean; note: string; }>
+  ) => {
     setChecklist(prev => prev.map(item =>
       item.id === itemId ? { ...item, completed, data } : item
     ));
@@ -306,7 +310,7 @@ const SeraKontrol = () => {
               
               {/* Checklist Items */}
               <div className="space-y-4">
-                {checklist.map((item, index) => (
+                {checklist.map((item) => (
                   <ChecklistItem
                     key={item.id}
                     item={item}
