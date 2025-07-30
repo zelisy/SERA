@@ -16,27 +16,38 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 // ReçeteComponent tanımı:
 const ReceteComponent: React.FC = () => {
+  const [producers, setProducers] = React.useState<{id: string, firstName: string, lastName: string}[]>([]);
+  const [selectedProducer, setSelectedProducer] = React.useState<{id: string, firstName: string, lastName: string} | null>(null);
   const [form, setForm] = React.useState({
     hastaAdi: '',
     hastaSoyadi: '',
+    hastaYasi: '',
     hastaTelefon: '',
-    hastaAdres: '',
-    hastalikTani: '',
+    hastalikAdi: '',
+    hastalikBelirtileri: '',
+    tedaviYontemi: '',
     ilaclar: '',
-    dozlar: '',
-    kullanimSekli: '',
-    sure: '',
+    dozaj: '',
+    kullanimSuresi: '',
     notlar: '',
-    tarih: new Date().toISOString().split('T')[0],
+    goruntuler: [] as string[],
+    producerId: '',
+    producerName: ''
   });
-  const [savedReceteler, setSavedReceteler] = React.useState<any[]>([]);
+  const [imageFiles, setImageFiles] = React.useState<File[]>([]);
   const [message, setMessage] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+  const [savedReceteler, setSavedReceteler] = React.useState<any[]>([]);
   const [editIndex, setEditIndex] = React.useState<number | null>(null);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [modalData, setModalData] = React.useState<any | null>(null);
+  const [imageModalOpen, setImageModalOpen] = React.useState(false);
+  const [imageModalIndex, setImageModalIndex] = React.useState<number>(0);
+  const [imageModalImages, setImageModalImages] = React.useState<string[]>([]);
 
   React.useEffect(() => {
+    // Üreticileri Firestore'dan çek
+    getAllDenemeProducers().then(setProducers).catch(() => setProducers([]));
     // Reçete verilerini Firestore'dan çek
     // getAllReceteler().then(setSavedReceteler).catch(() => setSavedReceteler([]));
   }, []);
@@ -45,71 +56,176 @@ const ReceteComponent: React.FC = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      setImageFiles(prev => [...prev, ...files]);
+      const urls = files.map(f => URL.createObjectURL(f));
+      setForm(prev => ({ ...prev, goruntuler: [...prev.goruntuler, ...urls] }));
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    try {
-      // await saveRecete(form);
-      setMessage('Reçete kaydedildi');
-      setForm({
-        hastaAdi: '',
-        hastaSoyadi: '',
-        hastaTelefon: '',
-        hastaAdres: '',
-        hastalikTani: '',
-        ilaclar: '',
-        dozlar: '',
-        kullanimSekli: '',
-        sure: '',
-        notlar: '',
-        tarih: new Date().toISOString().split('T')[0],
-      });
-      setEditIndex(null);
-      // getAllReceteler().then(setSavedReceteler);
-    } catch (error) {
-      setMessage('Reçete kaydedilemedi!');
+    let imageUrls: string[] = [];
+    if (imageFiles.length > 0) {
+      imageUrls = await Promise.all(imageFiles.map(file => uploadToCloudinary(file)));
     }
+    let newForm = { 
+      ...form, 
+      producer: selectedProducer, 
+      goruntuler: imageUrls,
+      producerId: selectedProducer?.id || '',
+      producerName: selectedProducer ? `${selectedProducer.firstName} ${selectedProducer.lastName}` : ''
+    };
+    if (editIndex !== null) {
+      // Düzenleme modunda güncelle
+      const oldId = savedReceteler[editIndex]?.id;
+      if (oldId) {
+        // Firestore'dan sil
+        // (Silme fonksiyonu eklenirse burada kullanılabilir)
+      }
+      await saveDenemeForm(newForm);
+      setEditIndex(null);
+    } else {
+      await saveDenemeForm(newForm);
+    }
+    setMessage('Reçete kaydedildi');
+    setForm({
+      hastaAdi: '',
+      hastaSoyadi: '',
+      hastaYasi: '',
+      hastaTelefon: '',
+      hastalikAdi: '',
+      hastalikBelirtileri: '',
+      tedaviYontemi: '',
+      ilaclar: '',
+      dozaj: '',
+      kullanimSuresi: '',
+      notlar: '',
+      goruntuler: [],
+      producerId: '',
+      producerName: ''
+    });
+    setImageFiles([]);
     setLoading(false);
   };
 
   const handleEdit = (idx: number) => {
     const item = savedReceteler[idx];
-    setForm({ ...item });
+    setForm({
+      hastaAdi: item.hastaAdi || '',
+      hastaSoyadi: item.hastaSoyadi || '',
+      hastaYasi: item.hastaYasi || '',
+      hastaTelefon: item.hastaTelefon || '',
+      hastalikAdi: item.hastalikAdi || '',
+      hastalikBelirtileri: item.hastalikBelirtileri || '',
+      tedaviYontemi: item.tedaviYontemi || '',
+      ilaclar: item.ilaclar || '',
+      dozaj: item.dozaj || '',
+      kullanimSuresi: item.kullanimSuresi || '',
+      notlar: item.notlar || '',
+      goruntuler: item.goruntuler || [],
+      producerId: item.producerId || '',
+      producerName: item.producerName || ''
+    });
     setEditIndex(idx);
-    setMessage('Düzenleme modunda');
   };
 
   const handleDelete = async (idx: number) => {
-    if (window.confirm('Bu reçeteyi silmek istediğinize emin misiniz?')) {
-      // await deleteRecete(savedReceteler[idx].id);
-      setSavedReceteler(prev => prev.filter((_, i) => i !== idx));
-      setMessage('Reçete silindi');
+    const item = savedReceteler[idx];
+    if (item.id) {
+      await deleteDoc(doc(db, 'denemeForms', item.id));
     }
+    setSavedReceteler(prev => prev.filter((_, i) => i !== idx));
   };
 
+  // ADIM 1: Üretici seçimi
+  if (!selectedProducer) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="p-4 lg:p-6">
+          {/* Header */}
+          <div className="mb-6 text-center">
+            <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-2">
+              Reçete Yönetimi
+            </h1>
+            <p className="text-slate-600 text-lg">
+              Reçete oluşturmak için önce bir üretici seçin
+            </p>
+          </div>
+
+          {/* Progress Steps */}
+          <div className="mb-8 max-w-md mx-auto">
+            <div className="flex items-center">
+              <div className="flex items-center text-purple-600">
+                <div className="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                  1
+                </div>
+                <span className="ml-2 font-medium">Üretici Seç</span>
+              </div>
+              <div className="flex-1 mx-4 h-1 bg-gray-200 rounded"></div>
+              <div className="flex items-center text-gray-400">
+                <div className="w-8 h-8 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-sm font-bold">
+                  2
+                </div>
+                <span className="ml-2">Reçete Formu</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Producer Selection */}
+          <UreticiListesi
+            selectionMode={true}
+            onSelect={setSelectedProducer}
+            selectedProducer={selectedProducer}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // ADIM 2: Reçete formu
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="p-4 lg:p-6 space-y-6">
+        {/* Header with Producer Info */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-500 rounded-xl flex items-center justify-center">
-              <span className="text-white text-xl">💊</span>
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center space-x-4 mb-4 lg:mb-0">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-500 rounded-xl flex items-center justify-center">
+                <span className="text-white text-xl">💊</span>
+              </div>
+              <div>
+                <h1 className="text-xl lg:text-2xl font-bold text-slate-800">
+                  Reçete - {selectedProducer.firstName} {selectedProducer.lastName}
+                </h1>
+                <p className="text-slate-600">
+                  Hasta bilgileri ve tedavi reçetesi
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl lg:text-2xl font-bold text-slate-800">
-                Reçete Yönetimi
-              </h1>
-              <p className="text-slate-600">Hasta reçetelerini yönetin</p>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => setSelectedProducer(null)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
+              >
+                👤 Üretici Değiştir
+              </button>
             </div>
           </div>
         </div>
 
+        {/* Reçete Formu */}
         <form className="space-y-6 md:space-y-8" onSubmit={handleSave}>
           {loading && (
             <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
               Kaydediliyor...
             </div>
           )}
+          
           <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">Hasta Bilgileri</h2>
           <div className="bg-slate-50 rounded-xl shadow border p-3 md:p-4 mb-3 md:mb-4 space-y-3 md:space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
@@ -124,49 +240,69 @@ const ReceteComponent: React.FC = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
               <div>
+                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Yaş</label>
+                <input name="hastaYasi" type="number" value={form.hastaYasi} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent" min="0" max="150" />
+              </div>
+              <div>
                 <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Telefon</label>
                 <input name="hastaTelefon" value={form.hastaTelefon} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
               </div>
-              <div>
-                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Tarih</label>
-                <input name="tarih" type="date" value={form.tarih} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent" required />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Adres</label>
-              <textarea name="hastaAdres" value={form.hastaAdres} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none" rows={2} />
             </div>
           </div>
 
-          <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">Hastalık ve Tedavi</h2>
+          <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">Hastalık Bilgileri</h2>
           <div className="bg-slate-50 rounded-xl shadow border p-3 md:p-4 mb-3 md:mb-4 space-y-3 md:space-y-4">
             <div>
-              <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Hastalık Tanısı</label>
-              <textarea name="hastalikTani" value={form.hastalikTani} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none" rows={3} required />
+              <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Hastalık Adı</label>
+              <input name="hastalikAdi" value={form.hastalikAdi} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent" required />
             </div>
+            <div>
+              <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Hastalık Belirtileri</label>
+              <textarea name="hastalikBelirtileri" value={form.hastalikBelirtileri} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none" rows={3} />
+            </div>
+          </div>
+
+          <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">Tedavi Bilgileri</h2>
+          <div className="bg-slate-50 rounded-xl shadow border p-3 md:p-4 mb-3 md:mb-4 space-y-3 md:space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+              <div>
+                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Tedavi Yöntemi</label>
+                <input name="tedaviYontemi" value={form.tedaviYontemi} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+              </div>
               <div>
                 <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">İlaçlar</label>
-                <textarea name="ilaclar" value={form.ilaclar} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none" rows={3} required />
-              </div>
-              <div>
-                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Dozlar</label>
-                <textarea name="dozlar" value={form.dozlar} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none" rows={3} required />
+                <input name="ilaclar" value={form.ilaclar} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
               <div>
-                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Kullanım Şekli</label>
-                <textarea name="kullanimSekli" value={form.kullanimSekli} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none" rows={2} />
+                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Dozaj</label>
+                <input name="dozaj" value={form.dozaj} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
               </div>
               <div>
-                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Süre</label>
-                <input name="sure" value={form.sure} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="Örn: 7 gün" />
+                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Kullanım Süresi</label>
+                <input name="kullanimSuresi" value={form.kullanimSuresi} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
               </div>
             </div>
             <div>
               <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Notlar</label>
-              <textarea name="notlar" value={form.notlar} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none" rows={3} placeholder="Ek notlar..." />
+              <textarea name="notlar" value={form.notlar} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none" rows={3} placeholder="Ek notlar ve öneriler..." />
+            </div>
+          </div>
+
+          <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">Görüntüler</h2>
+          <div className="bg-slate-50 rounded-xl shadow border p-3 md:p-4 mb-3 md:mb-4">
+            <div className="flex flex-col items-center">
+              <label htmlFor="recete-goruntu-input" className="inline-block cursor-pointer bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold py-2 md:py-3 px-4 md:px-6 rounded-xl shadow-lg hover:from-purple-600 hover:to-pink-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm md:text-base">
+                📷 Fotoğraf Seç
+              </label>
+              <input id="recete-goruntu-input" type="file" multiple accept="image/*" onChange={handleImageChange} className="hidden" />
+              <p className="text-xs text-gray-500 mt-2 text-center">Birden fazla fotoğraf seçebilirsiniz</p>
+            </div>
+            <div className="flex flex-row flex-wrap gap-2 md:gap-4 mt-3 md:mt-4">
+              {form.goruntuler.map((url, i) => (
+                <img key={i} src={url} alt={`görsel${i}`} className="w-20 h-20 md:w-32 md:h-32 object-cover rounded-lg shadow cursor-pointer hover:scale-105 transition-transform duration-200" onClick={e => { e.stopPropagation(); setImageModalImages(form.goruntuler); setImageModalIndex(i); setImageModalOpen(true); }} />
+              ))}
             </div>
           </div>
 
@@ -174,6 +310,34 @@ const ReceteComponent: React.FC = () => {
             <button type="submit" className="flex-1 sm:flex-none bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 md:px-6 py-3 md:py-4 rounded-xl font-semibold shadow-lg hover:from-purple-600 hover:to-pink-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm md:text-base">
               💾 {editIndex !== null ? 'Güncelle' : 'Kaydet'}
             </button>
+            {editIndex !== null && (
+              <button 
+                type="button" 
+                onClick={() => {
+                  setEditIndex(null);
+                  setForm({
+                    hastaAdi: '',
+                    hastaSoyadi: '',
+                    hastaYasi: '',
+                    hastaTelefon: '',
+                    hastalikAdi: '',
+                    hastalikBelirtileri: '',
+                    tedaviYontemi: '',
+                    ilaclar: '',
+                    dozaj: '',
+                    kullanimSuresi: '',
+                    notlar: '',
+                    goruntuler: [],
+                    producerId: '',
+                    producerName: ''
+                  });
+                  setImageFiles([]);
+                }}
+                className="px-4 md:px-6 py-3 md:py-4 bg-gray-500 text-white rounded-xl font-semibold hover:bg-gray-600 transition-colors"
+              >
+                ❌ İptal
+              </button>
+            )}
           </div>
           {message && <div className="text-center text-purple-600 mt-3 text-sm md:text-base">{message}</div>}
         </form>
@@ -181,7 +345,7 @@ const ReceteComponent: React.FC = () => {
         {/* Kayıtlı Reçeteler Listesi */}
         <div className="mt-6 md:mt-8">
           <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">Kayıtlı Reçeteler</h2>
-          {savedReceteler.length === 0 && <div className="text-slate-500 text-center py-8">Henüz reçete kaydı yok.</div>}
+          {savedReceteler.length === 0 && <div className="text-slate-500 text-center py-8">Henüz kayıt yok.</div>}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
             {savedReceteler.map((item, idx) => (
               <div key={idx} className="bg-white rounded-xl shadow border p-3 md:p-4 cursor-pointer hover:bg-purple-50 transition-all duration-200 hover:shadow-lg" onClick={() => { setModalOpen(true); setModalData(item); }}>
@@ -194,10 +358,22 @@ const ReceteComponent: React.FC = () => {
                     </div>
                   </div>
                   <div className="text-xs md:text-sm text-slate-600 space-y-1">
-                    <div><span className="font-medium">Tarih:</span> {item.tarih}</div>
-                    <div><span className="font-medium">Tanı:</span> {item.hastalikTani?.substring(0, 40)}...</div>
-                    <div><span className="font-medium">Telefon:</span> {item.hastaTelefon}</div>
+                    <div><span className="font-medium">Hastalık:</span> {item.hastalikAdi?.substring(0, 30)}...</div>
+                    <div><span className="font-medium">Tedavi:</span> {item.tedaviYontemi?.substring(0, 30)}...</div>
+                    <div><span className="font-medium">Üretici:</span> {item.producerName?.substring(0, 25)}...</div>
                   </div>
+                  {item.goruntuler?.length > 0 && (
+                    <div className="flex flex-row flex-wrap gap-1 md:gap-2 mt-2">
+                      {item.goruntuler.slice(0, 3).map((url: string, i: number) => (
+                        <img key={i} src={url} alt={`görsel${i}`} className="w-12 h-12 md:w-16 md:h-16 object-cover rounded-lg" />
+                      ))}
+                      {item.goruntuler.length > 3 && (
+                        <div className="w-12 h-12 md:w-16 md:h-16 bg-gray-200 rounded-lg flex items-center justify-center text-xs text-gray-500">
+                          +{item.goruntuler.length - 3}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -211,17 +387,50 @@ const ReceteComponent: React.FC = () => {
               <button className="absolute top-2 md:top-4 right-2 md:right-4 text-xl md:text-2xl text-gray-400 hover:text-purple-600 z-10" onClick={() => setModalOpen(false)}>&times;</button>
               <h2 className="text-lg md:text-2xl font-bold mb-3 md:mb-4 text-purple-700 pr-8">Reçete Detayı</h2>
               <div className="space-y-2 md:space-y-3 mb-4 text-sm md:text-base">
-                <div><span className="font-semibold">Hasta:</span> {modalData.hastaAdi} {modalData.hastaSoyadi}</div>
+                <div><span className="font-semibold">Üretici:</span> {modalData.producerName}</div>
+                <div><span className="font-semibold">Hasta Adı:</span> {modalData.hastaAdi} {modalData.hastaSoyadi}</div>
+                <div><span className="font-semibold">Yaş:</span> {modalData.hastaYasi}</div>
                 <div><span className="font-semibold">Telefon:</span> {modalData.hastaTelefon}</div>
-                <div><span className="font-semibold">Adres:</span> {modalData.hastaAdres}</div>
-                <div><span className="font-semibold">Tarih:</span> {modalData.tarih}</div>
-                <div><span className="font-semibold">Hastalık Tanısı:</span> {modalData.hastalikTani}</div>
+                <div><span className="font-semibold">Hastalık:</span> {modalData.hastalikAdi}</div>
+                <div><span className="font-semibold">Belirtiler:</span> {modalData.hastalikBelirtileri}</div>
+                <div><span className="font-semibold">Tedavi Yöntemi:</span> {modalData.tedaviYontemi}</div>
                 <div><span className="font-semibold">İlaçlar:</span> {modalData.ilaclar}</div>
-                <div><span className="font-semibold">Dozlar:</span> {modalData.dozlar}</div>
-                <div><span className="font-semibold">Kullanım Şekli:</span> {modalData.kullanimSekli}</div>
-                <div><span className="font-semibold">Süre:</span> {modalData.sure}</div>
+                <div><span className="font-semibold">Dozaj:</span> {modalData.dozaj}</div>
+                <div><span className="font-semibold">Kullanım Süresi:</span> {modalData.kullanimSuresi}</div>
                 <div><span className="font-semibold">Notlar:</span> {modalData.notlar}</div>
               </div>
+              <div>
+                <div className="font-semibold mb-2 md:mb-3">Görüntüler:</div>
+                <div className="flex flex-row flex-wrap gap-2 md:gap-3">
+                  {modalData.goruntuler?.length > 0 ? (
+                    modalData.goruntuler.map((url: string, i: number) => (
+                      <img key={i} src={url} alt={`görsel${i}`} className="w-20 h-20 md:w-32 md:h-32 object-cover rounded-lg shadow cursor-pointer hover:scale-105 transition-transform duration-200" onClick={e => { e.stopPropagation(); setImageModalImages(modalData.goruntuler); setImageModalIndex(i); setImageModalOpen(true); }} />
+                    ))
+                  ) : (
+                    <span className="text-slate-400 text-sm md:text-base">Görsel yok</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Görsel Carousel Lightbox Modal */}
+        {imageModalOpen && imageModalImages.length > 0 && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => setImageModalOpen(false)}>
+            <div className="relative flex items-center justify-center w-full h-full" onClick={e => e.stopPropagation()}>
+              <button
+                className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 text-2xl md:text-4xl text-white bg-black/40 rounded-full px-2 md:px-3 py-1 hover:bg-black/70 z-10 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                onClick={e => { e.stopPropagation(); setImageModalIndex((prev) => (prev - 1 + imageModalImages.length) % imageModalImages.length); }}
+                disabled={imageModalImages.length < 2}
+              >&#8592;</button>
+              <img src={imageModalImages[imageModalIndex]} alt="Büyük görsel" className="max-w-full max-h-[80vh] rounded-xl shadow-2xl border-2 md:border-4 border-white" />
+              <button
+                className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 text-2xl md:text-4xl text-white bg-black/40 rounded-full px-2 md:px-3 py-1 hover:bg-black/70 z-10 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                onClick={e => { e.stopPropagation(); setImageModalIndex((prev) => (prev + 1) % imageModalImages.length); }}
+                disabled={imageModalImages.length < 2}
+              >&#8594;</button>
+              <button className="absolute top-2 md:top-8 right-2 md:right-8 text-2xl md:text-4xl text-white bg-black/40 rounded-full px-2 md:px-3 py-1 hover:bg-black/70 min-w-[44px] min-h-[44px] flex items-center justify-center" onClick={() => setImageModalOpen(false)}>&times;</button>
             </div>
           </div>
         )}
@@ -468,94 +677,70 @@ const DenemeComponent: React.FC = () => {
               Kaydediliyor...
             </div>
           )}
-          <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">Genel Bilgi</h2>
+          <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">Genel Bilgiler</h2>
           <div className="bg-slate-50 rounded-xl shadow border p-3 md:p-4 mb-3 md:mb-4 space-y-3 md:space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
               <div>
-                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Çalışmak</label>
-                <input name="genelCalismak" value={form.genelCalismak} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Genel Çalışmak</label>
+                <input name="genelCalismak" value={form.genelCalismak} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent" required />
               </div>
               <div>
-                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Amaç</label>
-                <input name="genelAmac" value={form.genelAmac} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Genel Amaç</label>
+                <input name="genelAmac" value={form.genelAmac} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent" required />
               </div>
             </div>
-          </div>
-          <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">Çalışma Yeri</h2>
-          <div className="bg-slate-50 rounded-xl shadow border p-3 md:p-4 mb-3 md:mb-4 space-y-3 md:space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
               <div>
                 <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Ülke</label>
-                <select name="ulke" value={form.ulke} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
-                  <option value="">Ülke Seçiniz</option>
-                  <option value="Türkiye">Türkiye</option>
-                  <option value="Almanya">Almanya</option>
-                  <option value="Fransa">Fransa</option>
-                  <option value="İtalya">İtalya</option>
-                  <option value="İspanya">İspanya</option>
-                  <option value="Ukrayna">Ukrayna</option>
-                  <option value="ABD">ABD</option>
-                  <option value="İngiltere">İngiltere</option>
-                  <option value="Rusya">Rusya</option>
-                  <option value="Çin">Çin</option>
-                  <option value="Japonya">Japonya</option>
-                  <option value="Hollanda">Hollanda</option>
-                  <option value="Brezilya">Brezilya</option>
-                  <option value="Kanada">Kanada</option>
-                  <option value="Avustralya">Avustralya</option>
-                  <option value="Meksika">Meksika</option>
-                  <option value="Güney Kore">Güney Kore</option>
-                  <option value="Hindistan">Hindistan</option>
-                  <option value="Diğer">Diğer</option>
-                </select>
+                <input name="ulke" value={form.ulke} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
               </div>
               <div>
                 <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Konum</label>
-                <input name="konum" value={form.konum} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+                <input name="konum" value={form.konum} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
               </div>
             </div>
           </div>
-          <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">Mahsul Bilgileri</h2>
+
+          <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">Tür ve Çeşitlilik Bilgileri</h2>
+          <div className="bg-slate-50 rounded-xl shadow border p-3 md:p-4 mb-3 md:mb-4 space-y-3 md:space-y-4">
+            <div>
+              <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Türler</label>
+              <input name="turler" value={form.turler} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent" required />
+            </div>
+            <div>
+              <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Çeşitlilik</label>
+              <textarea name="cesitlilik" value={form.cesitlilik} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none" rows={3} />
+            </div>
+          </div>
+
+          <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">Tedavi ve Tekrar Bilgileri</h2>
           <div className="bg-slate-50 rounded-xl shadow border p-3 md:p-4 mb-3 md:mb-4 space-y-3 md:space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
               <div>
-                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Türler</label>
-                <input name="turler" value={form.turler} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
-              </div>
-              <div>
-                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Çeşitlilik</label>
-                <input name="cesitlilik" value={form.cesitlilik} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
-              </div>
-            </div>
-          </div>
-          <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">Sonuçlar</h2>
-          <div className="bg-slate-50 rounded-xl shadow border p-3 md:p-4 mb-3 md:mb-4 space-y-3 md:space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-              <div>
                 <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Tedaviler</label>
-                <input name="tedaviler" value={form.tedaviler} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+                <input name="tedaviler" value={form.tedaviler} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
               </div>
               <div>
                 <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Tekrarlar</label>
-                <input name="tekrarlar" value={form.tekrarlar} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
-              </div>
-              <div className="md:col-span-2 lg:col-span-1">
-                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Tedavi başına bitki sayısı</label>
-                <input name="tedaviBitkiSayisi" type="number" value={form.tedaviBitkiSayisi} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-emerald-500 focus:border-transparent" min="0" />
+                <input name="tekrarlar" value={form.tekrarlar} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
               </div>
             </div>
-          </div>
-          <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">Mahsul Durumu</h2>
-          <div className="bg-slate-50 rounded-xl shadow border p-3 md:p-4 mb-3 md:mb-4 space-y-4">
-            <div>
-              <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Mahsul durumu</label>
-              <textarea name="mahsulDurumu" value={form.mahsulDurumu} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none" rows={3} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+              <div>
+                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Tedavi Bitki Sayısı</label>
+                <input name="tedaviBitkiSayisi" value={form.tedaviBitkiSayisi} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+              </div>
+              <div>
+                <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Mahsul Durumu</label>
+                <input name="mahsulDurumu" value={form.mahsulDurumu} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+              </div>
             </div>
             <div>
-              <h3 className="text-base md:text-lg font-semibold mb-1 md:mb-2">Evrim</h3>
-              <textarea name="evrim" value={form.evrim} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none" rows={2} placeholder="Evrim bilgisini giriniz..." />
+              <label className="block text-sm md:text-base font-semibold mb-1 md:mb-2">Evrim</label>
+              <textarea name="evrim" value={form.evrim} onChange={handleChange} className="w-full p-2 md:p-3 rounded-lg border text-sm md:text-base focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none" rows={3} placeholder="Evrim bilgileri..." />
             </div>
           </div>
+
           <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">Görüntüler</h2>
           <div className="bg-slate-50 rounded-xl shadow border p-3 md:p-4 mb-3 md:mb-4">
             <div className="flex flex-col items-center">
@@ -571,6 +756,7 @@ const DenemeComponent: React.FC = () => {
               ))}
             </div>
           </div>
+
           <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
             <button type="submit" className="flex-1 sm:flex-none bg-gradient-to-r from-emerald-500 to-blue-500 text-white px-4 md:px-6 py-3 md:py-4 rounded-xl font-semibold shadow-lg hover:from-emerald-600 hover:to-blue-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm md:text-base">
               💾 Kaydet

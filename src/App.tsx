@@ -15,6 +15,8 @@ import Products from './pages/Products';
 import BlogPage from './pages/Blog';
 import BlogManagement from './pages/BlogManagement';
 import AdminProducts from './pages/AdminProducts';
+import Recipe from './pages/Recipe';
+import RecipeCreate from './pages/RecipeCreate';
 
 // Authentication kontrolü
 const isAuthenticated = () => {
@@ -76,6 +78,16 @@ function AppContent() {
           <Route path="/profile" element={
             <PrivateRoute>
               <Profile />
+            </PrivateRoute>
+          } />
+          <Route path="/recipe" element={
+            <PrivateRoute>
+              <Recipe />
+            </PrivateRoute>
+          } />
+          <Route path="/recipe/create/:producerId" element={
+            <PrivateRoute>
+              <RecipeCreate />
             </PrivateRoute>
           } />
         </Routes>
