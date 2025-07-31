@@ -8,4 +8,5 @@ export interface Producer {
   gender: string;
   experienceYear: string;
   registerDate: string;
+  birthDate?: string;
 } 
