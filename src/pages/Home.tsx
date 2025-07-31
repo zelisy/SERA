@@ -61,16 +61,20 @@ const Home = () => {
         <div className="min-h-screen flex items-center justify-center px-4">
           <div className="text-center text-white max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-              AGROVİA 
-              <span className="block text-emerald-400">SİSTEMİ</span>
+              AGROVİA
             </h1>
-            <p className="text-xl md:text-3xl mb-8 text-gray-200 font-light leading-relaxed">
-              Profesyonel sera yönetimi ve 
-              <span className="block">dikim öncesi kontrol sistemi</span>
+            <p className="text-xl md:text-3xl mb-8 text-emerald-400 font-light leading-relaxed">
+              Sera Takip Sistemi
             </p>
             <p className="text-lg md:text-xl mb-12 text-gray-300 max-w-3xl mx-auto leading-relaxed">
-              Sera üreticileri için geliştirilmiş kapsamlı takip ve kontrol sistemi. 
-              Dikim öncesi dönem kontrollerinden hasat sürecine kadar tüm üretim aşamalarınızı dijital ortamda yönetin.
+            Sera üretiminizi dijital dünyaya taşıyın.
+            AGROVİA, dikim öncesinden hasada kadar tüm üretim sürecinizi adım adım takip etmenizi sağlayan yenilikçi bir kontrol platformudur.
+            <br />
+          
+            📊 İklim verileri, 🌱 bitki gelişimi, 💧 sulama planlaması ve 🐛 zararlı gözlemleri artık tek yerde, parmaklarınızın ucunda.
+          
+            <br />
+            Tarımı kolaylaştırmak, verimi artırmak, her adımı kayıt altına almak için buradayız.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
@@ -133,7 +137,7 @@ const Home = () => {
                 </p>
                 <div className="flex items-center text-sm text-emerald-400 font-semibold">
                   <span className="mr-2">🔐</span>
-                  <span>Giriş Gerekli</span>
+                  <span>Sadece Yetkili Kullanıcılar İçin</span>
                 </div>
               </div>
 
@@ -148,7 +152,7 @@ const Home = () => {
                 </p>
                 <div className="flex items-center text-sm text-emerald-400 font-semibold">
                   <span className="mr-2">🔐</span>
-                  <span>Giriş Gerekli</span>
+                  <span>Sadece Yetkili Kullanıcılar İçin</span>
                 </div>
               </div>
 
@@ -163,7 +167,7 @@ const Home = () => {
                 </p>
                 <div className="flex items-center text-sm text-emerald-400 font-semibold">
                   <span className="mr-2">🔐</span>
-                  <span>Giriş Gerekli</span>
+                  <span>Sadece Yetkili Kullanıcılar İçin</span>
                 </div>
               </div>
 
@@ -178,7 +182,7 @@ const Home = () => {
                 </p>
                 <div className="flex items-center text-sm text-emerald-400 font-semibold">
                   <span className="mr-2">🔐</span>
-                  <span>Giriş Gerekli</span>
+                  <span>Sadece Yetkili Kullanıcılar İçin</span>
                 </div>
               </div>
 
@@ -193,7 +197,7 @@ const Home = () => {
                 </p>
                 <div className="flex items-center text-sm text-emerald-400 font-semibold">
                   <span className="mr-2">🔐</span>
-                  <span>Giriş Gerekli</span>
+                  <span>Sadece Yetkili Kullanıcılar İçin</span>
                 </div>
               </div>
 
@@ -208,7 +212,7 @@ const Home = () => {
                 </p>
                 <div className="flex items-center text-sm text-emerald-400 font-semibold">
                   <span className="mr-2">🔐</span>
-                  <span>Giriş Gerekli</span>
+                  <span>Sadece Yetkili Kullanıcılar İçin</span>
                 </div>
               </div>
             </div>
