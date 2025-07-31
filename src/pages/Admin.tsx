@@ -6,6 +6,7 @@ import DikimOncesiDonem from '../components/DikimOncesiDonem';
 import SeraKontrol from '../components/SeraKontrol';
 import HasatBilgisi from '../components/HasatBilgisi';
 import Rapor from '../components/Rapor';
+import Recipe from './Recipe';
 import { useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
 import { saveDenemeProducer, getAllDenemeProducers, deleteDenemeProducer, saveDenemeForm, getAllDenemeForms } from '../utils/firestoreUtils';
@@ -866,7 +867,7 @@ const sidebarItems = [
   { id: 'greenhouse', name: 'Sera Kontrol', icon: '🏠' },
   { id: 'harvest', name: 'Hasat Bilgisi', icon: '🌾' },
   { id: 'reports', name: 'Rapor', icon: '📊' },
-  { id: 'recete', name: 'Reçete', icon: '💊', path: '/admin/recipe' },
+  { id: 'recete', name: 'Reçete', icon: '💊' },
   { id: 'deneme', name: 'Deneme', icon: '🧪' },
 ];
 
@@ -877,7 +878,7 @@ const sectionComponents: Record<string, ReactElement> = {
   'Sera Kontrol': <SeraKontrol />,
   'Hasat Bilgisi': <HasatBilgisi />,
   'Rapor': <Rapor />,
-  'Reçete': <ReceteComponent />,
+  'Reçete': <Recipe />,
   'Deneme': <DenemeComponent />,
 };
 
@@ -952,11 +953,7 @@ const Admin = () => {
               <button
                 key={item.id}
                 onClick={() => {
-                  if (item.path) {
-                    navigate(item.path);
-                  } else {
-                    setActiveSection(item.name);
-                  }
+                  setActiveSection(item.name);
                   setSidebarOpen(false);
                 }}
                 className={`
