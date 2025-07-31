@@ -243,33 +243,33 @@ const SeraKontrol: React.FC = () => {
   // Producer Selection Step
   if (currentStep === 'select-producer') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4">
-        <div className="max-w-6xl mx-auto">
+      <div className="min-h-screen bg-gray-50">
+        <div className="p-4 lg:p-6">
           {/* Header */}
-          <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-6">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">
-              🏠 Sera Kontrol Sistemi
+          <div className="mb-6 text-center">
+            <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-2">
+               Sera Kontrol Sistemi
             </h1>
-            <p className="text-gray-600 text-lg mb-6">
+            <p className="text-slate-600 text-lg">
               Sera kontrol işlemlerini başlatmak için önce bir üretici seçin
             </p>
-            
-            {/* Progress Steps */}
-            <div className="mb-8 max-w-md">
-              <div className="flex items-center">
-                <div className="flex items-center text-emerald-600">
-                  <div className="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                    1
-                  </div>
-                  <span className="ml-2 font-medium">Üretici Seç</span>
+          </div>
+          
+          {/* Progress Steps */}
+          <div className="mb-8 max-w-md mx-auto">
+            <div className="flex items-center">
+              <div className="flex items-center text-emerald-600">
+                <div className="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                  1
                 </div>
-                <div className="flex-1 mx-4 h-1 bg-gray-200 rounded"></div>
-                <div className="flex items-center text-gray-400">
-                  <div className="w-8 h-8 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-sm font-bold">
-                    2
-                  </div>
-                  <span className="ml-2">Kontrol Listesi</span>
+                <span className="ml-2 font-medium">Üretici Seç</span>
+              </div>
+              <div className="flex-1 mx-4 h-1 bg-gray-200 rounded"></div>
+              <div className="flex items-center text-gray-400">
+                <div className="w-8 h-8 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-sm font-bold">
+                  2
                 </div>
+                <span className="ml-2">Kontrol Listesi</span>
               </div>
             </div>
           </div>

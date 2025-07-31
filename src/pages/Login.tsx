@@ -144,7 +144,7 @@ const Login: React.FC = () => {
               </div>
 
               {/* Remember Me */}
-              <div className="flex items-center justify-between">
+              <div className="flex items-center">
                 <label className="flex items-center space-x-2 cursor-pointer">
                   <input 
                     type="checkbox" 
@@ -152,9 +152,6 @@ const Login: React.FC = () => {
                   />
                   <span className="text-sm text-gray-300">Beni hatırla</span>
                 </label>
-                <a href="/forgot-password" className="text-sm text-emerald-400 hover:text-emerald-300 font-medium">
-                  Şifremi unuttum
-                </a>
               </div>
 
               {/* Submit Button */}
