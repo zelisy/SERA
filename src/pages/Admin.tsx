@@ -866,7 +866,7 @@ const sidebarItems = [
   { id: 'greenhouse', name: 'Sera Kontrol', icon: '🏠' },
   { id: 'harvest', name: 'Hasat Bilgisi', icon: '🌾' },
   { id: 'reports', name: 'Rapor', icon: '📊' },
-  { id: 'recete', name: 'Reçete', icon: '💊' },
+  { id: 'recete', name: 'Reçete', icon: '💊', path: '/admin/recipe' },
   { id: 'deneme', name: 'Deneme', icon: '🧪' },
 ];
 
@@ -952,7 +952,11 @@ const Admin = () => {
               <button
                 key={item.id}
                 onClick={() => {
-                  setActiveSection(item.name);
+                  if (item.path) {
+                    navigate(item.path);
+                  } else {
+                    setActiveSection(item.name);
+                  }
                   setSidebarOpen(false);
                 }}
                 className={`

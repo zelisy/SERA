@@ -91,7 +91,7 @@ const RecipeCreate: React.FC = () => {
       await saveRecipe(recipeData);
       
       alert('Reçete başarıyla kaydedildi!');
-      navigate('/recipe'); // Reçete listesine geri dön
+      navigate('/admin/recipe'); // Reçete listesine geri dön
     } catch (error) {
       console.error('Reçete kaydetme hatası:', error);
       alert('Reçete kaydedilirken bir hata oluştu!');
@@ -314,7 +314,7 @@ const RecipeCreate: React.FC = () => {
         {/* Alt Butonlar */}
         <div className="flex justify-center space-x-4">
           <button
-            onClick={() => navigate('/recipe')}
+                          onClick={() => navigate('/admin/recipe')}
             className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200 flex items-center"
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

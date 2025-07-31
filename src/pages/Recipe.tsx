@@ -69,7 +69,7 @@ const Recipe: React.FC = () => {
   }, []);
 
   const handleCreateRecipe = (producerId: string) => {
-    navigate(`/recipe/create/${producerId}`);
+    navigate(`/admin/recipe/create/${producerId}`);
   };
 
   if (loading) {

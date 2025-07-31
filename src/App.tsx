@@ -80,12 +80,12 @@ function AppContent() {
               <Profile />
             </PrivateRoute>
           } />
-          <Route path="/recipe" element={
+          <Route path="/admin/recipe" element={
             <PrivateRoute>
               <Recipe />
             </PrivateRoute>
           } />
-          <Route path="/recipe/create/:producerId" element={
+          <Route path="/admin/recipe/create/:producerId" element={
             <PrivateRoute>
               <RecipeCreate />
             </PrivateRoute>
