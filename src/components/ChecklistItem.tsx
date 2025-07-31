@@ -46,14 +46,23 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate }) => {
             photo: Yup.string().optional()
           }).optional();
           break;
-        case 'development-stage':
-          schema = Yup.object().shape({
-            selected: Yup.boolean().optional(),
-            note: Yup.string().optional()
-          }).optional();
-          break;
-        default:
-          schema = Yup.string().optional();
+              case 'development-stage':
+        schema = Yup.object().shape({
+          selected: Yup.boolean().optional(),
+          note: Yup.string().optional()
+        }).optional();
+        break;
+      case 'radio':
+        schema = Yup.string().optional();
+        break;
+      case 'checkbox':
+        schema = Yup.boolean().optional();
+        break;
+      case 'subheader':
+        schema = Yup.string().optional();
+        break;
+      default:
+        schema = Yup.string().optional();
       }
       
       shape[field.id] = schema;
@@ -79,6 +88,12 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate }) => {
           values[field.id] = savedValue || { selected: false, note: '' };
         } else if (field.type === 'multiple-files') {
           values[field.id] = savedValue || [];
+        } else if (field.type === 'radio') {
+          values[field.id] = savedValue || '';
+        } else if (field.type === 'checkbox') {
+          values[field.id] = savedValue || false;
+        } else if (field.type === 'subheader') {
+          values[field.id] = savedValue || '';
         } else {
           values[field.id] = savedValue || '';
         }
@@ -157,6 +172,12 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate }) => {
         return 'col-span-full'; // Full width for development stage
       case 'boolean':
         return 'col-span-full'; // Full width for checkboxes
+      case 'radio':
+        return 'col-span-full'; // Full width for radio buttons
+      case 'checkbox':
+        return 'col-span-full'; // Full width for checkboxes
+      case 'subheader':
+        return 'col-span-full'; // Full width for subheaders
       case 'date':
         return 'col-span-1 lg:col-span-1'; // Single column
       case 'number':
@@ -494,6 +515,66 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate }) => {
             </div>
           );
         }
+
+      case 'radio':
+        return (
+          <div key={field.id} className={fieldWidth}>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              {field.label}
+            </label>
+            <div className="space-y-2">
+              {field.options?.map(option => (
+                <label key={option} className="flex items-center space-x-3 cursor-pointer p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+                  <Field
+                    type="radio"
+                    name={field.id}
+                    value={option}
+                    className="h-4 w-4 text-emerald-600 border-gray-300 focus:ring-emerald-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700">{option}</span>
+                </label>
+              ))}
+            </div>
+            <div className="text-red-500 text-xs lg:text-sm mt-1">
+              <ErrorMessage name={field.id} />
+            </div>
+          </div>
+        );
+
+      case 'checkbox':
+        return (
+          <div key={field.id} className={fieldWidth}>
+            <label className="flex items-start lg:items-center space-x-3 cursor-pointer p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+              <Field
+                type="checkbox"
+                name={field.id}
+                className="h-4 w-4 lg:h-5 lg:w-5 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500 mt-0.5 lg:mt-0 flex-shrink-0"
+              />
+              <div className="flex-1">
+                <span className="text-sm lg:text-base font-semibold text-gray-700">
+                  {field.label}
+                </span>
+                {field.placeholder && (
+                  <p className="text-xs lg:text-sm text-gray-500 mt-1">{field.placeholder}</p>
+                )}
+              </div>
+            </label>
+            <div className="text-red-500 text-xs lg:text-sm mt-1">
+              <ErrorMessage name={field.id} />
+            </div>
+          </div>
+        );
+
+      case 'subheader':
+        return (
+          <div key={field.id} className={fieldWidth}>
+            <div className="border-b border-gray-200 pb-2 mb-4">
+              <h4 className="text-lg font-bold text-gray-800">
+                {field.label}
+              </h4>
+            </div>
+          </div>
+        );
 
       default:
         return (
