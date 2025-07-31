@@ -2,42 +2,42 @@ import type { ChecklistSection } from '../types/checklist';
 
 export const seraKontrolConfig: ChecklistSection = {
   id: 'sera-kontrol',
-  title: 'Sera Kontrol Checklist',
+  title: 'Sera Kontrol Detaylı Checklist',
   items: [
     {
       id: 'iklim-kontrolu',
-      label: '1. İklim Kontrolü',
+      label: '1) İklim Kontrolü',
       completed: false,
       hasDetails: true,
       detailFields: [
-        { 
-          id: 'isi', 
-          label: 'Isı', 
-          type: 'number', 
+        {
+          id: 'isi',
+          label: 'Isı',
+          type: 'number',
           required: false,
           placeholder: '°C',
           validation: { min: -50, max: 100 }
         },
-        { 
-          id: 'isik', 
-          label: 'Işık', 
-          type: 'number', 
+        {
+          id: 'isik',
+          label: 'Işık',
+          type: 'number',
           required: false,
           placeholder: 'lux',
           validation: { min: 0 }
         },
-        { 
-          id: 'nem', 
-          label: 'Nem', 
-          type: 'number', 
+        {
+          id: 'nem',
+          label: 'Nem',
+          type: 'number',
           required: false,
           placeholder: '%',
           validation: { min: 0, max: 100 }
         },
-        { 
-          id: 'havalandirma', 
-          label: 'Havalandırma', 
-          type: 'select', 
+        {
+          id: 'havalandirma',
+          label: 'Havalandırma',
+          type: 'select',
           required: false,
           options: ['İyi', 'Orta', 'Kötü']
         }
@@ -45,22 +45,22 @@ export const seraKontrolConfig: ChecklistSection = {
     },
     {
       id: 'bos-su-ec-ph',
-      label: '2. Boş Su EC / pH',
+      label: '2) Boş Su EC / pH',
       completed: false,
       hasDetails: true,
       detailFields: [
-        { 
-          id: 'ph-degeri', 
-          label: 'pH', 
-          type: 'number', 
+        {
+          id: 'ph-degeri',
+          label: 'pH',
+          type: 'number',
           required: false,
           placeholder: 'pH değeri',
           validation: { min: 0, max: 14 }
         },
-        { 
-          id: 'ec-degeri', 
-          label: 'EC', 
-          type: 'number', 
+        {
+          id: 'ec-degeri',
+          label: 'EC',
+          type: 'number',
           required: false,
           placeholder: 'EC değeri',
           validation: { min: 0 }
@@ -69,498 +69,514 @@ export const seraKontrolConfig: ChecklistSection = {
     },
     {
       id: 'toprak-analizi',
-      label: '3. Toprak Analizi',
+      label: '3) Toprak Analizi',
       completed: false,
       hasDetails: true,
       detailFields: [
-        { 
-          id: 'toprak-analizi-foto', 
-          label: 'A4 boyutunda görsel/fotoğraf', 
-          type: 'multiple-files', 
-          required: false 
+        {
+          id: 'toprak-analizi-foto',
+          label: '📎 A4 boyutunda foto eklenecek alan',
+          type: 'multiple-files',
+          required: false
         }
       ]
     },
     {
       id: 'kontrol-bitkileri-kontrolu',
-      label: '4. Kontrol Bitkileri Kontrolü',
+      label: '4) Kontrol Bitkileri Kontrolü',
       completed: false,
       hasDetails: true,
       detailFields: [
-        { 
-          id: 'kok-problemi', 
-          label: 'Kök problemi', 
-          type: 'select', 
+        {
+          id: 'kok-problemi',
+          label: 'Kök problemi',
+          type: 'select',
           required: false,
           options: ['Var', 'Yok']
         },
-        { 
-          id: 'kok-foto', 
-          label: 'Kök Fotoğrafları', 
-          type: 'multiple-files', 
-          required: false 
+        {
+          id: 'kok-foto',
+          label: 'Kök Fotoğrafları',
+          type: 'multiple-files',
+          required: false
         },
-        { 
-          id: 'drenaj-problemi', 
-          label: 'Drenaj problemi', 
-          type: 'select', 
+        {
+          id: 'drenaj-problemi',
+          label: 'Drenaj problemi',
+          type: 'select',
           required: false,
           options: ['Var', 'Yok']
         },
-        { 
-          id: 'drenaj-foto', 
-          label: 'Drenaj Fotoğrafları', 
-          type: 'multiple-files', 
-          required: false 
+        {
+          id: 'drenaj-foto',
+          label: 'Drenaj Fotoğrafları',
+          type: 'multiple-files',
+          required: false
         },
-        { 
-          id: 'vejetatif-kontrol-problemi', 
-          label: 'Vejetatif kontrol problemi', 
-          type: 'select', 
+        {
+          id: 'vejetatif-kontrol-problemi',
+          label: 'Vejetatif kontrol problemi',
+          type: 'select',
           required: false,
           options: ['Var', 'Yok']
         },
-        { 
-          id: 'vejetatif-kontrol-foto', 
-          label: 'Vejetatif kontrol Fotoğrafları', 
-          type: 'multiple-files', 
-          required: false 
+        {
+          id: 'vejetatif-foto',
+          label: 'Vejetatif Kontrol Fotoğrafları',
+          type: 'multiple-files',
+          required: false
         },
-        { 
-          id: 'brix-kontrol-problemi', 
-          label: 'Brix kontrol problemi', 
-          type: 'select', 
+        {
+          id: 'brix-kontrol-problemi',
+          label: 'Brix kontrol problemi',
+          type: 'select',
           required: false,
           options: ['Var', 'Yok']
         },
-        { 
-          id: 'brix-degeri', 
-          label: 'Brix değeri', 
-          type: 'number', 
+        {
+          id: 'brix-degeri',
+          label: 'Brix Değeri',
+          type: 'number',
           required: false,
-          placeholder: 'Brix değeri'
+          placeholder: 'Brix değeri',
+          dependsOn: 'brix-kontrol-problemi',
+          showWhen: 'Var'
         },
-        { 
-          id: 'brix-kontrol-foto', 
-          label: 'Brix kontrol Fotoğrafları', 
-          type: 'multiple-files', 
-          required: false 
+        {
+          id: 'brix-foto',
+          label: 'Brix Kontrol Fotoğrafları',
+          type: 'multiple-files',
+          required: false
         },
-        { 
-          id: 'klorofil-kontrol-problemi', 
-          label: 'Klorofil kontrol problemi', 
-          type: 'select', 
-          required: false,
-          options: ['Var', 'Yok']
-        },
-        { 
-          id: 'klorofil-degeri', 
-          label: 'Klorofil değeri', 
-          type: 'number', 
-          required: false,
-          placeholder: 'Klorofil değeri'
-        },
-        { 
-          id: 'klorofil-kontrol-foto', 
-          label: 'Klorofil kontrol Fotoğrafları', 
-          type: 'multiple-files', 
-          required: false 
-        },
-        { 
-          id: 'generatif-kontrol-problemi', 
-          label: 'Generatif kontrol problemi', 
-          type: 'select', 
+        {
+          id: 'klorofil-kontrol-problemi',
+          label: 'Klorofil kontrol problemi',
+          type: 'select',
           required: false,
           options: ['Var', 'Yok']
         },
-        { 
-          id: 'generatif-kontrol-foto', 
-          label: 'Generatif kontrol Fotoğrafları', 
-          type: 'multiple-files', 
-          required: false 
+        {
+          id: 'klorofil-degeri',
+          label: 'Klorofil Değeri',
+          type: 'number',
+          required: false,
+          placeholder: 'Klorofil değeri',
+          dependsOn: 'klorofil-kontrol-problemi',
+          showWhen: 'Var'
+        },
+        {
+          id: 'klorofil-foto',
+          label: 'Klorofil Kontrol Fotoğrafları',
+          type: 'multiple-files',
+          required: false
+        },
+        {
+          id: 'generatif-kontrol-problemi',
+          label: 'Generatif kontrol problemi',
+          type: 'select',
+          required: false,
+          options: ['Var', 'Yok']
+        },
+        {
+          id: 'generatif-foto',
+          label: 'Generatif Kontrol Fotoğrafları',
+          type: 'multiple-files',
+          required: false
         }
       ]
     },
     {
       id: 'sulama-kontrolu',
-      label: '5. Sulama Kontrolü',
+      label: '5) Sulama Kontrolü',
       completed: false,
       hasDetails: true,
       detailFields: [
-        { 
-          id: 'damla-5cm', 
-          label: '5 cm açık', 
-          type: 'boolean', 
-          required: false 
+        {
+          id: 'damla-mesafesi',
+          label: 'Damla mesafesi',
+          type: 'radio',
+          required: false,
+          options: ['5 cm açık', '10 cm açık', '15 cm açık']
         },
-        { 
-          id: 'damla-10cm', 
-          label: '10 cm açık', 
-          type: 'boolean', 
-          required: false 
+        {
+          id: 'su-miktari',
+          label: 'Su miktarının ayarlanması',
+          type: 'radio',
+          required: false,
+          options: ['400 ml', '500 ml', '600 ml', '700 ml', 'Diğer']
         },
-        { 
-          id: 'damla-15cm', 
-          label: '15 cm açık', 
-          type: 'boolean', 
-          required: false 
-        },
-        { 
-          id: 'su-400ml', 
-          label: '400 ml', 
-          type: 'boolean', 
-          required: false 
-        },
-        { 
-          id: 'su-500ml', 
-          label: '500 ml', 
-          type: 'boolean', 
-          required: false 
-        },
-        { 
-          id: 'su-600ml', 
-          label: '600 ml', 
-          type: 'boolean', 
-          required: false 
-        },
-        { 
-          id: 'su-700ml', 
-          label: '700 ml', 
-          type: 'boolean', 
-          required: false 
+        {
+          id: 'su-miktari-diger',
+          label: 'Diğer Su Miktarı',
+          type: 'number',
+          required: false,
+          placeholder: 'ml',
+          dependsOn: 'su-miktari',
+          showWhen: 'Diğer'
         }
       ]
     },
     {
-      id: 'bitki-gelisim-donemi',
-      label: '6. Bitki Gelişim Dönemleri',
+      id: 'bitki-gelisim-donemleri',
+      label: '6) Bitki Gelişim Dönemleri / Gözlemler',
       completed: false,
       hasDetails: true,
       detailFields: [
-        { 
-          id: 'vejetatif', 
-          label: 'Vejetatif', 
-          type: 'development-stage', 
-          required: false 
+        {
+          id: 'vejetatif-gelisim',
+          label: 'Vejetatif gelişim',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'generatif', 
-          label: 'Generatif', 
-          type: 'development-stage', 
-          required: false 
+        {
+          id: 'generatif-gelisim',
+          label: 'Generatif gelişim',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'ciceklenme', 
-          label: 'Çiçeklenme', 
-          type: 'development-stage', 
-          required: false 
+        {
+          id: 'ciceklenme',
+          label: 'Çiçeklenme',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'meyve-tutumu', 
-          label: 'Meyve tutumu', 
-          type: 'development-stage', 
-          required: false 
+        {
+          id: 'meyve-tutumu',
+          label: 'Meyve tutumu',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'meyve-irilesme', 
-          label: 'Meyve iriliği', 
-          type: 'development-stage', 
-          required: false 
+        {
+          id: 'meyve-olgunlasma',
+          label: 'Meyve olgunlaşma',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'meyve-olgunlasma', 
-          label: 'Meyve olgunlaşma', 
-          type: 'development-stage', 
-          required: false 
+        {
+          id: 'meyve-hasat',
+          label: 'Meyve hasat',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'meyve-hasat', 
-          label: 'Meyve hasadı', 
-          type: 'development-stage', 
-          required: false 
+        {
+          id: 'buton-ve-gubreleme-onerisi',
+          label: '💡 Buton ve gübreleme önerisi',
+          type: 'textarea',
+          required: false,
+          placeholder: 'Gübreleme önerilerinizi buraya yazın...'
         }
       ]
     },
     {
-      id: 'zararli-kontrolu',
-      label: '7. Zararlı Kontrolü',
+      id: 'zararli-kontrol',
+      label: '7) Zararlı Kontrol',
       completed: false,
       hasDetails: true,
       detailFields: [
-        // Zararlı Türleri
-        { 
-          id: 'insektisit', 
-          label: 'İnsektisit', 
-          type: 'pest-control', 
-          required: false 
+        {
+          id: 'bocuk-zararli-turleri',
+          label: 'Böcek/Zararlı Türleri:',
+          type: 'subheader',
+          required: false
         },
-        { 
-          id: 'beyaz-sinek', 
-          label: 'Beyaz sinek', 
-          type: 'pest-control', 
-          required: false 
+        {
+          id: 'insektisit',
+          label: 'İnsektisit',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'thrips', 
-          label: 'Thrips', 
-          type: 'pest-control', 
-          required: false 
+        {
+          id: 'beyaz-sinek',
+          label: 'Beyaz sinek',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'yesil-kurt-tuta', 
-          label: 'Yeşil kurt / Tuta', 
-          type: 'pest-control', 
-          required: false 
+        {
+          id: 'thrips',
+          label: 'Thrips',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'yaprak-biti', 
-          label: 'Yaprak biti', 
-          type: 'pest-control', 
-          required: false 
+        {
+          id: 'yesil-kurt-tuta',
+          label: 'Yeşil kurt / Tuta',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'unlu-biti', 
-          label: 'Unlu biti', 
-          type: 'pest-control', 
-          required: false 
+        {
+          id: 'yaprak-biti',
+          label: 'Yaprak biti',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'biber-gal-sinegi', 
-          label: 'Biber gal sineği', 
-          type: 'pest-control', 
-          required: false 
+        {
+          id: 'unlu-biti',
+          label: 'Unlu biti',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'akarisit', 
-          label: 'Akarisit', 
-          type: 'pest-control', 
-          required: false 
+        {
+          id: 'biber-gal-sinegi',
+          label: 'Biber gal sineği',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'kirmizi-orumcek', 
-          label: 'Kırmızı örümcek', 
-          type: 'pest-control', 
-          required: false 
+        {
+          id: 'akarisit',
+          label: 'Akarisit',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'sari-cay-akari', 
-          label: 'Sarı çay akarı', 
-          type: 'pest-control', 
-          required: false 
+        {
+          id: 'kirmizi-orumcek',
+          label: 'Kırmızı örümcek',
+          type: 'checkbox',
+          required: false
         },
-        // Hastalık Türleri
-        { 
-          id: 'fungusit', 
-          label: 'Fungusit', 
-          type: 'pest-control', 
-          required: false 
+        {
+          id: 'sari-cay-akar',
+          label: 'Sarı çay akar',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'kulleme', 
-          label: 'Külleme', 
-          type: 'pest-control', 
-          required: false 
+        {
+          id: 'hastalik-turleri',
+          label: 'Hastalık Türleri:',
+          type: 'subheader',
+          required: false
         },
-        { 
-          id: 'pas', 
-          label: 'Pas', 
-          type: 'pest-control', 
-          required: false 
+        {
+          id: 'fungusit',
+          label: 'Fungusit',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'virus', 
-          label: 'Virüs', 
-          type: 'pest-control', 
-          required: false 
+        {
+          id: 'kulleme',
+          label: 'Külleme',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'bakteri', 
-          label: 'Bakteri', 
-          type: 'pest-control', 
-          required: false 
+        {
+          id: 'pas',
+          label: 'Pas',
+          type: 'checkbox',
+          required: false
+        },
+        {
+          id: 'virus',
+          label: 'Virüs',
+          type: 'checkbox',
+          required: false
+        },
+        {
+          id: 'bakteri',
+          label: 'Bakteri',
+          type: 'checkbox',
+          required: false
+        },
+        {
+          id: 'zararli-fotograflar',
+          label: '📌 Tüm zararlılar için görseller',
+          type: 'multiple-files',
+          required: false
         }
       ]
     },
     {
       id: 'besin-eksikligi-kontrolu',
-      label: '8. Besin Eksikliği Kontrolü',
+      label: '8) Besin Eksikliği Kontrolü',
       completed: false,
       hasDetails: true,
       detailFields: [
-        // Makro Elementler
-        { 
-          id: 'azot', 
-          label: 'Azot', 
-          type: 'boolean', 
-          required: false 
+        {
+          id: 'makro-elementler',
+          label: 'Makro Elementler:',
+          type: 'subheader',
+          required: false
         },
-        { 
-          id: 'fosfor', 
-          label: 'Fosfor', 
-          type: 'boolean', 
-          required: false 
+        {
+          id: 'azot',
+          label: 'Azot',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'potasyum', 
-          label: 'Potasyum', 
-          type: 'boolean', 
-          required: false 
+        {
+          id: 'fosfor',
+          label: 'Fosfor',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'magnezyum', 
-          label: 'Magnezyum', 
-          type: 'boolean', 
-          required: false 
+        {
+          id: 'potasyum',
+          label: 'Potasyum',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'kalsiyum', 
-          label: 'Kalsiyum', 
-          type: 'boolean', 
-          required: false 
+        {
+          id: 'magnezyum',
+          label: 'Magnezyum',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'kukurt', 
-          label: 'Kükürt', 
-          type: 'boolean', 
-          required: false 
+        {
+          id: 'kalsiyum',
+          label: 'Kalsiyum',
+          type: 'checkbox',
+          required: false
         },
-        // Mikro Elementler
-        { 
-          id: 'mangan', 
-          label: 'Mangan', 
-          type: 'boolean', 
-          required: false 
+        {
+          id: 'kukurt',
+          label: 'Kükürt',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'cinko', 
-          label: 'Çinko', 
-          type: 'boolean', 
-          required: false 
+        {
+          id: 'mikro-elementler',
+          label: 'Mikro Elementler:',
+          type: 'subheader',
+          required: false
         },
-        { 
-          id: 'bor', 
-          label: 'Bor', 
-          type: 'boolean', 
-          required: false 
+        {
+          id: 'mangan',
+          label: 'Mangan',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'molibden', 
-          label: 'Molibden', 
-          type: 'boolean', 
-          required: false 
+        {
+          id: 'cinko',
+          label: 'Çinko',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'bakir', 
-          label: 'Bakır', 
-          type: 'boolean', 
-          required: false 
+        {
+          id: 'bor',
+          label: 'Bor',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'demir', 
-          label: 'Demir', 
-          type: 'boolean', 
-          required: false 
+        {
+          id: 'molibden',
+          label: 'Molibden',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'nikel', 
-          label: 'Nikel', 
-          type: 'boolean', 
-          required: false 
+        {
+          id: 'bakir',
+          label: 'Bakır',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'kobalt', 
-          label: 'Kobalt', 
-          type: 'boolean', 
-          required: false 
+        {
+          id: 'demir',
+          label: 'Demir',
+          type: 'checkbox',
+          required: false
+        },
+        {
+          id: 'nikel',
+          label: 'Nikel',
+          type: 'checkbox',
+          required: false
+        },
+        {
+          id: 'kobalt',
+          label: 'Kobalt',
+          type: 'checkbox',
+          required: false
         }
       ]
     },
     {
       id: 'sera-kulturel-genel-kontrol',
-      label: '9. Sera Kültürel – Genel Kontrol',
+      label: '9) Sera Kültürel – Genel Kontrol',
       completed: false,
       hasDetails: true,
       detailFields: [
-        { 
-          id: 'dolama', 
-          label: 'Dolama yapılmış mı?', 
-          type: 'boolean', 
-          required: false 
+        {
+          id: 'bitkisel-kulturel-islemler',
+          label: 'Bitkisel Kültürel İşlemler:',
+          type: 'subheader',
+          required: false
         },
-        { 
-          id: 'toplama', 
-          label: 'Toplama yapılmış mı?', 
-          type: 'boolean', 
-          required: false 
+        {
+          id: 'dolama-yapilmis-mi',
+          label: 'Dolama yapılmış mı?',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'nemlendirme', 
-          label: 'Nemlendirme yapılmış mı?', 
-          type: 'boolean', 
-          required: false 
+        {
+          id: 'toplama-yapilmis-mi',
+          label: 'Toplama yapılmış mı?',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'budama', 
-          label: 'Budama yapılmış mı?', 
-          type: 'boolean', 
-          required: false 
+        {
+          id: 'nemlendirme-yapilmis-mi',
+          label: 'Nemlendirme yapılmış mı?',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'ip-baglama', 
-          label: 'İp bağlama yapılmış mı?', 
-          type: 'boolean', 
-          required: false 
+        {
+          id: 'budama-yapilmis-mi',
+          label: 'Budama yapılmış mı?',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'sera-ici-temizlik', 
-          label: 'Sera içi temizlik', 
-          type: 'text', 
+        {
+          id: 'ip-baglama-yapilmis-mi',
+          label: 'İp bağlama yapılmış mı?',
+          type: 'checkbox',
+          required: false
+        },
+        {
+          id: 'sera-ici-temizlik',
+          label: 'Sera içi temizlik',
+          type: 'textarea',
           required: false,
-          placeholder: 'Temizlik detayları'
-        }
-      ]
-    },
-    {
-      id: 'tuzak-ekleme',
-      label: '10. Tuzak Ekleme',
-      completed: false,
-      hasDetails: true,
-      detailFields: [
-        { 
-          id: 'mavi-5-adet', 
-          label: '5 adet mavi', 
-          type: 'boolean', 
-          required: false 
+          placeholder: 'Sera içi temizlik durumunu açıklayın...'
         },
-        { 
-          id: 'sari-5-adet', 
-          label: '5 adet sarı', 
-          type: 'boolean', 
-          required: false 
+        {
+          id: 'tuzak-ekleme',
+          label: 'Tuzak Ekleme:',
+          type: 'subheader',
+          required: false
         },
-        { 
-          id: 'mavi-10-adet', 
-          label: '10 adet mavi', 
-          type: 'boolean', 
-          required: false 
+        {
+          id: '5-adet-mavi',
+          label: '5 adet mavi',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'sari-10-adet', 
-          label: '10 adet sarı', 
-          type: 'boolean', 
-          required: false 
+        {
+          id: '5-adet-sari',
+          label: '5 adet sarı',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'mavi-15-adet', 
-          label: '15 adet mavi', 
-          type: 'boolean', 
-          required: false 
+        {
+          id: '10-adet-mavi',
+          label: '10 adet mavi',
+          type: 'checkbox',
+          required: false
         },
-        { 
-          id: 'sari-15-adet', 
-          label: '15 adet sarı', 
-          type: 'boolean', 
-          required: false 
+        {
+          id: '10-adet-sari',
+          label: '10 adet sarı',
+          type: 'checkbox',
+          required: false
+        },
+        {
+          id: '15-adet-mavi',
+          label: '15 adet mavi',
+          type: 'checkbox',
+          required: false
+        },
+        {
+          id: '15-adet-sari',
+          label: '15 adet sarı',
+          type: 'checkbox',
+          required: false
         }
       ]
     }

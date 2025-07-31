@@ -19,6 +19,9 @@ const DikimOncesiDetayDonem: React.FC = () => {
       setLoading(true);
       const savedData = await loadChecklistData('dikim-oncesi-detay');
       
+      console.log('DikimOncesiDetayDonem - Loaded data:', savedData);
+      console.log('DikimOncesiDetayDonem - Config:', dikimOncesiDetayConfig);
+      
       if (savedData) {
         const mergedData = {
           ...dikimOncesiDetayConfig,
@@ -27,13 +30,16 @@ const DikimOncesiDetayDonem: React.FC = () => {
             return savedItem ? { ...configItem, ...savedItem } : configItem;
           })
         };
+        console.log('DikimOncesiDetayDonem - Merged data:', mergedData);
         setChecklistData(mergedData);
       } else {
+        console.log('DikimOncesiDetayDonem - No saved data, saving config');
         await saveChecklistData('dikim-oncesi-detay', dikimOncesiDetayConfig);
         setChecklistData(dikimOncesiDetayConfig);
       }
       setError(null);
     } catch (err) {
+      console.error('DikimOncesiDetayDonem - Error:', err);
       setError(err instanceof Error ? err.message : 'Veriler yüklenemedi');
     } finally {
       setLoading(false);
@@ -112,6 +118,12 @@ const DikimOncesiDetayDonem: React.FC = () => {
 
   const stats = getCompletionStats();
   const categoryStats = getCategoryStats();
+  
+  console.log('DikimOncesiDetayDonem - Current checklistData:', JSON.stringify(checklistData, null, 2));
+  console.log('DikimOncesiDetayDonem - Stats:', JSON.stringify(stats, null, 2));
+  console.log('DikimOncesiDetayDonem - CategoryStats:', JSON.stringify(categoryStats, null, 2));
+  console.log('DikimOncesiDetayDonem - Items count:', checklistData.items?.length);
+  console.log('DikimOncesiDetayDonem - First item:', checklistData.items?.[0]);
 
   if (loading) {
     return (
