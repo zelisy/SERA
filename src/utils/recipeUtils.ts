@@ -58,8 +58,7 @@ export const getRecipesByProducer = async (producerId: string): Promise<Recipe[]
   try {
     const q = query(
       collection(db, 'recipes'),
-      where('producerId', '==', producerId),
-      orderBy('createdAt', 'desc')
+      where('producerId', '==', producerId)
     );
     
     const querySnapshot = await getDocs(q);
@@ -69,7 +68,8 @@ export const getRecipesByProducer = async (producerId: string): Promise<Recipe[]
       recipes.push(doc.data() as Recipe);
     });
     
-    return recipes;
+    // Client-side sorting (geçici çözüm)
+    return recipes.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   } catch (error) {
     console.error('Reçete listesi getirme hatası:', error);
     throw new Error('Reçete listesi yüklenemedi');
@@ -79,10 +79,7 @@ export const getRecipesByProducer = async (producerId: string): Promise<Recipe[]
 // Tüm reçeteleri getirme
 export const getAllRecipes = async (): Promise<Recipe[]> => {
   try {
-    const q = query(
-      collection(db, 'recipes'),
-      orderBy('createdAt', 'desc')
-    );
+    const q = query(collection(db, 'recipes'));
     
     const querySnapshot = await getDocs(q);
     const recipes: Recipe[] = [];
@@ -91,7 +88,8 @@ export const getAllRecipes = async (): Promise<Recipe[]> => {
       recipes.push(doc.data() as Recipe);
     });
     
-    return recipes;
+    // Client-side sorting (geçici çözüm)
+    return recipes.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   } catch (error) {
     console.error('Tüm reçeteler getirme hatası:', error);
     throw new Error('Reçeteler yüklenemedi');

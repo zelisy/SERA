@@ -1,5 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { FaSort, FaSortUp, FaSortDown, FaSearch, FaEye, FaDownload } from 'react-icons/fa';
+import { FaSort, FaSortUp, FaSortDown, FaSearch, FaEye, FaDownload, FaSpinner } from 'react-icons/fa';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import type { ProducerPerformance, GreenhousePerformance, CropAnalysis } from '../../types/reports';
 import { formatCurrency, formatNumber, formatWeight, formatPercentage, formatArea } from '../../utils/reportUtils';
 
@@ -26,6 +28,7 @@ const ReportTable: React.FC<ReportTableProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
+  const [isExporting, setIsExporting] = useState(false);
   const itemsPerPage = 10;
 
   // Sıralama fonksiyonu
@@ -222,6 +225,152 @@ const ReportTable: React.FC<ReportTableProps> = ({
     }
   };
 
+  // PDF Export Function
+  const handleExportPDF = async () => {
+    try {
+      setIsExporting(true);
+      
+      // Check if there's data to export
+      if (filteredAndSortedData.length === 0) {
+        alert('Dışa aktarılacak veri bulunamadı. Lütfen önce rapor oluşturun veya filtreleri kontrol edin.');
+        return;
+      }
+      
+      // Get current table data
+      const currentColumns = getCurrentColumns();
+      const dataToExport = filteredAndSortedData;
+      
+      // Create PDF content
+      const pdfContent = document.createElement('div');
+      pdfContent.style.width = '210mm';
+      pdfContent.style.padding = '20mm';
+      pdfContent.style.fontFamily = 'Arial, sans-serif';
+      pdfContent.style.fontSize = '10px';
+      pdfContent.style.color = '#333';
+      pdfContent.style.background = 'white';
+      pdfContent.style.position = 'absolute';
+      pdfContent.style.left = '-9999px';
+      pdfContent.style.top = '0';
+
+      const getViewTitle = () => {
+        switch (currentView) {
+          case 'producers': return 'Üretici Performans Analizi';
+          case 'greenhouses': return 'Sera Performans Analizi';
+          case 'crops': return 'Ürün Bazlı Analiz';
+          default: return 'Detaylı Analiz Tablosu';
+        }
+      };
+
+      pdfContent.innerHTML = `
+        <style>
+          .pdf-container { max-width: 170mm; margin: 0 auto; }
+          .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #10b981; padding-bottom: 15px; }
+          .title { font-size: 18px; font-weight: bold; color: #1f2937; margin-bottom: 8px; }
+          .subtitle { font-size: 12px; color: #6b7280; margin-bottom: 5px; }
+          .date { font-size: 10px; color: #9ca3af; }
+          .table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 7px; table-layout: fixed; }
+          .table th, .table td { border: 1px solid #d1d5db; padding: 3px; text-align: left; word-wrap: break-word; overflow-wrap: break-word; }
+          .table th { background: #f3f4f6; font-weight: bold; }
+          .table tr:nth-child(even) { background: #f9fafb; }
+          .footer { margin-top: 20px; text-align: center; font-size: 8px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 10px; }
+          .summary { margin-bottom: 15px; font-size: 10px; }
+          .summary-item { margin-bottom: 5px; }
+          .table-container { overflow-x: auto; }
+        </style>
+        
+        <div class="pdf-container">
+          <div class="header">
+            <div class="title">${getViewTitle()}</div>
+            <div class="subtitle">Detaylı Analiz Tablosu</div>
+            <div class="date">Rapor Tarihi: ${new Date().toLocaleDateString('tr-TR')}</div>
+          </div>
+
+          <div class="summary">
+            <div class="summary-item"><strong>Toplam Kayıt:</strong> ${dataToExport.length}</div>
+            <div class="summary-item"><strong>Görünüm:</strong> ${getViewTitle()}</div>
+            <div class="summary-item"><strong>Sıralama:</strong> ${currentColumns.find(col => col.key === sortField)?.label || sortField} (${sortDirection === 'asc' ? 'Artan' : 'Azalan'})</div>
+            ${searchTerm ? `<div class="summary-item"><strong>Arama:</strong> "${searchTerm}"</div>` : ''}
+          </div>
+
+          <div class="table-container">
+            <table class="table">
+              <thead>
+                <tr>
+                  ${currentColumns.map(col => `<th>${col.label}</th>`).join('')}
+                </tr>
+              </thead>
+              <tbody>
+                ${dataToExport.map(item => `
+                  <tr>
+                    ${currentColumns.map(col => `<td>${formatValue(col.key, item[col.key])}</td>`).join('')}
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="footer">
+            <div>Bu rapor ${new Date().toLocaleString('tr-TR')} tarihinde otomatik olarak oluşturulmuştur.</div>
+            <div>Sera Yönetim Sistemi - Detaylı Analiz Tablosu</div>
+          </div>
+        </div>
+      `;
+
+      // Add to document temporarily
+      document.body.appendChild(pdfContent);
+
+      // Convert to canvas
+      const canvas = await html2canvas(pdfContent, {
+        useCORS: true,
+        allowTaint: true,
+        background: '#ffffff'
+      });
+
+      // Remove temporary element
+      document.body.removeChild(pdfContent);
+
+      // Create PDF
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 295; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      // Download PDF
+      const filename = `sera-detayli-analiz-${currentView}-${new Date().toISOString().split('T')[0]}.pdf`;
+      pdf.save(filename);
+
+      // Show success message
+      const successMessage = `PDF başarıyla oluşturuldu: ${filename}`;
+      console.log(successMessage);
+      
+      // You can add a toast notification here if you have a notification system
+      // For now, we'll just show an alert
+      setTimeout(() => {
+        alert(successMessage);
+      }, 100);
+
+    } catch (error) {
+      console.error('PDF oluşturma hatası:', error);
+      alert('PDF oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
@@ -250,7 +399,10 @@ const ReportTable: React.FC<ReportTableProps> = ({
     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
-        <h3 className="text-lg font-bold text-slate-800 mb-4 lg:mb-0">Detaylı Analiz Tablosu</h3>
+        <div>
+          <h3 className="text-lg font-bold text-slate-800 mb-2">Detaylı Analiz Tablosu</h3>
+          <p className="text-sm text-slate-600">Mevcut görünümdeki tüm verileri PDF formatında dışa aktarın</p>
+        </div>
         
         <div className="flex flex-wrap gap-3">
           {/* View Selector */}
@@ -279,10 +431,30 @@ const ReportTable: React.FC<ReportTableProps> = ({
           </div>
           
           {/* Export Button */}
-          <button className="flex items-center space-x-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors">
-            <FaDownload className="w-4 h-4" />
-            <span>Dışa Aktar</span>
-          </button>
+          <div className="flex flex-col items-end">
+            <button 
+              onClick={handleExportPDF}
+              disabled={isExporting || filteredAndSortedData.length === 0}
+              className="flex items-center space-x-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+            >
+              {isExporting ? (
+                <>
+                  <FaSpinner className="w-4 h-4 animate-spin" />
+                  <span>PDF Oluşturuluyor...</span>
+                </>
+              ) : (
+                <>
+                  <FaDownload className="w-4 h-4" />
+                  <span>Dışa Aktar</span>
+                </>
+              )}
+            </button>
+            {filteredAndSortedData.length > 0 && (
+              <span className="text-xs text-slate-500 mt-1">
+                {filteredAndSortedData.length} kayıt dışa aktarılacak
+              </span>
+            )}
+          </div>
         </div>
       </div>
 

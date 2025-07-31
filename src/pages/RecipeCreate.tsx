@@ -11,6 +11,8 @@ const RecipeCreate: React.FC = () => {
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [weatherData, setWeatherData] = useState<WeatherData[]>([]);
   const [weatherLoading, setWeatherLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // Form data states
   const [fertilization1, setFertilization1] = useState('');
@@ -74,6 +76,8 @@ const RecipeCreate: React.FC = () => {
   const handleSaveRecipe = async () => {
     if (!producer) return;
     
+    setIsSaving(true);
+    
     try {
       // Reçete verilerini hazırla
       const recipeData = {
@@ -90,11 +94,19 @@ const RecipeCreate: React.FC = () => {
       // Firebase'e kaydet
       await saveRecipe(recipeData);
       
-      alert('Reçete başarıyla kaydedildi!');
-      navigate('/admin/recipe'); // Reçete listesine geri dön
+      // Başarı mesajını göster
+      setShowSuccess(true);
+      
+      // Başarılı kayıt sonrası kısa bir gecikme ile yönlendirme
+      setTimeout(() => {
+        navigate('/admin/recipe'); // Reçete listesine geri dön
+      }, 2000);
+      
     } catch (error) {
       console.error('Reçete kaydetme hatası:', error);
       alert('Reçete kaydedilirken bir hata oluştu!');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -111,11 +123,38 @@ const RecipeCreate: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
+        {/* Geri Gitme Butonu */}
+        <div className="mb-6">
+          <button
+            onClick={() => navigate('/admin/recipe')}
+            className="flex items-center space-x-2 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            <span>Reçete Listesine Dön</span>
+          </button>
+        </div>
+        
         {/* Sayfa Başlığı */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Yeni Reçete Oluştur</h1>
           <p className="text-lg text-gray-600">Üretici için detaylı reçete bilgilerini girin</p>
         </div>
+
+        {/* Başarı Mesajı */}
+        {showSuccess && (
+          <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+            <div className="flex items-center justify-center">
+              <svg className="w-6 h-6 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span className="text-green-800 font-medium">
+                Reçete başarıyla kaydedildi! Reçete listesine yönlendiriliyorsunuz...
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* 4 Ana Bölüm - Grid Layout */}
         <div className="grid grid-cols-2 gap-6 mb-8">
@@ -314,7 +353,7 @@ const RecipeCreate: React.FC = () => {
         {/* Alt Butonlar */}
         <div className="flex justify-center space-x-4">
           <button
-                          onClick={() => navigate('/admin/recipe')}
+            onClick={() => navigate('/admin/recipe')}
             className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200 flex items-center"
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -324,12 +363,26 @@ const RecipeCreate: React.FC = () => {
           </button>
           <button
             onClick={handleSaveRecipe}
-            className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200 flex items-center"
+            disabled={isSaving}
+            className={`font-semibold py-3 px-8 rounded-lg transition-colors duration-200 flex items-center ${
+              isSaving 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-green-600 hover:bg-green-700'
+            } text-white`}
           >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            Reçeteyi Kaydet
+            {isSaving ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                Kaydediliyor...
+              </>
+            ) : (
+              <>
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Reçeteyi Kaydet
+              </>
+            )}
           </button>
         </div>
       </div>

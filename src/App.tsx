@@ -15,7 +15,6 @@ import Products from './pages/Products';
 import BlogPage from './pages/Blog';
 import BlogManagement from './pages/BlogManagement';
 import AdminProducts from './pages/AdminProducts';
-import Recipe from './pages/Recipe';
 import RecipeCreate from './pages/RecipeCreate';
 
 // Authentication kontrolü
@@ -29,7 +28,7 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 
 function AppContent() {
   const location = useLocation();
-  const isAdminPage = location.pathname === '/admin';
+  const isAdminPage = location.pathname.startsWith('/admin');
 
   return (
     <>
@@ -60,6 +59,16 @@ function AppContent() {
               <Admin />
             </PrivateRoute>
           } />
+          <Route path="/admin/recipe" element={
+            <PrivateRoute>
+              <Admin />
+            </PrivateRoute>
+          } />
+          <Route path="/admin/recipe/create/:producerId" element={
+            <PrivateRoute>
+              <Admin />
+            </PrivateRoute>
+          } />
           <Route path="/blog-management" element={
             <PrivateRoute>
               <BlogManagement />
@@ -80,16 +89,7 @@ function AppContent() {
               <Profile />
             </PrivateRoute>
           } />
-          <Route path="/admin/recipe" element={
-            <PrivateRoute>
-              <Recipe />
-            </PrivateRoute>
-          } />
-          <Route path="/admin/recipe/create/:producerId" element={
-            <PrivateRoute>
-              <RecipeCreate />
-            </PrivateRoute>
-          } />
+
         </Routes>
       </div>
       {!isAdminPage && <Footer />}

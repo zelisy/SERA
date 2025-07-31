@@ -6,8 +6,9 @@ import DikimOncesiDonem from '../components/DikimOncesiDonem';
 import SeraKontrol from '../components/SeraKontrol';
 import HasatBilgisi from '../components/HasatBilgisi';
 import Rapor from '../components/Rapor';
-import Recipe from './Recipe';
-import { useNavigate } from 'react-router-dom';
+import RecipePage from './Recipe';
+import RecipeCreate from './RecipeCreate';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useRef } from 'react';
 import { saveDenemeProducer, getAllDenemeProducers, deleteDenemeProducer, saveDenemeForm, getAllDenemeForms } from '../utils/firestoreUtils';
 import { doc, deleteDoc } from 'firebase/firestore';
@@ -878,7 +879,7 @@ const sectionComponents: Record<string, ReactElement> = {
   'Sera Kontrol': <SeraKontrol />,
   'Hasat Bilgisi': <HasatBilgisi />,
   'Rapor': <Rapor />,
-  'Reçete': <Recipe />,
+  'Reçete': <RecipePage />,
   'Deneme': <DenemeComponent />,
 };
 
@@ -886,6 +887,8 @@ const Admin = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('Üretici Listesi');
   const navigate = useNavigate();
+  const location = useLocation();
+  const params = useParams();
   const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
   const settingsMenuRef = useRef<HTMLDivElement>(null);
   const auth = getAuth();
@@ -915,6 +918,15 @@ const Admin = () => {
     localStorage.removeItem('isLoggedIn');
     navigate('/');
   };
+
+  // Route kontrolü - eğer recipe route'undaysa Recipe component'ini göster
+  const isRecipeRoute = location.pathname.startsWith('/admin/recipe');
+  const isRecipeCreateRoute = location.pathname.includes('/admin/recipe/create/');
+  
+  // Debug için console.log
+  console.log('Current location:', location.pathname);
+  console.log('isRecipeRoute:', isRecipeRoute);
+  console.log('isRecipeCreateRoute:', isRecipeCreateRoute);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -955,6 +967,10 @@ const Admin = () => {
                 onClick={() => {
                   setActiveSection(item.name);
                   setSidebarOpen(false);
+                  // Reçete için özel route yönlendirmesi
+                  if (item.id === 'recete') {
+                    navigate('/admin/recipe');
+                  }
                 }}
                 className={`
                   w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300
@@ -1014,9 +1030,21 @@ const Admin = () => {
                 </svg>
               </button>
               
-              <div>
-                <h2 className="text-lg lg:text-xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">{activeSection}</h2>
-                <p className="text-sm text-emerald-600 font-medium">Yönetim paneli</p>
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => navigate('/')}
+                  className="p-2 rounded-lg hover:bg-emerald-100 transition-colors text-emerald-600"
+                  title="Ana Sayfaya Dön"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                  </svg>
+                </button>
+                
+                <div>
+                  <h2 className="text-lg lg:text-xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">{activeSection}</h2>
+                  <p className="text-sm text-emerald-600 font-medium">Yönetim paneli</p>
+                </div>
               </div>
             </div>
             <div className="relative">
@@ -1088,7 +1116,17 @@ const Admin = () => {
         {/* Page Content */}
         <main className="p-4 lg:p-6">
           <div className="max-w-7xl mx-auto">
-            {sectionComponents[activeSection]}
+
+            
+            {isRecipeCreateRoute ? (
+              <RecipeCreate />
+            ) : isRecipeRoute ? (
+              <div>
+                <RecipePage />
+              </div>
+            ) : (
+              sectionComponents[activeSection]
+            )}
           </div>
         </main>
       </div>

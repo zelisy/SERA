@@ -59,7 +59,9 @@ export const fetchWeatherData = async (lat: number = 41.0082, lon: number = 28.9
     const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
     
     if (!apiKey) {
-      console.warn('OpenWeather API anahtarı bulunamadı. Mock veri kullanılıyor.');
+      if (import.meta.env.DEV) {
+        console.log('OpenWeather API anahtarı bulunamadı. Mock veri kullanılıyor.');
+      }
       return generateMockWeatherData();
     }
     
