@@ -74,14 +74,6 @@ const Footer = () => {
                   İletişim
                 </Link>
               </li>
-              <li>
-                <Link 
-                  to="/dikim-oncesi-detay" 
-                  className="text-slate-600 hover:text-emerald-600 text-xs transition-colors"
-                >
-                  Checklist
-                </Link>
-              </li>
             </ul>
           </div>
 

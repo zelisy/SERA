@@ -923,10 +923,17 @@ const Admin = () => {
   const isRecipeRoute = location.pathname.startsWith('/admin/recipe');
   const isRecipeCreateRoute = location.pathname.includes('/admin/recipe/create/');
   
-  // Debug için console.log
-  console.log('Current location:', location.pathname);
-  console.log('isRecipeRoute:', isRecipeRoute);
-  console.log('isRecipeCreateRoute:', isRecipeCreateRoute);
+  // Route'a göre activeSection'ı ayarla
+  React.useEffect(() => {
+    if (isRecipeRoute) {
+      setActiveSection('Reçete');
+    } else if (location.pathname === '/admin') {
+      // Ana admin sayfasında varsayılan section'ı ayarla
+      if (activeSection === 'Reçete') {
+        setActiveSection('Üretici Listesi');
+      }
+    }
+  }, [location.pathname, isRecipeRoute]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -970,11 +977,14 @@ const Admin = () => {
                   // Reçete için özel route yönlendirmesi
                   if (item.id === 'recete') {
                     navigate('/admin/recipe');
+                  } else {
+                    // Diğer sayfalar için ana admin sayfasına dön
+                    navigate('/admin');
                   }
                 }}
                 className={`
                   w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300
-                  ${activeSection === item.name 
+                  ${(activeSection === item.name || (item.id === 'recete' && isRecipeRoute))
                     ? 'bg-gradient-to-r from-emerald-500 to-blue-500 text-white shadow-lg transform scale-105 border-2 border-emerald-400' 
                     : 'text-slate-600 hover:bg-gradient-to-r hover:from-emerald-100 hover:to-blue-100 hover:text-emerald-700 hover:shadow-md hover:transform hover:scale-102'
                   }
@@ -995,7 +1005,7 @@ const Admin = () => {
                 <span className="font-semibold text-left truncate relative z-10">
                   {item.name}
                 </span>
-                {activeSection === item.name && (
+                {(activeSection === item.name || (item.id === 'recete' && isRecipeRoute)) && (
                   <div className="absolute right-2 w-2 h-2 bg-white rounded-full animate-ping"></div>
                 )}
               </button>
@@ -1116,8 +1126,6 @@ const Admin = () => {
         {/* Page Content */}
         <main className="p-4 lg:p-6">
           <div className="max-w-7xl mx-auto">
-
-            
             {isRecipeCreateRoute ? (
               <RecipeCreate />
             ) : isRecipeRoute ? (
@@ -1125,7 +1133,7 @@ const Admin = () => {
                 <RecipePage />
               </div>
             ) : (
-              sectionComponents[activeSection]
+              sectionComponents[activeSection] || sectionComponents['Üretici Listesi']
             )}
           </div>
         </main>

@@ -105,17 +105,6 @@ const RecipePage: React.FC = () => {
         <div className="p-4 lg:p-6">
           {/* Header */}
           <div className="mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <button
-                onClick={() => navigate('/admin')}
-                className="flex items-center space-x-2 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                <span>Geri Dön</span>
-              </button>
-            </div>
             
             <div className="text-center">
               <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-2">
@@ -172,28 +161,6 @@ const RecipePage: React.FC = () => {
     return (
       <div className="bg-gray-50">
         <div className="p-4 lg:p-6 space-y-6">
-          {/* Back Button */}
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => setCurrentStep('select-producer')}
-              className="flex items-center space-x-2 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              <span>Üretici Seçimine Dön</span>
-            </button>
-            
-            <button
-              onClick={() => navigate('/admin')}
-              className="flex items-center space-x-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
-              <span>Ana Sayfaya Dön</span>
-            </button>
-          </div>
           
           {/* Header */}
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
@@ -349,28 +316,6 @@ const RecipePage: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="p-4 lg:p-6 space-y-6">
-          {/* Back Button */}
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => setCurrentStep('select-producer')}
-              className="flex items-center space-x-2 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              <span>Üretici Seçimine Dön</span>
-            </button>
-            
-            <button
-              onClick={() => navigate('/admin')}
-              className="flex items-center space-x-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
-              <span>Ana Sayfaya Dön</span>
-            </button>
-          </div>
           
           {/* Header with Producer Info */}
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
