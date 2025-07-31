@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Producer } from '../types/producer';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebase/config';
 
 const Recipe: React.FC = () => {
   const [producers, setProducers] = useState<Producer[]>([]);
@@ -8,45 +10,62 @@ const Recipe: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Mock data - in real app this would come from Firebase
-    const mockProducers: Producer[] = [
-      {
-        id: '1',
-        firstName: 'Veli',
-        lastName: 'Koruz',
-        tcNo: '28609066164',
-        phone: '05377383743',
-        address: 'Kapaklı Mah.',
-        gender: 'Erkek',
-        experienceYear: '5',
-        registerDate: '2023-01-15'
-      },
-      {
-        id: '2',
-        firstName: 'Ahmet',
-        lastName: 'Yılmaz',
-        tcNo: '12345678901',
-        phone: '05321234567',
-        address: 'Merkez Mah.',
-        gender: 'Erkek',
-        experienceYear: '3',
-        registerDate: '2023-03-20'
-      },
-      {
-        id: '3',
-        firstName: 'Fatma',
-        lastName: 'Demir',
-        tcNo: '98765432109',
-        phone: '05339876543',
-        address: 'Yeni Mah.',
-        gender: 'Kadın',
-        experienceYear: '7',
-        registerDate: '2022-11-10'
+    const loadProducers = async () => {
+      try {
+        setLoading(true);
+        const querySnapshot = await getDocs(collection(db, 'producers'));
+        const producersData: Producer[] = [];
+        
+        querySnapshot.forEach((doc) => {
+          producersData.push({ id: doc.id, ...doc.data() } as Producer);
+        });
+        
+        setProducers(producersData);
+      } catch (error) {
+        console.error('Üreticiler yüklenirken hata:', error);
+        // Hata durumunda mock data kullan
+        const mockProducers: Producer[] = [
+          {
+            id: '1',
+            firstName: 'Veli',
+            lastName: 'Koruz',
+            tcNo: '28609066164',
+            phone: '05377383743',
+            address: 'Kapaklı Mah.',
+            gender: 'Erkek',
+            experienceYear: '5',
+            registerDate: '2023-01-15'
+          },
+          {
+            id: '2',
+            firstName: 'Ahmet',
+            lastName: 'Yılmaz',
+            tcNo: '12345678901',
+            phone: '05321234567',
+            address: 'Merkez Mah.',
+            gender: 'Erkek',
+            experienceYear: '3',
+            registerDate: '2023-03-20'
+          },
+          {
+            id: '3',
+            firstName: 'Fatma',
+            lastName: 'Demir',
+            tcNo: '98765432109',
+            phone: '05339876543',
+            address: 'Yeni Mah.',
+            gender: 'Kadın',
+            experienceYear: '7',
+            registerDate: '2022-11-10'
+          }
+        ];
+        setProducers(mockProducers);
+      } finally {
+        setLoading(false);
       }
-    ];
+    };
 
-    setProducers(mockProducers);
-    setLoading(false);
+    loadProducers();
   }, []);
 
   const handleCreateRecipe = (producerId: string) => {

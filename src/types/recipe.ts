@@ -48,14 +48,32 @@ export interface Recipe {
   id: string;
   producerId: string;
   producerName: string;
-  producerTC: string;
-  producerPhone: string;
-  producerAddress: string;
-  producerDecare: string;
+  fertilization1: string;
+  fertilization2: string;
+  fertilization3: string;
+  topFeeding: string;
+  notes: string;
+  weatherData: WeatherData[];
   createdAt: string;
-  fertilizationApplications: FertilizationApplication[];
-  topFeedingApplications: TopFeedingApplication[];
-  greenhouseControls: GreenhouseControls;
-  weatherForecast: WeatherForecast[];
-  consultantNotes: ConsultantNote[];
+  updatedAt: string;
+}
+
+export interface WeatherData {
+  date: string;
+  day: string;
+  icon: string;
+  minTemp: number;
+  maxTemp: number;
+  description: string;
+}
+
+export interface CreateRecipeData {
+  producerId: string;
+  producerName: string;
+  fertilization1: string;
+  fertilization2: string;
+  fertilization3: string;
+  topFeeding: string;
+  notes: string;
+  weatherData: WeatherData[];
 } 
