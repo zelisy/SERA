@@ -4,8 +4,7 @@ import UreticiListesi from '../components/UreticiListesi';
 import type { Producer } from '../types/producer';
 import type { Recipe } from '../types/recipe';
 import { getRecipesByProducer, deleteRecipe, getAllRecipes } from '../utils/recipeUtils';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebase/config';
+
 
 const RecipePage: React.FC = () => {
   const [selectedProducer, setSelectedProducer] = useState<Producer | null>(null);

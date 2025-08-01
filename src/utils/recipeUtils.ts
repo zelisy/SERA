@@ -1,4 +1,4 @@
-import { doc, setDoc, getDoc, updateDoc, serverTimestamp, collection, query, where, getDocs, deleteDoc, orderBy } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import type { Recipe, CreateRecipeData } from '../types/recipe';
 
@@ -7,7 +7,7 @@ export const saveRecipe = async (recipeData: CreateRecipeData): Promise<string> 
   try {
     const docRef = doc(collection(db, 'recipes'));
     
-    const recipe: Omit<Recipe, 'id'> = {
+    const recipe = {
       ...recipeData,
       id: docRef.id,
       createdAt: new Date().toISOString(),
