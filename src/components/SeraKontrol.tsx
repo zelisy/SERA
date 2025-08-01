@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import ChecklistItem from './ChecklistItem';
 import UreticiListesi from './UreticiListesi';
 import { seraKontrolConfig } from '../data/seraKontrolConfig';
@@ -23,11 +23,7 @@ const SeraKontrol: React.FC = () => {
     }
   }, [selectedProducer]);
 
-  useEffect(() => {
-    if (selectedProducer && currentStep === 'checklist') {
-      loadInitialData();
-    }
-  }, [selectedProducer, currentStep]);
+
 
   const loadSavedRecords = async () => {
     if (!selectedProducer) return;
@@ -46,7 +42,7 @@ const SeraKontrol: React.FC = () => {
     }
   };
 
-  const loadInitialData = async () => {
+  const loadInitialData = useCallback(async () => {
     if (!selectedProducer) return;
     
     try {
@@ -54,26 +50,26 @@ const SeraKontrol: React.FC = () => {
       const dataKey = `sera-kontrol-${selectedProducer.id}`;
       const savedData = await loadChecklistData(dataKey);
       
-              if (savedData) {
-          const mergedData = {
-            ...seraKontrolConfig,
-            items: seraKontrolConfig.items.map(configItem => {
-              const savedItem = savedData.items.find(item => item.id === configItem.id);
-              return savedItem ? { ...configItem, ...savedItem } : configItem;
-            })
-          };
-          setChecklistData(mergedData);
-        } else {
-          await saveChecklistData(dataKey, seraKontrolConfig);
-          setChecklistData(seraKontrolConfig);
-        }
+      if (savedData) {
+        const mergedData = {
+          ...seraKontrolConfig,
+          items: seraKontrolConfig.items.map(configItem => {
+            const savedItem = savedData.items.find(item => item.id === configItem.id);
+            return savedItem ? { ...configItem, ...savedItem } : configItem;
+          })
+        };
+        setChecklistData(mergedData);
+      } else {
+        await saveChecklistData(dataKey, seraKontrolConfig);
+        setChecklistData(seraKontrolConfig);
+      }
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Veriler yüklenemedi');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const handleItemUpdate = async (
     itemId: string, 
@@ -87,7 +83,7 @@ const SeraKontrol: React.FC = () => {
         ...prev,
         items: prev.items.map(item =>
           item.id === itemId
-            ? { ...item, completed, data: data || item.data }
+            ? { ...item, completed, data: data || item.data || {} }
             : item
         )
       }));
@@ -109,9 +105,12 @@ const SeraKontrol: React.FC = () => {
     const dataKey = `sera-kontrol-${selectedProducer.id}`;
     
     try {
+      const currentDate = new Date();
       const newRecord = {
         id: Date.now().toString(),
-        date: new Date().toISOString(),
+        date: currentDate.toISOString(),
+        dateFormatted: currentDate.toLocaleDateString('tr-TR'),
+        timeFormatted: currentDate.toLocaleTimeString('tr-TR'),
         items: checklistData.items,
         producerId: selectedProducer.id,
         producerName: `${selectedProducer.firstName} ${selectedProducer.lastName}`
@@ -132,8 +131,16 @@ const SeraKontrol: React.FC = () => {
       setSaveSuccess(true);
       setCurrentStep('list');
       
-      // Formu temizle
-      setChecklistData(seraKontrolConfig);
+      // Formu tamamen temizle
+      const cleanConfig = {
+        ...seraKontrolConfig,
+        items: seraKontrolConfig.items.map(item => ({
+          ...item,
+          completed: false,
+          data: {}
+        }))
+      };
+      setChecklistData(cleanConfig);
       setExpandedSections(new Set());
       
       setTimeout(() => setSaveSuccess(false), 2000);
@@ -234,11 +241,32 @@ const SeraKontrol: React.FC = () => {
   };
 
   const startNewRecord = () => {
+    console.log('startNewRecord called');
     setEditingRecord(null);
-    setChecklistData(seraKontrolConfig);
+    // Reset to completely clean config - no previous data
+    const cleanConfig = {
+      ...seraKontrolConfig,
+      items: seraKontrolConfig.items.map(item => ({
+        ...item,
+        completed: false,
+        data: {} // Boş obje kullan
+      }))
+    };
+    setChecklistData(cleanConfig);
     setExpandedSections(new Set());
     setCurrentStep('checklist');
+    // Clear any error messages and loading state
+    setError(null);
+    setLoading(false);
+    console.log('startNewRecord completed, currentStep should be checklist');
   };
+
+  // useEffect for loading initial data when editing
+  useEffect(() => {
+    if (selectedProducer && currentStep === 'checklist' && editingRecord) {
+      loadInitialData();
+    }
+  }, [currentStep, editingRecord, selectedProducer?.id]);
 
   // Producer Selection Step
   if (currentStep === 'select-producer') {
@@ -364,7 +392,7 @@ const SeraKontrol: React.FC = () => {
                     <div key={record.id} className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
                       <div className="flex items-center justify-between mb-3">
                         <div className="text-sm text-gray-600">
-                          {new Date(record.date).toLocaleDateString('tr-TR')}
+                          {record.dateFormatted || new Date(record.date).toLocaleDateString('tr-TR')}
                         </div>
                         <div className="flex gap-2">
                           <button
@@ -403,7 +431,7 @@ const SeraKontrol: React.FC = () => {
                       
                       <div className="text-xs text-gray-500 space-y-1">
                         <div>Tamamlanan: {completedCount}/{totalCount}</div>
-                        <div>Saat: {new Date(record.date).toLocaleTimeString('tr-TR')}</div>
+                        <div>Saat: {record.timeFormatted || new Date(record.date).toLocaleTimeString('tr-TR')}</div>
                       </div>
                     </div>
                   );
@@ -452,6 +480,11 @@ const SeraKontrol: React.FC = () => {
                 <h1 className="text-xl lg:text-2xl font-bold text-gray-800">
                   {editingRecord ? 'Sera Kontrol Kaydını Düzenle' : 'Yeni Sera Kontrol Kaydı'} - {selectedProducer?.firstName} {selectedProducer?.lastName}
                 </h1>
+                {!editingRecord && (
+                  <p className="text-gray-600 text-sm mt-1">
+                    Tarih: {new Date().toLocaleDateString('tr-TR')} - Saat: {new Date().toLocaleTimeString('tr-TR')}
+                  </p>
+                )}
                 <p className="text-gray-600">
                   TC: {selectedProducer?.tcNo} | Tel: {selectedProducer?.phone}
                 </p>
@@ -463,13 +496,6 @@ const SeraKontrol: React.FC = () => {
                 className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
               >
                 ← Listeye Dön
-              </button>
-              <button
-                onClick={handleSaveRecord}
-                disabled={loading}
-                className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-xl hover:from-emerald-600 hover:to-blue-600 transition-colors font-medium disabled:opacity-50"
-              >
-                {loading ? 'Kaydediliyor...' : (editingRecord ? 'Güncelle' : 'Kaydet')}
               </button>
             </div>
           </div>
@@ -595,6 +621,35 @@ const SeraKontrol: React.FC = () => {
             </p>
           </div>
         )}
+
+        {/* Save Button at Bottom */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button
+              onClick={() => setCurrentStep('list')}
+              className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
+            >
+              ← Listeye Dön
+            </button>
+            <button
+              onClick={handleSaveRecord}
+              disabled={loading}
+              className="px-8 py-3 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-xl hover:from-emerald-600 hover:to-blue-600 transition-colors font-medium disabled:opacity-50 shadow-lg hover:shadow-xl transform hover:scale-105"
+            >
+              {loading ? (
+                <div className="flex items-center space-x-2">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Kaydediliyor...</span>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <span>💾</span>
+                  <span>{editingRecord ? 'Güncelle' : 'Kaydet'}</span>
+                </div>
+              )}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
