@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import logoImage from '../assets/logo.avif';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -68,21 +67,14 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3 group">
-            <div className="flex items-center space-x-3">
-              <img 
-                src={logoImage} 
-                alt="AGROVİA Logo" 
-                className="w-10 h-10 object-cover rounded-xl transition-transform group-hover:scale-105"
-              />
-              <div className="hidden sm:block">
-                <h1 className={`text-xl font-bold ${
-                  isWhiteTextPage 
-                    ? 'text-white' 
-                    : 'bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent'
-                }`}>
-                  AGROVİA
-                </h1>
-              </div>
+            <div className="hidden sm:block">
+              <h1 className={`text-xl font-bold ${
+                isWhiteTextPage 
+                  ? 'text-white' 
+                  : 'bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent'
+              }`}>
+                AGROVİA
+              </h1>
             </div>
           </Link>
 

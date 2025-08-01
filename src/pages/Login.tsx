@@ -3,7 +3,6 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import { useNavigate, Link } from 'react-router-dom';
 import arkaplanImage from '../assets/arkaplan1.jpg';
-import logoImage from '../assets/logo.avif';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -17,12 +16,41 @@ const Login: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    
+    // Form validasyonu
+    if (!email.trim()) {
+      setError('E-posta adresi gereklidir.');
+      setLoading(false);
+      return;
+    }
+    
+    if (!password.trim()) {
+      setError('Şifre gereklidir.');
+      setLoading(false);
+      return;
+    }
+    
     try {
       await signInWithEmailAndPassword(auth, email, password);
       localStorage.setItem('isLoggedIn', 'true');
       navigate('/admin');
-    } catch {
-      setError('E-posta veya şifre hatalı. Lütfen tekrar deneyin.');
+    } catch (error: any) {
+      // Firebase hata kodlarını özelleştir
+      if (error.code === 'auth/missing-password' || error.code === 'auth/missing-email') {
+        setError('E-posta ve şifre gereklidir.');
+      } else if (error.code === 'auth/invalid-email') {
+        setError('Geçersiz e-posta adresi.');
+      } else if (error.code === 'auth/user-not-found') {
+        setError('Bu e-posta adresi ile kayıtlı kullanıcı bulunamadı.');
+      } else if (error.code === 'auth/wrong-password') {
+        setError('Şifre hatalı.');
+      } else if (error.code === 'auth/too-many-requests') {
+        setError('Çok fazla başarısız deneme. Lütfen daha sonra tekrar deneyin.');
+      } else if (error.code === 'auth/network-request-failed') {
+        setError('Bağlantı hatası. İnternet bağlantınızı kontrol edin.');
+      } else {
+        setError('İşlem başarısız. Lütfen tekrar deneyin.');
+      }
     } finally {
       setLoading(false);
     }
@@ -62,13 +90,8 @@ const Login: React.FC = () => {
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700 p-8">
             {/* Header */}
             <div className="text-center mb-8">
-              <div className="flex items-center justify-center space-x-3 mb-4">
-                <img 
-                  src={logoImage} 
-                  alt="AGROVİA Logo" 
-                  className="w-12 h-12 object-cover rounded-xl"
-                />
-                <h1 className="text-2xl font-bold text-white">AGROVİA</h1>
+              <div className="mb-4">
+                <h1 className="text-3xl font-bold text-white">AGROVİA</h1>
               </div>
               <h2 className="text-xl font-bold text-white mb-2">Admin Giriş</h2>
               <p className="text-gray-300">AGROVİA yönetim paneline erişim</p>

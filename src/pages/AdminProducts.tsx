@@ -87,13 +87,33 @@ const AdminProducts: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-slate-50 py-10">
-      <div className="max-w-4xl mx-auto bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8">
-        <button onClick={() => navigate(-1)} className="mb-6 bg-gradient-to-r from-gray-300 to-gray-400 text-gray-800 font-semibold py-2 px-6 rounded-xl shadow hover:from-gray-400 hover:to-gray-500 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400">
-          ← Geri
-        </button>
-        <h2 className="text-2xl font-bold text-slate-800 mb-6 text-center">Ürün Yönetimi</h2>
-        <p className="text-slate-700 text-center mb-8">Buradan ürün ekleyebilir, güncelleyebilir ve silebilirsiniz.</p>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-slate-50">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-emerald-50 to-blue-50 shadow-lg border-b border-emerald-200 sticky top-0 z-30">
+        <div className="flex items-center justify-between px-4 lg:px-6 py-4">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="p-2 rounded-lg hover:bg-emerald-100 transition-colors text-emerald-600"
+              title="Geri Dön"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+            </button>
+            <div>
+              <h2 className="text-lg lg:text-xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">Ürün Yönetimi</h2>
+              <p className="text-sm text-emerald-600 font-medium">Ürün ekleme, düzenleme ve silme</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="py-10">
+        <div className="max-w-4xl mx-auto bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8">
+          <h2 className="text-2xl font-bold text-slate-800 mb-6 text-center">Ürün Yönetimi</h2>
+          <p className="text-slate-700 text-center mb-8">Buradan ürün ekleyebilir, güncelleyebilir ve silebilirsiniz.</p>
         <div className="flex justify-center mb-6">
           <button
             className="bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-semibold py-2 px-6 rounded-xl hover:from-emerald-600 hover:to-blue-600 transition-all duration-200 shadow-lg"
@@ -198,6 +218,7 @@ const AdminProducts: React.FC = () => {
               ))}
             </tbody>
           </table>
+        </div>
         </div>
       </div>
     </div>

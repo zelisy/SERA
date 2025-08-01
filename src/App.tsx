@@ -28,7 +28,7 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 
 function AppContent() {
   const location = useLocation();
-  const isAdminPage = location.pathname.startsWith('/admin');
+  const isAdminPage = location.pathname.startsWith('/admin') && !location.pathname.includes('/admin/products');
 
   return (
     <>
