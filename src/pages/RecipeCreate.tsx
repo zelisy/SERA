@@ -127,7 +127,8 @@ const RecipeCreatePage: React.FC = () => {
       console.log('Reçete Kaydedildi:', recipeData);
       await saveRecipe(recipeData);
       
-      navigate('/admin/recipes');
+      // Redirect to the recipes page with the specific producer selected
+      navigate(`/admin/recipes?producerId=${producer.id}`);
     } catch (error) {
       console.error('Reçete kaydetme hatası:', error);
       alert('Reçete kaydedilirken bir hata oluştu');
@@ -136,10 +137,10 @@ const RecipeCreatePage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Veriler yükleniyor...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-slate-300 border-t-slate-600 mx-auto mb-3"></div>
+          <p className="text-slate-600 text-sm">Yükleniyor...</p>
         </div>
       </div>
     );
@@ -147,16 +148,16 @@ const RecipeCreatePage: React.FC = () => {
 
   if (error || !producer) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-6xl mb-4">⚠️</div>
-          <h3 className="text-lg font-semibold text-slate-700 mb-2">Hata</h3>
-          <p className="text-slate-600 mb-4">{error || 'Üretici bulunamadı'}</p>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-6">
+          <div className="text-4xl mb-4">⚠️</div>
+          <h3 className="text-lg font-medium text-slate-800 mb-2">Hata</h3>
+          <p className="text-slate-600 mb-6">{error || 'Üretici bulunamadı'}</p>
           <button
             onClick={() => navigate('/admin/recipes')}
-            className="bg-gradient-to-r from-emerald-500 to-blue-500 text-white px-6 py-3 rounded-xl hover:from-emerald-600 hover:to-blue-600 transition-all duration-200 shadow-lg"
+            className="bg-slate-800 text-white px-6 py-2.5 rounded-lg hover:bg-slate-700 transition-colors text-sm"
           >
-            ← Geri Dön
+            Geri Dön
           </button>
         </div>
       </div>
@@ -164,133 +165,125 @@ const RecipeCreatePage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto p-6 space-y-6">
+    <div className="min-h-screen bg-slate-50">
+      <div className="max-w-4xl mx-auto p-6 space-y-8">
         {/* Header */}
-        <div className="bg-white rounded-2xl shadow-lg p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-2xl font-bold text-slate-800 mb-2">Yeni Reçete Oluştur</h1>
-              <p className="text-slate-600">Üretici için detaylı reçete hazırlayın</p>
-            </div>
-            <button
-              onClick={() => navigate('/admin/recipes')}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
-            >
-              ← Geri Dön
-            </button>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold text-slate-900 mb-1">Yeni Reçete</h1>
+            <p className="text-slate-600 text-sm">Üretici için reçete oluşturun</p>
           </div>
+          <button
+            onClick={() => navigate('/admin/recipes')}
+            className="text-slate-600 hover:text-slate-800 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
 
-          {/* Üretici Bilgisi */}
-          <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-xl p-4 border border-emerald-200">
-            <h2 className="font-semibold text-lg mb-3 text-emerald-800">👤 Üretici Bilgisi</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-gray-600">Ad Soyad</p>
-                <p className="font-semibold text-slate-800">{producer.firstName} {producer.lastName}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">TC Kimlik No</p>
-                <p className="font-semibold text-slate-800">{producer.tcNo}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Telefon</p>
-                <p className="font-semibold text-slate-800">{producer.phone}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Adres</p>
-                <p className="font-semibold text-slate-800">{producer.address}</p>
-              </div>
+        {/* Üretici Bilgisi */}
+        <div className="bg-white rounded-xl p-6 border border-slate-200">
+          <h2 className="font-medium text-slate-900 mb-4">Üretici Bilgisi</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div>
+              <span className="text-slate-500">Ad Soyad</span>
+              <p className="font-medium text-slate-900">{producer.firstName} {producer.lastName}</p>
+            </div>
+            <div>
+              <span className="text-slate-500">TC Kimlik No</span>
+              <p className="font-medium text-slate-900">{producer.tcNo}</p>
+            </div>
+            <div>
+              <span className="text-slate-500">Telefon</span>
+              <p className="font-medium text-slate-900">{producer.phone}</p>
+            </div>
+            <div>
+              <span className="text-slate-500">Adres</span>
+              <p className="font-medium text-slate-900">{producer.address}</p>
             </div>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           {/* Gübreleme Programı */}
-          <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="bg-white rounded-xl p-6 border border-slate-200">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-slate-800">🌱 Gübreleme Programı</h2>
+              <h2 className="font-medium text-slate-900">Gübreleme Programı</h2>
               <button
                 type="button"
                 onClick={() => addFert({ date: '', time: '', water: '', duration: '', products: '' })}
-                className="px-4 py-2 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 transition-colors text-sm font-medium"
+                className="text-slate-600 hover:text-slate-800 transition-colors text-sm"
               >
-                + Yeni Gübreleme
+                + Ekle
               </button>
             </div>
             
             <div className="space-y-4">
               {fertFields.map((field, index) => (
-                <div key={field.id} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                <div key={field.id} className="border border-slate-200 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold text-slate-700">Gübreleme #{index + 1}</h3>
+                    <span className="text-sm font-medium text-slate-700">Gübreleme {index + 1}</span>
                     {fertFields.length > 1 && (
                       <button
                         type="button"
                         onClick={() => removeFert(index)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="text-slate-400 hover:text-slate-600 transition-colors"
                       >
-                        🗑️
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
                       </button>
                     )}
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        📅 Tarih
-                      </label>
+                      <label className="block text-xs font-medium text-slate-700 mb-1">Tarih</label>
                       <input
                         {...register(`fertilizations.${index}.date`)}
                         type="date"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                        className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-1 focus:ring-slate-400 focus:border-slate-400 transition-colors"
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        🕐 Saat
-                      </label>
+                      <label className="block text-xs font-medium text-slate-700 mb-1">Saat</label>
                       <input
                         {...register(`fertilizations.${index}.time`)}
                         type="time"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                        className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-1 focus:ring-slate-400 focus:border-slate-400 transition-colors"
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        💧 Su Miktarı (ml)
-                      </label>
+                      <label className="block text-xs font-medium text-slate-700 mb-1">Su (ml)</label>
                       <input
                         {...register(`fertilizations.${index}.water`)}
                         type="number"
-                        placeholder="Örn: 1000"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                        placeholder="1000"
+                        className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-1 focus:ring-slate-400 focus:border-slate-400 transition-colors"
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        ⏱️ Süre (dk)
-                      </label>
+                      <label className="block text-xs font-medium text-slate-700 mb-1">Süre (dk)</label>
                       <input
                         {...register(`fertilizations.${index}.duration`)}
                         type="number"
-                        placeholder="Örn: 30"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                        placeholder="30"
+                        className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-1 focus:ring-slate-400 focus:border-slate-400 transition-colors"
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        🧪 Ürünler
-                      </label>
+                      <label className="block text-xs font-medium text-slate-700 mb-1">Ürünler</label>
                       <input
                         {...register(`fertilizations.${index}.products`)}
                         type="text"
                         placeholder="Gübre adları"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                        className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-1 focus:ring-slate-400 focus:border-slate-400 transition-colors"
                       />
                     </div>
                   </div>
@@ -300,66 +293,62 @@ const RecipeCreatePage: React.FC = () => {
           </div>
 
           {/* Üstten Besleme */}
-          <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="bg-white rounded-xl p-6 border border-slate-200">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-slate-800">🌿 Üstten Besleme</h2>
+              <h2 className="font-medium text-slate-900">Üstten Besleme</h2>
               <button
                 type="button"
                 onClick={() => addFeed({ date: '', time: '', applications: '' })}
-                className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium"
+                className="text-slate-600 hover:text-slate-800 transition-colors text-sm"
               >
-                + Yeni Uygulama
+                + Ekle
               </button>
             </div>
             
             <div className="space-y-4">
               {feedFields.map((field, index) => (
-                <div key={field.id} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                <div key={field.id} className="border border-slate-200 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold text-slate-700">Uygulama #{index + 1}</h3>
+                    <span className="text-sm font-medium text-slate-700">Uygulama {index + 1}</span>
                     {feedFields.length > 1 && (
                       <button
                         type="button"
                         onClick={() => removeFeed(index)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="text-slate-400 hover:text-slate-600 transition-colors"
                       >
-                        🗑️
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
                       </button>
                     )}
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        📅 Tarih
-                      </label>
+                      <label className="block text-xs font-medium text-slate-700 mb-1">Tarih</label>
                       <input
                         {...register(`topFeedings.${index}.date`)}
                         type="date"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-1 focus:ring-slate-400 focus:border-slate-400 transition-colors"
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        🕐 Saat
-                      </label>
+                      <label className="block text-xs font-medium text-slate-700 mb-1">Saat</label>
                       <input
                         {...register(`topFeedings.${index}.time`)}
                         type="time"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-1 focus:ring-slate-400 focus:border-slate-400 transition-colors"
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        🧪 Uygulamalar
-                      </label>
+                      <label className="block text-xs font-medium text-slate-700 mb-1">Uygulamalar</label>
                       <input
                         {...register(`topFeedings.${index}.applications`)}
                         type="text"
                         placeholder="Uygulama detayları"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-1 focus:ring-slate-400 focus:border-slate-400 transition-colors"
                       />
                     </div>
                   </div>
@@ -369,20 +358,20 @@ const RecipeCreatePage: React.FC = () => {
           </div>
 
           {/* Sera İçi Kontrol Seçimi */}
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <h2 className="text-xl font-bold text-slate-800 mb-6">🏠 Sera İçi Kontrol Verileri</h2>
+          <div className="bg-white rounded-xl p-6 border border-slate-200">
+            <h2 className="font-medium text-slate-900 mb-6">Sera İçi Kontrol Verileri</h2>
             
             {seraKontrolRecords.length === 0 ? (
-              <div className="text-center py-8 bg-yellow-50 rounded-xl border border-yellow-200">
-                <div className="text-4xl mb-3">⚠️</div>
-                <h3 className="text-lg font-semibold text-yellow-800 mb-2">Sera Kontrol Verisi Bulunamadı</h3>
-                <p className="text-yellow-700 mb-4">
-                  Bu üretici için henüz sera kontrol kaydı bulunmuyor. Önce sera kontrol sayfasından kayıt oluşturun.
+              <div className="text-center py-8 bg-slate-50 rounded-lg border border-slate-200">
+                <div className="text-2xl mb-3">⚠️</div>
+                <h3 className="text-sm font-medium text-slate-800 mb-2">Sera Kontrol Verisi Bulunamadı</h3>
+                <p className="text-slate-600 mb-4 text-sm">
+                  Bu üretici için henüz sera kontrol kaydı bulunmuyor.
                 </p>
                 <button
                   type="button"
                   onClick={() => navigate('/admin/sera-kontrol')}
-                  className="bg-yellow-500 text-white px-6 py-3 rounded-xl hover:bg-yellow-600 transition-colors"
+                  className="bg-slate-800 text-white px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors text-sm"
                 >
                   Sera Kontrol Sayfasına Git
                 </button>
@@ -390,12 +379,12 @@ const RecipeCreatePage: React.FC = () => {
             ) : (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    📋 Sera Kontrol Kaydı Seçin
+                  <label className="block text-xs font-medium text-slate-700 mb-1">
+                    Sera Kontrol Kaydı Seçin
                   </label>
                   <select
                     {...register('selectedSeraKontrol')}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-1 focus:ring-slate-400 focus:border-slate-400 transition-colors"
                   >
                     <option value="">Sera kontrol kaydı seçin...</option>
                     {seraKontrolRecords.map((record) => (
@@ -408,25 +397,25 @@ const RecipeCreatePage: React.FC = () => {
 
                 {/* Seçilen sera kontrol verilerini göster */}
                 {selectedSeraKontrolData && (
-                  <div className="bg-purple-50 rounded-xl p-4 border border-purple-200">
-                    <h3 className="font-semibold text-purple-800 mb-3">
-                      📊 Seçilen Sera Kontrol Verileri
+                  <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                    <h3 className="font-medium text-slate-800 mb-3 text-sm">
+                      Seçilen Sera Kontrol Verileri
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {selectedSeraKontrolData.items.map((item: any, index: number) => (
-                        <div key={index} className="bg-white rounded-lg p-3 border border-purple-200">
+                        <div key={index} className="bg-white rounded-lg p-3 border border-slate-200">
                           <div className="flex items-center justify-between mb-2">
-                            <span className="font-medium text-purple-700 text-sm">{item.label}</span>
+                            <span className="font-medium text-slate-700 text-xs">{item.label}</span>
                             <span className={`px-2 py-1 rounded-full text-xs ${
                               item.completed 
-                                ? 'bg-green-100 text-green-700' 
-                                : 'bg-red-100 text-red-700'
+                                ? 'bg-slate-100 text-slate-700' 
+                                : 'bg-red-50 text-red-700'
                             }`}>
-                              {item.completed ? '✓ Tamamlandı' : '✗ Eksik'}
+                              {item.completed ? 'Tamamlandı' : 'Eksik'}
                             </span>
                           </div>
                           {item.data && Object.keys(item.data).length > 0 && (
-                            <div className="text-xs text-gray-600">
+                            <div className="text-xs text-slate-600">
                               {Object.entries(item.data).map(([key, value]) => (
                                 <div key={key}>
                                   <strong>{key}:</strong> {String(value)}
@@ -444,38 +433,36 @@ const RecipeCreatePage: React.FC = () => {
           </div>
 
           {/* Danışman Notu */}
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <h2 className="text-xl font-bold text-slate-800 mb-4">📝 Danışman Notu</h2>
+          <div className="bg-white rounded-xl p-6 border border-slate-200">
+            <h2 className="font-medium text-slate-900 mb-4">Danışman Notu</h2>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                💬 Öneriler ve Notlar
+              <label className="block text-xs font-medium text-slate-700 mb-1">
+                Öneriler ve Notlar
               </label>
               <textarea
                 {...register('notes')}
                 placeholder="Üretici için öneriler, dikkat edilmesi gerekenler ve diğer notlarınızı buraya yazın..."
                 rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors resize-none"
+                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-1 focus:ring-slate-400 focus:border-slate-400 transition-colors resize-none"
               />
             </div>
           </div>
 
           {/* Kaydet Butonu */}
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                type="button"
-                onClick={() => navigate('/admin/recipes')}
-                className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
-              >
-                ← İptal Et
-              </button>
-              <button
-                type="submit"
-                className="px-8 py-3 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-xl hover:from-emerald-600 hover:to-blue-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 font-medium"
-              >
-                💾 Reçeteyi Kaydet
-              </button>
-            </div>
+          <div className="flex flex-col sm:flex-row gap-3 justify-end">
+            <button
+              type="button"
+              onClick={() => navigate('/admin/recipes')}
+              className="px-6 py-2.5 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors text-sm font-medium"
+            >
+              İptal
+            </button>
+            <button
+              type="submit"
+              className="px-6 py-2.5 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-colors text-sm font-medium"
+            >
+              Reçeteyi Kaydet
+            </button>
           </div>
         </form>
       </div>

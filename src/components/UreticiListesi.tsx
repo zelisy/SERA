@@ -154,7 +154,7 @@ const UreticiListesi: React.FC<UreticiListesiProps> = ({
         )}
       </div>
 
-      {/* Filters and Search */}
+      {/* Filters and Search - Simplified for selection mode */}
       <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
         <div className="flex flex-col lg:flex-row gap-4">
           <div className="flex-1">
@@ -167,39 +167,41 @@ const UreticiListesi: React.FC<UreticiListesiProps> = ({
             />
           </div>
           
-          <div className="flex flex-wrap gap-3">
-            <select 
-              value={sortKey} 
-              onChange={e => setSortKey(e.target.value as 'firstName' | 'registerDate')}
-              className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-            >
-              <option value="firstName">İsme Göre</option>
-              <option value="registerDate">Kayıt Tarihine Göre</option>
-            </select>
-            
-            <button
-              onClick={() => setSortDir(sortDir === 'asc' ? 'desc' : 'asc')}
-              className="px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors"
-            >
-              {sortDir === 'asc' ? '↑ A-Z' : '↓ Z-A'}
-            </button>
+          {!selectionMode && (
+            <div className="flex flex-wrap gap-3">
+              <select 
+                value={sortKey} 
+                onChange={e => setSortKey(e.target.value as 'firstName' | 'registerDate')}
+                className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              >
+                <option value="firstName">İsme Göre</option>
+                <option value="registerDate">Kayıt Tarihine Göre</option>
+              </select>
+              
+              <button
+                onClick={() => setSortDir(sortDir === 'asc' ? 'desc' : 'asc')}
+                className="px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors"
+              >
+                {sortDir === 'asc' ? '↑ A-Z' : '↓ Z-A'}
+              </button>
 
-            {/* View Mode Toggle - Hide on mobile, show cards by default */}
-            <div className="hidden lg:flex border border-gray-300 rounded-xl overflow-hidden">
-              <button
-                onClick={() => setViewMode('table')}
-                className={`px-4 py-3 transition-colors ${viewMode === 'table' ? 'bg-emerald-500 text-white' : 'bg-white text-slate-600 hover:bg-gray-50'}`}
-              >
-                📋 Tablo
-              </button>
-              <button
-                onClick={() => setViewMode('cards')}
-                className={`px-4 py-3 transition-colors ${viewMode === 'cards' ? 'bg-emerald-500 text-white' : 'bg-white text-slate-600 hover:bg-gray-50'}`}
-              >
-                📱 Kart
-              </button>
+              {/* View Mode Toggle - Hide on mobile, show cards by default */}
+              <div className="hidden lg:flex border border-gray-300 rounded-xl overflow-hidden">
+                <button
+                  onClick={() => setViewMode('table')}
+                  className={`px-4 py-3 transition-colors ${viewMode === 'table' ? 'bg-emerald-500 text-white' : 'bg-white text-slate-600 hover:bg-gray-50'}`}
+                >
+                  📋 Tablo
+                </button>
+                <button
+                  onClick={() => setViewMode('cards')}
+                  className={`px-4 py-3 transition-colors ${viewMode === 'cards' ? 'bg-emerald-500 text-white' : 'bg-white text-slate-600 hover:bg-gray-50'}`}
+                >
+                  📱 Kart
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -479,28 +481,41 @@ const UreticiListesi: React.FC<UreticiListesiProps> = ({
                     )}
                   </div>
 
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-blue-500">📱</span>
-                      <span className="text-slate-700 font-medium">{producer.phone}</span>
-                    </div>
-                    <div className="flex items-start space-x-2">
-                      <span className="text-green-500 mt-1">📍</span>
-                      <span className="text-slate-700 text-sm leading-relaxed">{producer.address}</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 pt-3 border-t border-gray-100">
-                      <div className="text-center">
-                        <p className="text-slate-500 text-xs">Deneyim</p>
-                        <p className="font-bold text-slate-800">{producer.experienceYear} yıl</p>
+                  {!selectionMode ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-blue-500">📱</span>
+                        <span className="text-slate-700 font-medium">{producer.phone}</span>
                       </div>
-                      <div className="text-center">
-                        <p className="text-slate-500 text-xs">Kayıt Tarihi</p>
-                        <p className="font-bold text-slate-800">
-                          {new Date(producer.registerDate).toLocaleDateString('tr-TR')}
-                        </p>
+                      <div className="flex items-start space-x-2">
+                        <span className="text-green-500 mt-1">📍</span>
+                        <span className="text-slate-700 text-sm leading-relaxed">{producer.address}</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 pt-3 border-t border-gray-100">
+                        <div className="text-center">
+                          <p className="text-slate-500 text-xs">Deneyim</p>
+                          <p className="font-bold text-slate-800">{producer.experienceYear} yıl</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-slate-500 text-xs">Kayıt Tarihi</p>
+                          <p className="font-bold text-slate-800">
+                            {new Date(producer.registerDate).toLocaleDateString('tr-TR')}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-blue-500">📱</span>
+                        <span className="text-slate-700 text-sm">{producer.phone}</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-green-500">📍</span>
+                        <span className="text-slate-700 text-sm">{producer.address}</span>
+                      </div>
+                    </div>
+                  )}
 
                   {selectionMode && selectedProducer?.id === producer.id && (
                     <div className="mt-4 p-3 bg-emerald-100 rounded-lg">

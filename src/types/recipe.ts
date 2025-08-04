@@ -54,6 +54,7 @@ export interface Recipe {
   topFeeding: string;
   notes: string;
   weatherData: WeatherData[];
+  selectedSeraKontrolData?: any;
   createdAt: string;
   updatedAt: string;
 }
