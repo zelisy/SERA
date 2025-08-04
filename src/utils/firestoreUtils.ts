@@ -430,3 +430,22 @@ export const getAllDenemeForms = async (): Promise<any[]> => {
     throw new Error('Deneme formları yüklenemedi');
   }
 };
+
+// Sera kontrol verilerini üretici ID'sine göre getir
+export const getSeraKontrolRecords = async (producerId: string): Promise<any[]> => {
+  try {
+    const dataKey = `sera-kontrol-${producerId}`;
+    const savedData = await loadChecklistData(dataKey);
+    if (savedData && savedData.history) {
+      return savedData.history.map((record: any) => ({
+        ...record,
+        dateFormatted: record.dateFormatted || new Date(record.date).toLocaleDateString('tr-TR'),
+        timeFormatted: record.timeFormatted || new Date(record.date).toLocaleTimeString('tr-TR')
+      }));
+    }
+    return [];
+  } catch (error) {
+    console.error('Sera kontrol verileri yükleme hatası:', error);
+    throw new Error('Sera kontrol verileri yüklenemedi');
+  }
+};

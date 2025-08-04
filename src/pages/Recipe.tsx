@@ -286,6 +286,34 @@ const RecipePage: React.FC = () => {
                             </div>
                           </div>
                         )}
+
+                        {/* Sera Kontrol Verileri */}
+                        {recipe.selectedSeraKontrolData && (
+                          <div className="mt-4">
+                            <h4 className="font-medium text-slate-700 mb-2">🏠 Sera Kontrol Verileri</h4>
+                            <div className="bg-purple-50 p-3 rounded">
+                              <div className="text-sm text-purple-700 mb-2">
+                                <strong>Tarih:</strong> {new Date(recipe.selectedSeraKontrolData.date).toLocaleDateString('tr-TR')}
+                              </div>
+                              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                                {recipe.selectedSeraKontrolData.items?.slice(0, 6).map((item: any, index: number) => (
+                                  <div key={index} className="bg-white p-2 rounded text-xs">
+                                    <div className="flex items-center justify-between">
+                                      <span className="font-medium text-purple-700 truncate">{item.label}</span>
+                                      <span className={`px-1 py-0.5 rounded text-xs ${
+                                        item.completed 
+                                          ? 'bg-green-100 text-green-700' 
+                                          : 'bg-red-100 text-red-700'
+                                      }`}>
+                                        {item.completed ? '✓' : '✗'}
+                                      </span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                       
                       <div className="flex flex-col space-y-2 ml-4">
@@ -469,6 +497,34 @@ const RecipePage: React.FC = () => {
                                   </div>
                                 </div>
                               ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Sera Kontrol Verileri */}
+                        {recipe.selectedSeraKontrolData && (
+                          <div className="mt-4">
+                            <h4 className="font-medium text-slate-700 mb-2">🏠 Sera Kontrol Verileri</h4>
+                            <div className="bg-purple-50 p-3 rounded">
+                              <div className="text-sm text-purple-700 mb-2">
+                                <strong>Tarih:</strong> {new Date(recipe.selectedSeraKontrolData.date).toLocaleDateString('tr-TR')}
+                              </div>
+                              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                                {recipe.selectedSeraKontrolData.items?.slice(0, 6).map((item: any, index: number) => (
+                                  <div key={index} className="bg-white p-2 rounded text-xs">
+                                    <div className="flex items-center justify-between">
+                                      <span className="font-medium text-purple-700 truncate">{item.label}</span>
+                                      <span className={`px-1 py-0.5 rounded text-xs ${
+                                        item.completed 
+                                          ? 'bg-green-100 text-green-700' 
+                                          : 'bg-red-100 text-red-700'
+                                      }`}>
+                                        {item.completed ? '✓' : '✗'}
+                                      </span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
                           </div>
                         )}

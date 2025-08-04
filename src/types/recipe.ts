@@ -75,5 +75,7 @@ export interface CreateRecipeData {
   fertilization3: string;
   topFeeding: string;
   notes: string;
+  selectedSeraKontrolId?: string;
+  selectedSeraKontrolData?: any;
   weatherData: WeatherData[];
 } 
