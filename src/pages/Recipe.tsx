@@ -666,50 +666,151 @@ const RecipePage: React.FC = () => {
                           </div>
                         </div>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div className="space-y-6 mb-4">
+                          {/* Gübreleme Programı */}
                           <div>
-                            <h4 className="font-medium text-slate-700 mb-2 text-xs">Gübreleme Programı</h4>
-                            <div className="space-y-2">
+                            <h4 className="font-semibold text-slate-800 mb-4 text-base border-b border-slate-300 pb-2">
+                              🌱 Gübreleme Programı
+                            </h4>
+                            <div className="space-y-4">
                               {recipe.fertilization1 && (
-                                <div className="bg-slate-50 p-2 rounded text-xs">
-                                  <span className="font-medium text-slate-700">1. Gübreleme:</span>
-                                  <p className="text-slate-600 mt-1">{recipe.fertilization1}</p>
+                                <div className="border-l-4 border-green-500 pl-4 py-2">
+                                  <div className="flex items-center mb-2">
+                                    <span className="text-green-700 font-semibold text-sm mr-3">
+                                      1. Uygulama
+                                    </span>
+                                  </div>
+                                  <p className="text-slate-800 text-sm leading-relaxed">{recipe.fertilization1}</p>
                                 </div>
                               )}
                               {recipe.fertilization2 && (
-                                <div className="bg-slate-50 p-2 rounded text-xs">
-                                  <span className="font-medium text-slate-700">2. Gübreleme:</span>
-                                  <p className="text-slate-600 mt-1">{recipe.fertilization2}</p>
+                                <div className="border-l-4 border-blue-500 pl-4 py-2">
+                                  <div className="flex items-center mb-2">
+                                    <span className="text-blue-700 font-semibold text-sm mr-3">
+                                      2. Uygulama
+                                    </span>
+                                  </div>
+                                  <p className="text-slate-800 text-sm leading-relaxed">{recipe.fertilization2}</p>
                                 </div>
                               )}
                               {recipe.fertilization3 && (
-                                <div className="bg-slate-50 p-2 rounded text-xs">
-                                  <span className="font-medium text-slate-700">3. Gübreleme:</span>
-                                  <p className="text-slate-600 mt-1">{recipe.fertilization3}</p>
+                                <div className="border-l-4 border-purple-500 pl-4 py-2">
+                                  <div className="flex items-center mb-2">
+                                    <span className="text-purple-700 font-semibold text-sm mr-3">
+                                      3. Uygulama
+                                    </span>
+                                  </div>
+                                  <p className="text-slate-800 text-sm leading-relaxed">{recipe.fertilization3}</p>
+                                </div>
+                              )}
+                              {!recipe.fertilization1 && !recipe.fertilization2 && !recipe.fertilization3 && (
+                                <div className="border-l-4 border-slate-300 pl-4 py-2">
+                                  <p className="text-slate-500 text-sm italic">Gübreleme programı belirtilmemiş</p>
                                 </div>
                               )}
                             </div>
                           </div>
-                          
+
+                          {/* Üstten Besleme */}
                           <div>
-                            <h4 className="font-medium text-slate-700 mb-2 text-xs">Üstten Besleme</h4>
+                            <h4 className="font-semibold text-slate-800 mb-4 text-base border-b border-slate-300 pb-2">
+                              💧 Üstten Besleme
+                            </h4>
                             {recipe.topFeeding ? (
-                              <div className="bg-slate-50 p-2 rounded text-xs">
-                                <p className="text-slate-700">{recipe.topFeeding}</p>
+                              <div className="border-l-4 border-amber-500 pl-4 py-2">
+                                <div className="flex items-center mb-2">
+                                  <span className="text-amber-700 font-semibold text-sm mr-3">
+                                    Besleme Bilgisi
+                                  </span>
+                                </div>
+                                <p className="text-slate-800 text-sm leading-relaxed">{recipe.topFeeding}</p>
                               </div>
                             ) : (
-                              <p className="text-slate-500 text-xs italic">Üstten besleme bilgisi yok</p>
-                            )}
-                            
-                            {recipe.notes && (
-                              <div className="mt-3">
-                                <h4 className="font-medium text-slate-700 mb-2 text-xs">Notlar</h4>
-                                <div className="bg-slate-50 p-2 rounded text-xs">
-                                  <p className="text-slate-700">{recipe.notes}</p>
-                                </div>
+                              <div className="border-l-4 border-slate-300 pl-4 py-2">
+                                <p className="text-slate-500 text-sm italic">Üstten besleme bilgisi belirtilmemiş</p>
                               </div>
                             )}
                           </div>
+
+                          {/* Sera Kontrol Bilgileri */}
+                          {recipe.selectedSeraKontrolData && (
+                            <div>
+                              <h4 className="font-semibold text-slate-800 mb-4 text-base border-b border-slate-300 pb-2">
+                                📊 Sera Kontrol Bilgileri
+                              </h4>
+                              <div className="space-y-3">
+                                <div className="border-l-4 border-indigo-500 pl-4 py-2">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                      <span className="text-indigo-700 font-semibold text-sm">📅 Kontrol Tarihi:</span>
+                                      <p className="text-slate-800 text-sm mt-1">
+                                        {new Date(recipe.selectedSeraKontrolData.date).toLocaleDateString('tr-TR')}
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <span className="text-indigo-700 font-semibold text-sm">🕐 Kontrol Saati:</span>
+                                      <p className="text-slate-800 text-sm mt-1">
+                                        {recipe.selectedSeraKontrolData.timeFormatted || 'Belirtilmemiş'}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                {recipe.selectedSeraKontrolData.items && (
+                                  <div className="border-l-4 border-indigo-500 pl-4 py-2">
+                                    <span className="text-indigo-700 font-semibold text-sm mb-3 block">✅ Kontrol Maddeleri:</span>
+                                    <div className="space-y-2">
+                                      {recipe.selectedSeraKontrolData.items.slice(0, 8).map((item, index) => (
+                                        <div key={index} className="flex items-center justify-between">
+                                          <span className="text-slate-700 text-sm">{item.label}</span>
+                                          <span className={`text-xs px-2 py-1 rounded ${
+                                            item.completed 
+                                              ? 'text-green-700 bg-green-50' 
+                                              : 'text-red-700 bg-red-50'
+                                          }`}>
+                                            {item.completed ? '✓ Tamamlandı' : '✗ Eksik'}
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Hava Durumu */}
+                          {recipe.weatherData && recipe.weatherData.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold text-slate-800 mb-4 text-base border-b border-slate-300 pb-2">
+                                🌤️ Hava Durumu
+                              </h4>
+                              <div className="border-l-4 border-cyan-500 pl-4 py-2">
+                                <div className="space-y-2">
+                                  {recipe.weatherData.slice(0, 5).map((weather, index) => (
+                                    <div key={index} className="flex items-center justify-between">
+                                      <span className="text-slate-700 text-sm">{weather.day}</span>
+                                      <span className="text-slate-800 text-sm font-medium">
+                                        {weather.icon} {weather.minTemp}°C - {weather.maxTemp}°C
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Danışman Notları */}
+                          {recipe.notes && (
+                            <div>
+                              <h4 className="font-semibold text-slate-800 mb-4 text-base border-b border-slate-300 pb-2">
+                                📝 Danışman Notları
+                              </h4>
+                              <div className="border-l-4 border-emerald-500 pl-4 py-2">
+                                <p className="text-slate-800 text-sm leading-relaxed">{recipe.notes}</p>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                       
@@ -855,50 +956,151 @@ const RecipePage: React.FC = () => {
                           </div>
                         </div>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div className="space-y-6 mb-4">
+                          {/* Gübreleme Programı */}
                           <div>
-                            <h4 className="font-medium text-slate-700 mb-2 text-xs">Gübreleme Programı</h4>
-                            <div className="space-y-2">
+                            <h4 className="font-semibold text-slate-800 mb-4 text-base border-b border-slate-300 pb-2">
+                              🌱 Gübreleme Programı
+                            </h4>
+                            <div className="space-y-4">
                               {recipe.fertilization1 && (
-                                <div className="bg-slate-50 p-2 rounded text-xs">
-                                  <span className="font-medium text-slate-700">1. Gübreleme:</span>
-                                  <p className="text-slate-600 mt-1">{recipe.fertilization1}</p>
+                                <div className="border-l-4 border-green-500 pl-4 py-2">
+                                  <div className="flex items-center mb-2">
+                                    <span className="text-green-700 font-semibold text-sm mr-3">
+                                      1. Uygulama
+                                    </span>
+                                  </div>
+                                  <p className="text-slate-800 text-sm leading-relaxed">{recipe.fertilization1}</p>
                                 </div>
                               )}
                               {recipe.fertilization2 && (
-                                <div className="bg-slate-50 p-2 rounded text-xs">
-                                  <span className="font-medium text-slate-700">2. Gübreleme:</span>
-                                  <p className="text-slate-600 mt-1">{recipe.fertilization2}</p>
+                                <div className="border-l-4 border-blue-500 pl-4 py-2">
+                                  <div className="flex items-center mb-2">
+                                    <span className="text-blue-700 font-semibold text-sm mr-3">
+                                      2. Uygulama
+                                    </span>
+                                  </div>
+                                  <p className="text-slate-800 text-sm leading-relaxed">{recipe.fertilization2}</p>
                                 </div>
                               )}
                               {recipe.fertilization3 && (
-                                <div className="bg-slate-50 p-2 rounded text-xs">
-                                  <span className="font-medium text-slate-700">3. Gübreleme:</span>
-                                  <p className="text-slate-600 mt-1">{recipe.fertilization3}</p>
+                                <div className="border-l-4 border-purple-500 pl-4 py-2">
+                                  <div className="flex items-center mb-2">
+                                    <span className="text-purple-700 font-semibold text-sm mr-3">
+                                      3. Uygulama
+                                    </span>
+                                  </div>
+                                  <p className="text-slate-800 text-sm leading-relaxed">{recipe.fertilization3}</p>
+                                </div>
+                              )}
+                              {!recipe.fertilization1 && !recipe.fertilization2 && !recipe.fertilization3 && (
+                                <div className="border-l-4 border-slate-300 pl-4 py-2">
+                                  <p className="text-slate-500 text-sm italic">Gübreleme programı belirtilmemiş</p>
                                 </div>
                               )}
                             </div>
                           </div>
-                          
+
+                          {/* Üstten Besleme */}
                           <div>
-                            <h4 className="font-medium text-slate-700 mb-2 text-xs">Üstten Besleme</h4>
+                            <h4 className="font-semibold text-slate-800 mb-4 text-base border-b border-slate-300 pb-2">
+                              💧 Üstten Besleme
+                            </h4>
                             {recipe.topFeeding ? (
-                              <div className="bg-slate-50 p-2 rounded text-xs">
-                                <p className="text-slate-700">{recipe.topFeeding}</p>
+                              <div className="border-l-4 border-amber-500 pl-4 py-2">
+                                <div className="flex items-center mb-2">
+                                  <span className="text-amber-700 font-semibold text-sm mr-3">
+                                    Besleme Bilgisi
+                                  </span>
+                                </div>
+                                <p className="text-slate-800 text-sm leading-relaxed">{recipe.topFeeding}</p>
                               </div>
                             ) : (
-                              <p className="text-slate-500 text-xs italic">Üstten besleme bilgisi yok</p>
-                            )}
-                            
-                            {recipe.notes && (
-                              <div className="mt-3">
-                                <h4 className="font-medium text-slate-700 mb-2 text-xs">Notlar</h4>
-                                <div className="bg-slate-50 p-2 rounded text-xs">
-                                  <p className="text-slate-700">{recipe.notes}</p>
-                                </div>
+                              <div className="border-l-4 border-slate-300 pl-4 py-2">
+                                <p className="text-slate-500 text-sm italic">Üstten besleme bilgisi belirtilmemiş</p>
                               </div>
                             )}
                           </div>
+
+                          {/* Sera Kontrol Bilgileri */}
+                          {recipe.selectedSeraKontrolData && (
+                            <div>
+                              <h4 className="font-semibold text-slate-800 mb-4 text-base border-b border-slate-300 pb-2">
+                                📊 Sera Kontrol Bilgileri
+                              </h4>
+                              <div className="space-y-3">
+                                <div className="border-l-4 border-indigo-500 pl-4 py-2">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                      <span className="text-indigo-700 font-semibold text-sm">📅 Kontrol Tarihi:</span>
+                                      <p className="text-slate-800 text-sm mt-1">
+                                        {new Date(recipe.selectedSeraKontrolData.date).toLocaleDateString('tr-TR')}
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <span className="text-indigo-700 font-semibold text-sm">🕐 Kontrol Saati:</span>
+                                      <p className="text-slate-800 text-sm mt-1">
+                                        {recipe.selectedSeraKontrolData.timeFormatted || 'Belirtilmemiş'}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                {recipe.selectedSeraKontrolData.items && (
+                                  <div className="border-l-4 border-indigo-500 pl-4 py-2">
+                                    <span className="text-indigo-700 font-semibold text-sm mb-3 block">✅ Kontrol Maddeleri:</span>
+                                    <div className="space-y-2">
+                                      {recipe.selectedSeraKontrolData.items.slice(0, 8).map((item, index) => (
+                                        <div key={index} className="flex items-center justify-between">
+                                          <span className="text-slate-700 text-sm">{item.label}</span>
+                                          <span className={`text-xs px-2 py-1 rounded ${
+                                            item.completed 
+                                              ? 'text-green-700 bg-green-50' 
+                                              : 'text-red-700 bg-red-50'
+                                          }`}>
+                                            {item.completed ? '✓ Tamamlandı' : '✗ Eksik'}
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Hava Durumu */}
+                          {recipe.weatherData && recipe.weatherData.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold text-slate-800 mb-4 text-base border-b border-slate-300 pb-2">
+                                🌤️ Hava Durumu
+                              </h4>
+                              <div className="border-l-4 border-cyan-500 pl-4 py-2">
+                                <div className="space-y-2">
+                                  {recipe.weatherData.slice(0, 5).map((weather, index) => (
+                                    <div key={index} className="flex items-center justify-between">
+                                      <span className="text-slate-700 text-sm">{weather.day}</span>
+                                      <span className="text-slate-800 text-sm font-medium">
+                                        {weather.icon} {weather.minTemp}°C - {weather.maxTemp}°C
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Danışman Notları */}
+                          {recipe.notes && (
+                            <div>
+                              <h4 className="font-semibold text-slate-800 mb-4 text-base border-b border-slate-300 pb-2">
+                                📝 Danışman Notları
+                              </h4>
+                              <div className="border-l-4 border-emerald-500 pl-4 py-2">
+                                <p className="text-slate-800 text-sm leading-relaxed">{recipe.notes}</p>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                       
