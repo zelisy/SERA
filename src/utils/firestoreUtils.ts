@@ -368,7 +368,15 @@ export const getAllProducts = async (): Promise<Product[]> => {
 };
 
 // Deneme ekranı için bağımsız üretici fonksiyonları
-export const saveDenemeProducer = async (producer: { firstName: string; lastName: string }): Promise<string> => {
+export const saveDenemeProducer = async (producer: { 
+  firstName: string; 
+  lastName: string;
+  phone?: string;
+  address?: string;
+  gender?: string;
+  birthDate?: string;
+  registerDate?: string;
+}): Promise<string> => {
   try {
     const docRef = doc(collection(db, 'denemeProducers'));
     await setDoc(docRef, {
@@ -383,10 +391,31 @@ export const saveDenemeProducer = async (producer: { firstName: string; lastName
   }
 };
 
-export const getAllDenemeProducers = async (): Promise<{id: string, firstName: string, lastName: string}[]> => {
+export const getAllDenemeProducers = async (): Promise<{
+  id: string, 
+  firstName: string, 
+  lastName: string,
+  phone?: string,
+  address?: string,
+  gender?: string,
+  birthDate?: string,
+  registerDate?: string
+}[]> => {
   try {
     const querySnapshot = await getDocs(collection(db, 'denemeProducers'));
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as {id: string, firstName: string, lastName: string}));
+    return querySnapshot.docs.map(doc => ({ 
+      id: doc.id, 
+      ...doc.data() 
+    } as {
+      id: string, 
+      firstName: string, 
+      lastName: string,
+      phone?: string,
+      address?: string,
+      gender?: string,
+      birthDate?: string,
+      registerDate?: string
+    }));
   } catch (error) {
     console.error('Tüm deneme üreticileri yüklenemedi:', error);
     throw new Error('Deneme üreticiler yüklenemedi');

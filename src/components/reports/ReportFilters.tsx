@@ -45,10 +45,7 @@ const ReportFilters: React.FC<ReportFiltersProps> = ({
 
 
 
-  // Ürün türleri
-  const cropTypes = [
-    'Domates', 'Salatalık', 'Biber', 'Patlıcan', 'Kabak', 'Fasulye', 'Marul'
-  ];
+
 
   useEffect(() => {
     loadData();
@@ -93,13 +90,7 @@ const ReportFilters: React.FC<ReportFiltersProps> = ({
     handleFilterChange('reportTypes', newTypes);
   };
 
-  const handleCropTypeToggle = (cropType: string) => {
-    const newCropTypes = filters.cropTypes.includes(cropType)
-      ? filters.cropTypes.filter(type => type !== cropType)
-      : [...filters.cropTypes, cropType];
-    
-    handleFilterChange('cropTypes', newCropTypes);
-  };
+
 
   const resetFilters = () => {
     onFiltersChange(getDefaultFilters());
@@ -328,27 +319,7 @@ const ReportFilters: React.FC<ReportFiltersProps> = ({
               </div>
             )}
 
-            {/* Ürün Türleri */}
-            <div className="space-y-3">
-              <div className="flex items-center space-x-2">
-                <Building className="w-4 h-4 text-emerald-600" />
-                <label className={`${isMobile ? 'text-sm' : 'text-base'} font-medium text-slate-700`}>Ürün Türleri</label>
-                <span className="text-xs text-slate-500">({filters.cropTypes.length} seçili)</span>
-              </div>
-              <div className={`grid ${isMobile ? 'grid-cols-2 gap-2' : 'grid-cols-3 gap-3'}`}>
-                {cropTypes.map(cropType => (
-                  <label key={cropType} className="flex items-center space-x-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={filters.cropTypes.includes(cropType)}
-                      onChange={() => handleCropTypeToggle(cropType)}
-                      className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
-                    />
-                    <span className={`${isMobile ? 'text-xs' : 'text-sm'} text-slate-700`}>{cropType}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
+
           </div>
         )}
 

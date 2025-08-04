@@ -36,8 +36,7 @@ export const getDefaultFilters = (): ReportFilters => {
     endDate,
     period: 'month',
     season: `${currentYear}-${currentYear + 1}`,
-    reportTypes: ['production', 'financial'],
-    cropTypes: []
+    reportTypes: ['production', 'financial']
   };
 };
 
