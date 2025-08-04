@@ -381,6 +381,7 @@ const DenemeComponent: React.FC = () => {
           {/* Producers List */}
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
             <h3 className="text-lg font-bold text-slate-800 mb-4 border-b border-gray-200 pb-2">👥 Üretici Listesi</h3>
+            <p className="text-sm text-slate-600 mb-4">Üreticiyi seçmek için kartın üzerine tıklayın veya "Seç" butonunu kullanın.</p>
             {producers.length === 0 ? (
               <div className="text-center py-8 text-slate-500">
                 <div className="text-4xl mb-2">👥</div>
@@ -391,7 +392,8 @@ const DenemeComponent: React.FC = () => {
                  {producers.map((p) => (
                    <div 
                      key={p.id} 
-                     className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+                     className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer hover:border-emerald-300 hover:bg-emerald-50/30 group"
+                     onClick={() => setSelected(p)}
                    >
                      <div className="flex items-start justify-between mb-4">
                        <div className="flex items-center space-x-3">
@@ -401,30 +403,27 @@ const DenemeComponent: React.FC = () => {
                            </span>
                          </div>
                          <div>
-                           <h3 className="text-lg font-bold text-slate-800">
+                           <h3 className="text-lg font-bold text-slate-800 group-hover:text-emerald-700">
                              {p.firstName} {p.lastName}
                            </h3>
                            <p className="text-slate-600 text-sm">{p.gender || 'Belirtilmemiş'}</p>
                          </div>
                        </div>
+                       <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                         <span className="text-emerald-500 text-sm font-medium">👆 Tıklayın</span>
+                       </div>
                        <div className="flex gap-2">
                          <button 
-                           className="p-2 text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors" 
-                           onClick={() => setSelected(p)}
-                           title="Seç"
+                           className="bg-gradient-to-r from-emerald-500 to-blue-500 text-white px-4 py-2 rounded-lg shadow hover:from-emerald-600 hover:to-blue-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm font-medium" 
+                           onClick={(e) => { e.stopPropagation(); setSelected(p); }}
                          >
-                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                           </svg>
+                           ✅ Seç
                          </button>
                          <button 
-                           className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors" 
-                           onClick={() => handleDeleteProducer(p.id)}
-                           title="Sil"
+                           className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-2 rounded-lg shadow hover:from-red-600 hover:to-pink-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-400 text-sm font-medium" 
+                           onClick={(e) => { e.stopPropagation(); handleDeleteProducer(p.id); }}
                          >
-                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                           </svg>
+                           🗑️ Sil
                          </button>
                        </div>
                      </div>
