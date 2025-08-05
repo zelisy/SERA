@@ -127,7 +127,7 @@ const RecipePage: React.FC = () => {
           
           /* Header Section */
           .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid #10b981; }
-          .logo { font-size: 50px; font-weight: 4000; color:rgb(10, 169, 66); text-shadow: 0 1px 2px rgba(0,0,0,0.1); font-family: 'Segoe UI', sans-serif; }
+          .logo { font-size: 50px; font-weight: 900; color: #10b981; text-shadow: 2px 2px 4px rgba(0,0,0,0.3), 1px 1px 2px rgba(0,0,0,0.2), 0 0 8px rgba(16, 185, 129, 0.4); font-family: 'Segoe UI', sans-serif; -webkit-text-stroke: 1px rgba(16, 185, 129, 0.8); letter-spacing: 2px; }
           .header-info { text-align: right; }
           .header-title { font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 5px; font-family: 'Segoe UI', sans-serif; }
           .header-datetime { font-size: 11px; color: #6b7280; margin-bottom: 10px; font-family: 'Segoe UI', sans-serif; font-weight: 500; }

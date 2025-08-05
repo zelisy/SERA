@@ -3,8 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { getProducerById, getSeraKontrolRecords } from '../utils/firestoreUtils';
 import { saveRecipe } from '../utils/recipeUtils';
+import { fetchWeatherData } from '../utils/weatherUtils';
 import type { Producer } from '../types/producer';
 import type { ChecklistItem } from '../types/checklist';
+import type { WeatherData } from '../utils/weatherUtils';
 
 interface Fertilization {
   date: string;
@@ -35,6 +37,94 @@ const RecipeCreatePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [seraKontrolRecords, setSeraKontrolRecords] = useState<any[]>([]);
   const [selectedSeraKontrolData, setSelectedSeraKontrolData] = useState<any | null>(null);
+  const [weatherData, setWeatherData] = useState<WeatherData[]>([]);
+  const [weatherLoading, setWeatherLoading] = useState(false);
+  const [userLocation, setUserLocation] = useState<string>('');
+  const [locationLoading, setLocationLoading] = useState(true);
+  const [lastLocation, setLastLocation] = useState<{lat: number, lon: number} | null>(null);
+
+  // Koordinatları şehir adına çeviren fonksiyon
+  const getCityNameFromCoordinates = async (latitude: number, longitude: number): Promise<string> => {
+    try {
+      // Önce OpenWeather API ile deneyelim
+      const response = await fetch(
+        `https://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&limit=5&appid=${import.meta.env.VITE_OPENWEATHER_API_KEY}`
+      );
+      
+      if (response.ok) {
+        const locationData = await response.json();
+        if (locationData.length > 0) {
+          // En uygun sonucu bul (şehir + ilçe kombinasyonu)
+          let bestLocation = locationData[0];
+          
+          // Şehir ve ilçe bilgisi olan bir sonuç ara
+          for (const location of locationData) {
+            if (location.name && location.state && location.name !== location.state) {
+              bestLocation = location;
+              break;
+            }
+          }
+          
+          const cityName = bestLocation.name || 'Bilinmeyen Şehir';
+          const stateName = bestLocation.state || '';
+          const countryName = bestLocation.country || '';
+          
+          let locationString = `📍 ${cityName}`;
+          if (stateName && stateName !== cityName) {
+            locationString += `, ${stateName}`;
+          }
+          if (countryName) {
+            locationString += `, ${countryName}`;
+          }
+          
+          return locationString;
+        }
+      }
+      
+      // OpenWeather API başarısız olursa Nominatim API'yi dene
+      const nominatimResponse = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10&addressdetails=1`
+      );
+      
+      if (nominatimResponse.ok) {
+        const nominatimData = await nominatimResponse.json();
+        const address = nominatimData.address;
+        
+        if (address) {
+          const city = address.city || address.town || address.village || address.county || '';
+          const district = address.suburb || address.district || address.neighbourhood || '';
+          const state = address.state || '';
+          const country = address.country || '';
+          
+          let locationString = '📍 ';
+          if (city) {
+            locationString += city;
+          }
+          if (district && district !== city) {
+            locationString += `, ${district}`;
+          }
+          if (state && state !== city && state !== district) {
+            locationString += `, ${state}`;
+          }
+          if (country) {
+            locationString += `, ${country}`;
+          }
+          
+          if (locationString === '📍 ') {
+            return `📍 ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+          }
+          
+          return locationString;
+        }
+      }
+      
+      // Her iki API de başarısız olursa koordinatları göster
+      return `📍 ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+    } catch (error) {
+      console.log('Konum adı alınamadı, koordinat kullanılıyor');
+      return `📍 ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+    }
+  };
   
   const { register, control, handleSubmit, watch } = useForm<FormData>({
     defaultValues: {
@@ -50,7 +140,7 @@ const RecipeCreatePage: React.FC = () => {
 
   const selectedSeraKontrol = watch('selectedSeraKontrol');
 
-  // Üretici ve sera kontrol verilerini yükle
+  // Üretici, sera kontrol ve hava durumu verilerini yükle
   useEffect(() => {
     const loadData = async () => {
       if (!producerId) {
@@ -61,10 +151,15 @@ const RecipeCreatePage: React.FC = () => {
 
       try {
         setLoading(true);
-        const [producerData, seraKontrolData] = await Promise.all([
+        setWeatherLoading(true);
+        
+        const [producerData, seraKontrolData, weatherDataResult] = await Promise.all([
           getProducerById(producerId),
-          getSeraKontrolRecords(producerId)
+          getSeraKontrolRecords(producerId),
+          fetchWeatherData()
         ]);
+        
+        console.log('Weather data result:', weatherDataResult);
         
         if (producerData) {
           setProducer(producerData);
@@ -73,16 +168,122 @@ const RecipeCreatePage: React.FC = () => {
         }
         
         setSeraKontrolRecords(seraKontrolData);
+        setWeatherData(weatherDataResult);
+        
+        // Kullanıcı konumunu belirle
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              const { latitude, longitude } = position.coords;
+              const currentLocation = { lat: latitude, lon: longitude };
+              
+              // Konum değişip değişmediğini kontrol et
+              const locationChanged = !lastLocation || 
+                Math.abs(lastLocation.lat - latitude) > 0.01 || 
+                Math.abs(lastLocation.lon - longitude) > 0.01;
+              
+              if (locationChanged) {
+                console.log('Konum değişikliği tespit edildi, hava durumu güncelleniyor...');
+                setLastLocation(currentLocation);
+                setLocationLoading(true);
+                
+                try {
+                  // Koordinatları şehir adına çevir
+                  const locationString = await getCityNameFromCoordinates(latitude, longitude);
+                  setUserLocation(locationString);
+                  
+                  // Yeni konum için hava durumu verilerini güncelle
+                  setWeatherLoading(true);
+                  const newWeatherData = await fetchWeatherData();
+                  setWeatherData(newWeatherData);
+                  setWeatherLoading(false);
+                  
+                          } catch (error) {
+            console.log('Konum adı alınamadı, koordinat kullanılıyor');
+            setUserLocation(`📍 ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+          } finally {
+            setLocationLoading(false);
+          }
+              }
+            },
+            () => {
+              setUserLocation('📍 İstanbul, Türkiye (Varsayılan)');
+              setLocationLoading(false);
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 300000
+            }
+          );
+        } else {
+          setUserLocation('📍 İstanbul, Türkiye (Varsayılan)');
+          setLocationLoading(false);
+        }
       } catch (err) {
         setError('Veriler yüklenirken hata oluştu');
         console.error('Veri yükleme hatası:', err);
       } finally {
         setLoading(false);
+        setWeatherLoading(false);
       }
     };
 
     loadData();
   }, [producerId]);
+
+  // Sürekli konum takibi
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+
+    const watchId = navigator.geolocation.watchPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        const currentLocation = { lat: latitude, lon: longitude };
+        
+        // Konum değişip değişmediğini kontrol et (1km tolerans)
+        const locationChanged = !lastLocation || 
+          Math.abs(lastLocation.lat - latitude) > 0.01 || 
+          Math.abs(lastLocation.lon - longitude) > 0.01;
+        
+        if (locationChanged) {
+          console.log('Konum değişikliği tespit edildi, hava durumu güncelleniyor...');
+          setLastLocation(currentLocation);
+          setLocationLoading(true);
+          
+          try {
+            // Koordinatları şehir adına çevir
+            const locationString = await getCityNameFromCoordinates(latitude, longitude);
+            setUserLocation(locationString);
+            
+            // Yeni konum için hava durumu verilerini güncelle
+            setWeatherLoading(true);
+            const newWeatherData = await fetchWeatherData();
+            setWeatherData(newWeatherData);
+            setWeatherLoading(false);
+            
+          } catch (error) {
+            console.log('Konum adı alınamadı, koordinat kullanılıyor');
+            setUserLocation(`📍 ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+          } finally {
+            setLocationLoading(false);
+          }
+        }
+      },
+      (error) => {
+        console.log('Konum takibi hatası:', error.message);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000
+      }
+    );
+
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
+  }, [lastLocation]);
 
   // Seçilen sera kontrol verilerini güncelle
   useEffect(() => {
@@ -162,16 +363,7 @@ const RecipeCreatePage: React.FC = () => {
         selectedSeraKontrolData: selectedSeraKontrolData,
         tuzakBilgileri: tuzakBilgileri,
         zararlıBilgileri: zararlıBilgileri,
-        weatherData: [
-          {
-            date: new Date().toISOString().split('T')[0],
-            day: 'Bugün',
-            icon: '☀️',
-            minTemp: 24,
-            maxTemp: 32,
-            description: '24°C - 32°C'
-          }
-        ]
+        weatherData: weatherData
       };
 
       console.log('Reçete Kaydedildi:', recipeData);
@@ -582,6 +774,133 @@ const RecipeCreatePage: React.FC = () => {
                 )}
               </div>
             )}
+          </div>
+
+          {/* Hava Durumu Bölümü */}
+          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+            <h2 className="font-bold text-slate-900 text-xl mb-4 flex items-center">
+              <span className="mr-3">🌤️</span>
+              Canlı Konum Hava Durumu
+            </h2>
+            
+            <div className="mb-4">
+              {locationLoading ? (
+                <div className="flex items-center space-x-2 mb-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-slate-300 border-t-slate-600"></div>
+                  <p className="text-sm text-slate-600">Konum belirleniyor...</p>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2 mb-2">
+                  <p className="text-sm font-medium text-slate-800">{userLocation}</p>
+                  <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-full">
+                    Canlı Konum
+                  </span>
+                </div>
+              )}
+              <p className="text-xs text-slate-500">10 günlük hava durumu tahmini</p>
+            </div>
+
+            {weatherLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-slate-300 border-t-slate-600 mx-auto mb-3"></div>
+                <p className="text-slate-600 text-sm">Hava durumu verileri yükleniyor...</p>
+              </div>
+            ) : weatherData.length > 0 ? (
+              <div className="space-y-3">
+                <div className="grid grid-cols-5 gap-2">
+                  {weatherData.slice(0, 5).map((weather, index) => (
+                    <div key={index} className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3 text-center border border-blue-100 hover:shadow-md transition-shadow">
+                      <div className="text-xs font-medium text-slate-600 mb-1">{weather.day}</div>
+                      <div className="text-lg mb-1">{weather.icon}</div>
+                      <div className="text-xs font-bold text-slate-800">{weather.minTemp}°</div>
+                      <div className="text-xs text-slate-600">{weather.maxTemp}°</div>
+                      <div className="text-xs text-slate-500 mt-1 truncate" title={weather.description}>
+                        {weather.description}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="grid grid-cols-5 gap-2">
+                  {weatherData.slice(5, 10).map((weather, index) => (
+                    <div key={index + 5} className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3 text-center border border-blue-100 hover:shadow-md transition-shadow">
+                      <div className="text-xs font-medium text-slate-600 mb-1">{weather.day}</div>
+                      <div className="text-lg mb-1">{weather.icon}</div>
+                      <div className="text-xs font-bold text-slate-800">{weather.minTemp}°</div>
+                      <div className="text-xs text-slate-600">{weather.maxTemp}°</div>
+                      <div className="text-xs text-slate-500 mt-1 truncate" title={weather.description}>
+                        {weather.description}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 p-3 bg-slate-50 rounded-lg">
+                  <p className="text-xs text-slate-600">
+                    <strong>Not:</strong> Bu hava durumu verileri reçete PDF'inde de görünecektir.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-6">
+                <div className="text-3xl mb-3">🌤️</div>
+                <p className="text-slate-600 text-sm">Hava durumu verileri yüklenemedi</p>
+                <p className="text-xs text-slate-500 mt-2">API anahtarı veya internet bağlantısı kontrol edin</p>
+                <div className="mt-3 p-2 bg-red-50 rounded text-xs text-red-600">
+                  <p>Debug: weatherData.length = {weatherData.length}</p>
+                  <p>Debug: weatherLoading = {weatherLoading.toString()}</p>
+                </div>
+              </div>
+            )}
+            
+            {/* Manuel Güncelleme Butonu */}
+            <div className="mt-4 flex justify-center">
+              <button
+                type="button"
+                onClick={async () => {
+                  if (navigator.geolocation) {
+                    setLocationLoading(true);
+                    setWeatherLoading(true);
+                    
+                    try {
+                      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+                        navigator.geolocation.getCurrentPosition(resolve, reject, {
+                          enableHighAccuracy: true,
+                          timeout: 10000,
+                          maximumAge: 0
+                        });
+                      });
+                      
+                      const { latitude, longitude } = position.coords;
+                      const locationString = await getCityNameFromCoordinates(latitude, longitude);
+                      setUserLocation(locationString);
+                      
+                      // Yeni konum için hava durumu verilerini güncelle
+                      const newWeatherData = await fetchWeatherData();
+                      setWeatherData(newWeatherData);
+                      
+                    } catch (error) {
+                      console.log('Manuel güncelleme hatası:', error);
+                    } finally {
+                      setLocationLoading(false);
+                      setWeatherLoading(false);
+                    }
+                  }
+                }}
+                disabled={locationLoading || weatherLoading}
+                className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors text-sm font-medium flex items-center space-x-2"
+              >
+                {locationLoading || weatherLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                    <span>Güncelleniyor...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>🔄</span>
+                    <span>Hava Durumunu Güncelle</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Danışman Notu */}

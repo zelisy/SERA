@@ -87,25 +87,31 @@ export const fetchWeatherData = async (): Promise<WeatherData[]> => {
   try {
     const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
     
+    console.log('Weather API Key kontrol ediliyor...');
+    console.log('API Key mevcut:', !!apiKey);
+    
     if (!apiKey) {
-      if (import.meta.env.DEV) {
-        console.log('OpenWeather API anahtarı bulunamadı. Mock veri kullanılıyor.');
-      }
+      console.log('OpenWeather API anahtarı bulunamadı. Mock veri kullanılıyor.');
       return generateMockWeatherData();
     }
 
     // Kullanıcının konumunu al
     const { lat, lon } = await getUserLocation();
+    console.log('Kullanıcı konumu alındı:', { lat, lon });
     
-    const response = await fetch(
-      `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=tr`
-    );
+    const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=tr`;
+    console.log('Weather API URL:', url);
+    
+    const response = await fetch(url);
+    console.log('Weather API Response status:', response.status);
     
     if (!response.ok) {
+      console.error('Weather API Error:', response.status, response.statusText);
       throw new Error('Hava durumu verileri alınamadı');
     }
     
     const data = await response.json();
+    console.log('Weather API Response data:', data);
     
     // 10 günlük tahmin için verileri işle
     const processedData: WeatherData[] = [];
@@ -138,6 +144,7 @@ export const fetchWeatherData = async (): Promise<WeatherData[]> => {
       }
     }
     
+    console.log('İşlenmiş hava durumu verileri:', processedData);
     return processedData;
   } catch (error) {
     console.error('Hava durumu verisi alınamadı:', error);
