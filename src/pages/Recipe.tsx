@@ -7,6 +7,7 @@ import type { Recipe } from '../types/recipe';
 import type { ChecklistItem } from '../types/checklist';
 import { getRecipesByProducer, deleteRecipe } from '../utils/recipeUtils';
 import { getProducerById } from '../utils/firestoreUtils';
+import { fetchWeatherData } from '../utils/weatherUtils';
 
 const RecipePage: React.FC = () => {
   const [selectedProducer, setSelectedProducer] = useState<Producer | null>(null);
@@ -69,8 +70,10 @@ const RecipePage: React.FC = () => {
     }
   };
 
-  const generatePDF = (recipe: Recipe) => {
+  const generatePDF = async (recipe: Recipe) => {
     try {
+      // Hava durumu verilerini al (otomatik konum algılama ile)
+      const weatherData = await fetchWeatherData();
       // Parse fonksiyonları
       const parseFertilizationData = (fertString: string) => {
         // Örnek format: "2025-07-31 03:40 - Su: 100ml, Süre: 3dk, Ürünler: aaa"
@@ -124,7 +127,7 @@ const RecipePage: React.FC = () => {
           
           /* Header Section */
           .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid #10b981; }
-          .logo { font-size: 28px; font-weight: bold; color: #10b981; }
+          .logo { font-size: 50px; font-weight: 4000; color:rgb(10, 169, 66); text-shadow: 0 1px 2px rgba(0,0,0,0.1); font-family: 'Segoe UI', sans-serif; }
           .header-info { text-align: right; }
           .header-title { font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 5px; font-family: 'Segoe UI', sans-serif; }
           .header-datetime { font-size: 11px; color: #6b7280; margin-bottom: 10px; font-family: 'Segoe UI', sans-serif; font-weight: 500; }
@@ -211,9 +214,9 @@ const RecipePage: React.FC = () => {
             <div class="section-card">
               <div class="section-title">🌱 Gübreleme Programı</div>
               <div class="section-subtitle">1 Dönüme / Dekara</div>
-              ${[recipe.fertilization1, recipe.fertilization2, recipe.fertilization3]
-                .filter(Boolean)
-                .map((fert, index: number) => {
+                              ${[recipe.fertilization1, recipe.fertilization2, recipe.fertilization3]
+                  .filter(Boolean)
+                  .map((fert) => {
                   // Fertilization verilerini parse et
                   const fertData = parseFertilizationData(fert);
                   return `
@@ -241,7 +244,7 @@ const RecipePage: React.FC = () => {
               <div class="section-title">💧 Üsten Besleme</div>
               <div class="section-subtitle">100 lt suya</div>
               ${recipe.topFeeding ? `
-                ${parseTopFeedingData(recipe.topFeeding).map((feed, index) => {
+                ${parseTopFeedingData(recipe.topFeeding).map((feed) => {
                   return `
                     <div class="application-card">
                       <div class="application-header">
@@ -339,7 +342,7 @@ const RecipePage: React.FC = () => {
             <div class="section-card">
               <div class="section-title">🌤️ Hava Durumu</div>
               <div class="section-subtitle">10 GÜNLÜK TAHMIN</div>
-              ${recipe.weatherData && recipe.weatherData.length > 0 ? `
+              ${weatherData && weatherData.length > 0 ? `
                 <table class="weather-table">
                   <thead>
                     <tr>
@@ -350,7 +353,7 @@ const RecipePage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    ${recipe.weatherData.slice(0, 10).map((weather, index) => `
+                    ${weatherData.slice(0, 10).map((weather) => `
                       <tr>
                         <td>${weather.day}</td>
                         <td class="weather-icon">${weather.icon}</td>
@@ -667,9 +670,23 @@ const RecipePage: React.FC = () => {
                           👁️ Önizle
                         </button>
                         <button
-                          onClick={() => generatePDF(recipe)}
+                          onClick={async () => {
+                            // Loading mesajı göster
+                            const button = event?.target as HTMLButtonElement;
+                            const originalText = button.innerHTML;
+                            button.innerHTML = '📍 Konum alınıyor...';
+                            button.disabled = true;
+                            
+                            try {
+                              await generatePDF(recipe);
+                            } finally {
+                              // Button'u eski haline getir
+                              button.innerHTML = originalText;
+                              button.disabled = false;
+                            }
+                          }}
                           className="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors font-medium"
-                          title="PDF İndir"
+                          title="PDF İndir (Konum algılama ile)"
                         >
                           📥 İndir
                         </button>

@@ -54,7 +54,36 @@ export const generateMockWeatherData = (): WeatherData[] => {
   return mockData;
 };
 
-export const fetchWeatherData = async (lat: number = 41.0082, lon: number = 28.9784): Promise<WeatherData[]> => {
+// Kullanıcının konumunu al
+export const getUserLocation = (): Promise<{lat: number, lon: number}> => {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      console.log('Geolocation desteklenmiyor. Varsayılan konum kullanılıyor.');
+      resolve({ lat: 41.0082, lon: 28.9784 }); // İstanbul varsayılan
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        console.log(`Kullanıcı konumu: ${lat}, ${lon}`);
+        resolve({ lat, lon });
+      },
+      (error) => {
+        console.log('Konum alınamadı, varsayılan konum kullanılıyor:', error.message);
+        resolve({ lat: 41.0082, lon: 28.9784 }); // İstanbul varsayılan
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000 // 5 dakika cache
+      }
+    );
+  });
+};
+
+export const fetchWeatherData = async (): Promise<WeatherData[]> => {
   try {
     const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
     
@@ -64,6 +93,9 @@ export const fetchWeatherData = async (lat: number = 41.0082, lon: number = 28.9
       }
       return generateMockWeatherData();
     }
+
+    // Kullanıcının konumunu al
+    const { lat, lon } = await getUserLocation();
     
     const response = await fetch(
       `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=tr`
