@@ -73,7 +73,6 @@ const DenemeComponent: React.FC = () => {
   const [editIndex, setEditIndex] = React.useState<number | null>(null); // Düzenlenen formun indexi
   const [modalOpen, setModalOpen] = React.useState(false);
   const [modalData, setModalData] = React.useState<any | null>(null);
-  const navigate = useNavigate();
   const [imageModalOpen, setImageModalOpen] = React.useState(false);
   const [imageModalIndex, setImageModalIndex] = React.useState<number>(0);
   const [imageModalImages, setImageModalImages] = React.useState<string[]>([]);
@@ -219,28 +218,18 @@ const DenemeComponent: React.FC = () => {
   // ADIM 1: Üretici seçimi
   if (!selected) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-emerald-50">
-        <div className="p-4 lg:p-6 max-w-4xl mx-auto">
-          <button onClick={() => navigate(-1)} className="mb-6 bg-gradient-to-r from-gray-300 to-gray-400 text-gray-800 font-semibold py-2 px-6 rounded-xl shadow hover:from-gray-400 hover:to-gray-500 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400">
-            ← Geri
-          </button>
+      <div className="min-h-screen bg-gray-50">
+        <div className="p-4 lg:p-6">
           
-          {/* Header Section - PDF Style */}
-          <div className="mb-8 text-center bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-            <div className="mb-4">
-              <h1 className="text-3xl lg:text-4xl font-bold text-slate-800 mb-2">
-                Deneme Formu Detayı
-              </h1>
-              
-            </div>
-            <div className="border-b-2 border-emerald-500 pb-4">
-              <p className="text-slate-600 text-lg">
-                Devam etmek için önce bir üretici seçin
-              </p>
-            </div>
+          <div className="mb-6 text-center">
+            <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-2">
+              Deneme Formu Detayı
+            </h1>
+            <p className="text-slate-600 text-lg">
+              Devam etmek için önce bir üretici seçin
+            </p>
           </div>
 
-          {/* Progress Steps */}
           <div className="mb-8 max-w-md mx-auto">
             <div className="flex items-center">
               <div className="flex items-center text-emerald-600">
@@ -268,114 +257,114 @@ const DenemeComponent: React.FC = () => {
 
           {/* Add Producer Form */}
           {showAddForm && (
-                          <div className="mb-6 bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-                <h3 className="text-lg font-bold text-slate-800 mb-4 border-b border-gray-200 pb-2">👤 Yeni Üretici Ekle</h3>
-                <form onSubmit={handleAddProducer} className="space-y-6">
-                  {/* Kişisel Bilgiler */}
-                  <div className="bg-gradient-to-br from-emerald-50 to-blue-50 rounded-xl p-4 border border-emerald-200">
-                    <h4 className="text-md font-semibold text-slate-800 mb-3 border-b border-gray-200 pb-2">📋 Kişisel Bilgiler</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">Ad *</label>
-                        <input 
-                          name="firstName" 
-                          value={addForm.firstName} 
-                          onChange={e => setAddForm(f => ({ ...f, firstName: e.target.value }))} 
-                          className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white" 
-                          required 
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">Soyad *</label>
-                        <input 
-                          name="lastName" 
-                          value={addForm.lastName} 
-                          onChange={e => setAddForm(f => ({ ...f, lastName: e.target.value }))} 
-                          className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white" 
-                          required 
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">Cinsiyet</label>
-                        <select 
-                          name="gender" 
-                          value={addForm.gender} 
-                          onChange={e => setAddForm(f => ({ ...f, gender: e.target.value }))} 
-                          className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white"
-                        >
-                          <option value="">Seçiniz</option>
-                          <option value="Erkek">Erkek</option>
-                          <option value="Kadın">Kadın</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">Doğum Tarihi</label>
-                        <input 
-                          type="date"
-                          name="birthDate" 
-                          value={addForm.birthDate} 
-                          onChange={e => setAddForm(f => ({ ...f, birthDate: e.target.value }))} 
-                          className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white" 
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">Kayıt Tarihi</label>
-                        <input 
-                          type="date"
-                          name="registerDate" 
-                          value={addForm.registerDate} 
-                          onChange={e => setAddForm(f => ({ ...f, registerDate: e.target.value }))} 
-                          className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white" 
-                        />
-                      </div>
+            <div className="mb-6 bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+              <h3 className="text-lg font-bold text-slate-800 mb-4 border-b border-gray-200 pb-2">👤 Yeni Üretici Ekle</h3>
+              <form onSubmit={handleAddProducer} className="space-y-6">
+                {/* Kişisel Bilgiler */}
+                <div className="bg-gradient-to-br from-emerald-50 to-blue-50 rounded-xl p-4 border border-emerald-200">
+                  <h4 className="text-md font-semibold text-slate-800 mb-3 border-b border-gray-200 pb-2">📋 Kişisel Bilgiler</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">Ad *</label>
+                      <input 
+                        name="firstName" 
+                        value={addForm.firstName} 
+                        onChange={e => setAddForm(f => ({ ...f, firstName: e.target.value }))} 
+                        className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white" 
+                        required 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">Soyad *</label>
+                      <input 
+                        name="lastName" 
+                        value={addForm.lastName} 
+                        onChange={e => setAddForm(f => ({ ...f, lastName: e.target.value }))} 
+                        className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white" 
+                        required 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">Cinsiyet</label>
+                      <select 
+                        name="gender" 
+                        value={addForm.gender} 
+                        onChange={e => setAddForm(f => ({ ...f, gender: e.target.value }))} 
+                        className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white"
+                      >
+                        <option value="">Seçiniz</option>
+                        <option value="Erkek">Erkek</option>
+                        <option value="Kadın">Kadın</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">Doğum Tarihi</label>
+                      <input 
+                        type="date"
+                        name="birthDate" 
+                        value={addForm.birthDate} 
+                        onChange={e => setAddForm(f => ({ ...f, birthDate: e.target.value }))} 
+                        className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">Kayıt Tarihi</label>
+                      <input 
+                        type="date"
+                        name="registerDate" 
+                        value={addForm.registerDate} 
+                        onChange={e => setAddForm(f => ({ ...f, registerDate: e.target.value }))} 
+                        className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white" 
+                      />
                     </div>
                   </div>
+                </div>
 
-                  {/* İletişim Bilgileri */}
-                  <div className="bg-gradient-to-br from-emerald-50 to-blue-50 rounded-xl p-4 border border-emerald-200">
-                    <h4 className="text-md font-semibold text-slate-800 mb-3 border-b border-gray-200 pb-2">📞 İletişim Bilgileri</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">Telefon</label>
-                        <input 
-                          name="phone" 
-                          value={addForm.phone} 
-                          onChange={e => setAddForm(f => ({ ...f, phone: e.target.value }))} 
-                          className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white" 
-                          placeholder="+90 5XX XXX XX XX"
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">Adres</label>
-                        <textarea 
-                          name="address" 
-                          value={addForm.address} 
-                          onChange={e => setAddForm(f => ({ ...f, address: e.target.value }))} 
-                          className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white resize-none" 
-                          rows={3}
-                          placeholder="Tam adres bilgisi..."
-                        />
-                      </div>
+                {/* İletişim Bilgileri */}
+                <div className="bg-gradient-to-br from-emerald-50 to-blue-50 rounded-xl p-4 border border-emerald-200">
+                  <h4 className="text-md font-semibold text-slate-800 mb-3 border-b border-gray-200 pb-2">📞 İletişim Bilgileri</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">Telefon</label>
+                      <input 
+                        name="phone" 
+                        value={addForm.phone} 
+                        onChange={e => setAddForm(f => ({ ...f, phone: e.target.value }))} 
+                        className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white" 
+                        placeholder="+90 5XX XXX XX XX"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">Adres</label>
+                      <textarea 
+                        name="address" 
+                        value={addForm.address} 
+                        onChange={e => setAddForm(f => ({ ...f, address: e.target.value }))} 
+                        className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white resize-none" 
+                        rows={3}
+                        placeholder="Tam adres bilgisi..."
+                      />
                     </div>
                   </div>
+                </div>
 
-                  <div className="flex justify-end space-x-4">
-                    <button 
-                      type="button" 
-                      onClick={() => setShowAddForm(false)}
-                      className="px-6 py-3 bg-gray-500 text-white rounded-xl font-semibold hover:bg-gray-600 transition-all duration-200"
-                    >
-                      İptal
-                    </button>
-                    <button 
-                      type="submit" 
-                      className="bg-gradient-to-r from-emerald-500 to-blue-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-emerald-600 hover:to-blue-600 transition-all duration-200"
-                    >
-                      Üretici Ekle
-                    </button>
-                  </div>
-                </form>
-              </div>
+                <div className="flex justify-end space-x-4">
+                  <button 
+                    type="button" 
+                    onClick={() => setShowAddForm(false)}
+                    className="px-6 py-3 bg-gray-500 text-white rounded-xl font-semibold hover:bg-gray-600 transition-all duration-200"
+                  >
+                    İptal
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="bg-gradient-to-r from-emerald-500 to-blue-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-emerald-600 hover:to-blue-600 transition-all duration-200"
+                  >
+                    Üretici Ekle
+                  </button>
+                </div>
+              </form>
+            </div>
           )}
 
           {/* Producers List */}
@@ -388,77 +377,48 @@ const DenemeComponent: React.FC = () => {
                 <p>Henüz üretici eklenmedi.</p>
               </div>
             ) : (
-                             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                 {producers.map((p) => (
-                   <div 
-                     key={p.id} 
-                     className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer hover:border-emerald-300 hover:bg-emerald-50/30 group"
-                     onClick={() => setSelected(p)}
-                   >
-                     <div className="flex items-start justify-between mb-4">
-                       <div className="flex items-center space-x-3">
-                         <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-xl flex items-center justify-center">
-                           <span className="text-white text-xl">
-                             {p.gender === 'Erkek' ? '👨' : p.gender === 'Kadın' ? '👩' : '👤'}
-                           </span>
-                         </div>
-                         <div>
-                           <h3 className="text-lg font-bold text-slate-800 group-hover:text-emerald-700">
-                             {p.firstName} {p.lastName}
-                           </h3>
-                           <p className="text-slate-600 text-sm">{p.gender || 'Belirtilmemiş'}</p>
-                         </div>
-                       </div>
-                       <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                         <span className="text-emerald-500 text-sm font-medium">👆 Tıklayın</span>
-                       </div>
-                       <div className="flex gap-2">
-                         <button 
-                           className="bg-gradient-to-r from-emerald-500 to-blue-500 text-white px-4 py-2 rounded-lg shadow hover:from-emerald-600 hover:to-blue-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm font-medium" 
-                           onClick={(e) => { e.stopPropagation(); setSelected(p); }}
-                         >
-                           ✅ Seç
-                         </button>
-                         <button 
-                           className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-2 rounded-lg shadow hover:from-red-600 hover:to-pink-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-400 text-sm font-medium" 
-                           onClick={(e) => { e.stopPropagation(); handleDeleteProducer(p.id); }}
-                         >
-                           🗑️ Sil
-                         </button>
-                       </div>
-                     </div>
-
-                     <div className="space-y-3">
-                       {p.phone && (
-                         <div className="flex items-center space-x-2">
-                           <span className="text-blue-500">📱</span>
-                           <span className="text-slate-700 font-medium">{p.phone}</span>
-                         </div>
-                       )}
-                       {p.address && (
-                         <div className="flex items-start space-x-2">
-                           <span className="text-green-500 mt-1">📍</span>
-                           <span className="text-slate-700 text-sm leading-relaxed">{p.address}</span>
-                         </div>
-                       )}
-                       <div className="grid grid-cols-2 gap-4 pt-3 border-t border-gray-100">
-                         <div className="text-center">
-                           <p className="text-slate-500 text-xs">Doğum Tarihi</p>
-                           <p className="font-bold text-slate-800">
-                             {p.birthDate ? new Date(p.birthDate).toLocaleDateString('tr-TR') : 'Belirtilmemiş'}
-                           </p>
-                         </div>
-                         <div className="text-center">
-                           <p className="text-slate-500 text-xs">Kayıt Tarihi</p>
-                           <p className="font-bold text-slate-800">
-                             {p.registerDate ? new Date(p.registerDate).toLocaleDateString('tr-TR') : 'Belirtilmemiş'}
-                           </p>
-                         </div>
-                       </div>
-                     </div>
-                   </div>
-                 ))}
-               </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                {producers.map((p) => (
+                  <div 
+                    key={p.id} 
+                    className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer hover:border-emerald-300 hover:bg-emerald-50/30 group"
+                    onClick={() => setSelected(p)}
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-xl flex items-center justify-center">
+                          <span className="text-white text-xl">
+                            {p.gender === 'Erkek' ? '👨' : p.gender === 'Kadın' ? '👩' : '👤'}
+                          </span>
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-slate-800 group-hover:text-emerald-700">
+                            {p.firstName} {p.lastName}
+                          </h3>
+                          <p className="text-slate-600 text-sm">{p.gender || 'Belirtilmemiş'}</p>
+                        </div>
+                      </div>
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <span className="text-emerald-500 text-sm font-medium">👆 Tıklayın</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <button 
+                          className="bg-gradient-to-r from-emerald-500 to-blue-500 text-white px-4 py-2 rounded-lg shadow hover:from-emerald-600 hover:to-blue-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm font-medium" 
+                          onClick={(e) => { e.stopPropagation(); setSelected(p); }}
+                        >
+                          ✅ Seç
+                        </button>
+                        <button 
+                          className="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-400 text-sm font-medium" 
+                          onClick={(e) => { e.stopPropagation(); handleDeleteProducer(p.id); }}
+                        >
+                          🗑️ Sil
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </div>
