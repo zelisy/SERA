@@ -69,6 +69,11 @@ function AppContent() {
               <Admin />
             </PrivateRoute>
           } />
+          <Route path="/admin/recipes" element={
+            <PrivateRoute>
+              <Admin />
+            </PrivateRoute>
+          } />
           <Route path="/blog-management" element={
             <PrivateRoute>
               <BlogManagement />

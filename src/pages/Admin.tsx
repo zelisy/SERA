@@ -954,6 +954,7 @@ const Admin = () => {
 
   // Route kontrolü - eğer recipe route'undaysa Recipe component'ini göster
   const isRecipeRoute = location.pathname.startsWith('/admin/recipe');
+  const isRecipesRoute = location.pathname === '/admin/recipes';
   const isRecipeCreateRoute = location.pathname.includes('/admin/recipe/create/');
   
   // Route'a göre activeSection'ı ayarla
@@ -1161,7 +1162,7 @@ const Admin = () => {
           <div className="max-w-7xl mx-auto">
             {isRecipeCreateRoute ? (
               <RecipeCreate />
-            ) : isRecipeRoute ? (
+            ) : isRecipeRoute || isRecipesRoute ? (
               <div>
                 <RecipePage />
               </div>
