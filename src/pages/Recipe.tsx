@@ -123,11 +123,15 @@ const RecipePage: React.FC = () => {
           .pdf-container { max-width: 210mm; margin: 0 auto; padding: 20px; background: white; border: 1px solid #000; }
           
           /* Header Section */
-          .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid #10b981; }
+          .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid #10b981; }
           .logo { font-size: 28px; font-weight: bold; color: #10b981; }
           .header-info { text-align: right; }
-          .header-title { font-size: 18px; font-weight: bold; color: #1f2937; margin-bottom: 5px; }
-          .header-datetime { font-size: 12px; color: #6b7280; }
+          .header-title { font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 5px; font-family: 'Segoe UI', sans-serif; }
+          .header-datetime { font-size: 11px; color: #6b7280; margin-bottom: 10px; font-family: 'Segoe UI', sans-serif; font-weight: 500; }
+          .header-producer-details { display: flex; flex-direction: column; gap: 3px; }
+          .producer-detail-row { display: flex; justify-content: space-between; align-items: center; font-size: 10px; line-height: 1.1; }
+          .producer-detail-label { color: #6b7280; font-weight: 600; font-family: 'Segoe UI', sans-serif; }
+          .producer-detail-value { color: #111827; font-weight: 700; font-family: 'Segoe UI', sans-serif; }
           
           /* Producer Info Section */
           .producer-info { background: #f8fafc; border-radius: 12px; padding: 15px; margin-bottom: 25px; border: 1px solid #e2e8f0; }
@@ -178,39 +182,28 @@ const RecipePage: React.FC = () => {
             <div class="header-info">
               <div class="header-title">Üretici Bilgisi</div>
               <div class="header-datetime">Saat: ${new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'})} / Tarih: ${new Date().toLocaleDateString('tr-TR')}</div>
-            </div>
-          </div>
-          
-          <!-- Üretici Bilgileri -->
-          <div class="producer-info">
-            <div class="producer-info-grid">
-              <div class="producer-info-item">
-                <span class="producer-info-label">Ad Soyad:</span>
-                <span class="producer-info-value">${recipe.producerName}</span>
-              </div>
-              <div class="producer-info-item">
-                <span class="producer-info-label">TC:</span>
-                <span class="producer-info-value">${selectedProducer?.tcNo || 'Belirtilmemiş'}</span>
-              </div>
-              <div class="producer-info-item">
-                <span class="producer-info-label">Tel:</span>
-                <span class="producer-info-value">${selectedProducer?.phone || 'Belirtilmemiş'}</span>
-              </div>
-              <div class="producer-info-item">
-                <span class="producer-info-label">Adres:</span>
-                <span class="producer-info-value">${selectedProducer?.address || 'Belirtilmemiş'}</span>
+              <div class="header-producer-details">
+                <div class="producer-detail-row">
+                  <span class="producer-detail-label">Ad Soyad:</span>
+                  <span class="producer-detail-value">${recipe.producerName}</span>
+                </div>
+                <div class="producer-detail-row">
+                  <span class="producer-detail-label">TC:</span>
+                  <span class="producer-detail-value">${selectedProducer?.tcNo || 'Belirtilmemiş'}</span>
+                </div>
+                <div class="producer-detail-row">
+                  <span class="producer-detail-label">Tel:</span>
+                  <span class="producer-detail-value">${selectedProducer?.phone || 'Belirtilmemiş'}</span>
+                </div>
+                <div class="producer-detail-row">
+                  <span class="producer-detail-label">Adres:</span>
+                  <span class="producer-detail-value">${selectedProducer?.address || 'Belirtilmemiş'}</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Üretici Bilgileri -->
-          <div class="section">
-            <div class="section-title">Üretici Bilgileri</div>
-            <div class="info-card">
-              <div class="info-label">Ad Soyad</div>
-              <div class="info-value">${recipe.producerName}</div>
-            </div>
-          </div>
+
 
           <!-- Ana İçerik Grid -->
           <div class="content-grid">
