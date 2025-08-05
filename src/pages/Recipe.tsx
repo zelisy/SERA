@@ -71,6 +71,43 @@ const RecipePage: React.FC = () => {
 
   const generatePDF = (recipe: Recipe) => {
     try {
+      // Parse fonksiyonları
+      const parseFertilizationData = (fertString: string) => {
+        // Örnek format: "2025-07-31 03:40 - Su: 100ml, Süre: 3dk, Ürünler: aaa"
+        const timeMatch = fertString.match(/(\d{2}:\d{2})/);
+        const dateMatch = fertString.match(/(\d{4}-\d{2}-\d{2})/);
+        const waterMatch = fertString.match(/Su:\s*(\d+)ml/);
+        const durationMatch = fertString.match(/Süre:\s*(\d+)dk/);
+        const productsMatch = fertString.match(/Ürünler:\s*(.+)/);
+        
+        return {
+          time: timeMatch ? timeMatch[1] : 'Belirtilmemiş',
+          date: dateMatch ? dateMatch[1].split('-').reverse().join('.') : 'Belirtilmemiş',
+          water: waterMatch ? waterMatch[1] : 'Belirtilmemiş',
+          duration: durationMatch ? durationMatch[1] : 'Belirtilmemiş',
+          products: productsMatch ? productsMatch[1].split(',').map(p => p.trim()) : []
+        };
+      };
+
+      const parseTopFeedingData = (feedingString: string) => {
+        // Örnek format: "2025-08-09 02:40 - sas"
+        const parts = feedingString.split(' - ');
+        if (parts.length >= 2) {
+          const dateTime = parts[0];
+          const products = parts[1];
+          
+          const timeMatch = dateTime.match(/(\d{2}:\d{2})/);
+          const dateMatch = dateTime.match(/(\d{4}-\d{2}-\d{2})/);
+          
+          return [{
+            time: timeMatch ? timeMatch[1] : 'Belirtilmemiş',
+            date: dateMatch ? dateMatch[1].split('-').reverse().join('.') : 'Belirtilmemiş',
+            products: [products]
+          }];
+        }
+        return [];
+      };
+
       // Create HTML content for PDF
       const container = document.createElement('div');
       container.style.width = '210mm';
@@ -82,31 +119,88 @@ const RecipePage: React.FC = () => {
 
       container.innerHTML = `
         <style>
-          .pdf-container { max-width: 170mm; margin: 0 auto; }
-          .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #10b981; padding-bottom: 20px; }
-          .title { font-size: 24px; font-weight: bold; color: #1f2937; margin-bottom: 10px; }
-          .subtitle { font-size: 14px; color: #6b7280; margin-bottom: 5px; }
-          .date { font-size: 12px; color: #9ca3af; }
-          .section { margin-bottom: 25px; }
-          .section-title { font-size: 16px; font-weight: bold; color: #1f2937; margin-bottom: 15px; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; }
-          .info-card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; background: #f9fafb; margin-bottom: 10px; }
-          .info-label { font-size: 10px; color: #6b7280; margin-bottom: 5px; }
-          .info-value { font-size: 14px; font-weight: bold; color: #1f2937; }
-          .table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-          .table th, .table td { border: 1px solid #d1d5db; padding: 8px; text-align: left; font-size: 11px; }
-          .table th { background: #f3f4f6; font-weight: bold; }
-          .table tr:nth-child(even) { background: #f9fafb; }
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+          .pdf-container { max-width: 210mm; margin: 0 auto; padding: 20px; background: white; border: 1px solid #000; }
+          
+          /* Header Section */
+          .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid #10b981; }
+          .logo { font-size: 28px; font-weight: bold; color: #10b981; }
+          .header-info { text-align: right; }
+          .header-title { font-size: 18px; font-weight: bold; color: #1f2937; margin-bottom: 5px; }
+          .header-datetime { font-size: 12px; color: #6b7280; }
+          
+          /* Producer Info Section */
+          .producer-info { background: #f8fafc; border-radius: 12px; padding: 15px; margin-bottom: 25px; border: 1px solid #e2e8f0; }
+          .producer-info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+          .producer-info-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; }
+          .producer-info-label { font-size: 12px; color: #64748b; font-weight: 600; }
+          .producer-info-value { font-size: 13px; color: #1f2937; font-weight: 700; }
+          
+          /* Main Content Grid */
+          .content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
+          
+          /* Section Cards */
+          .section-card { background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
+          .section-title { font-size: 18px; font-weight: bold; color: #1f2937; margin-bottom: 10px; display: flex; align-items: center; }
+          .section-subtitle { font-size: 12px; color: #6b7280; margin-bottom: 15px; font-weight: 500; }
+          
+          /* Application Cards */
+          .application-card { background: #10b981; border-radius: 8px; padding: 12px; margin-bottom: 10px; color: white; }
+          .application-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+          .application-time { font-size: 11px; font-weight: 600; }
+          .application-date { font-size: 11px; font-weight: 600; }
+          .application-details { font-size: 10px; line-height: 1.4; }
+          .application-products { margin-top: 5px; }
+          .product-item { text-decoration: underline; }
+          
+          /* Control Section */
+          .control-card { background: #10b981; border-radius: 8px; padding: 12px; margin-bottom: 10px; color: white; }
+          .control-item { display: flex; justify-content: space-between; margin-bottom: 3px; font-size: 10px; }
+          .control-label { font-weight: 600; }
+          .control-value { font-weight: 500; }
+          
+          /* Weather Section */
+          .weather-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+          .weather-table th, .weather-table td { padding: 4px 6px; text-align: center; font-size: 10px; }
+          .weather-table th { background: #10b981; color: white; font-weight: 600; }
+          .weather-table td { background: #f8fafc; }
+          .weather-icon { font-size: 12px; }
+          .temp-bar { background: #10b981; height: 4px; border-radius: 2px; margin: 2px 0; }
+          
+          /* Footer */
           .footer { margin-top: 30px; text-align: center; font-size: 10px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 15px; }
-          .status-completed { color: #059669; font-weight: bold; }
-          .status-pending { color: #dc2626; font-weight: bold; }
         </style>
         
-        <div class="pdf-container">
+                <div class="pdf-container">
           <!-- Header -->
           <div class="header">
-            <div class="title">Bioera Tarım Danışmanlığı</div>
-            <div class="subtitle">Reçete Raporu</div>
-            <div class="date">Tarih: ${new Date(recipe.createdAt).toLocaleDateString('tr-TR')}</div>
+            <div class="logo">Agrovia</div>
+            <div class="header-info">
+              <div class="header-title">Üretici Bilgisi</div>
+              <div class="header-datetime">Saat: ${new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'})} / Tarih: ${new Date().toLocaleDateString('tr-TR')}</div>
+            </div>
+          </div>
+          
+          <!-- Üretici Bilgileri -->
+          <div class="producer-info">
+            <div class="producer-info-grid">
+              <div class="producer-info-item">
+                <span class="producer-info-label">Ad Soyad:</span>
+                <span class="producer-info-value">${recipe.producerName}</span>
+              </div>
+              <div class="producer-info-item">
+                <span class="producer-info-label">TC:</span>
+                <span class="producer-info-value">${selectedProducer?.tcNo || 'Belirtilmemiş'}</span>
+              </div>
+              <div class="producer-info-item">
+                <span class="producer-info-label">Tel:</span>
+                <span class="producer-info-value">${selectedProducer?.phone || 'Belirtilmemiş'}</span>
+              </div>
+              <div class="producer-info-item">
+                <span class="producer-info-label">Adres:</span>
+                <span class="producer-info-value">${selectedProducer?.address || 'Belirtilmemiş'}</span>
+              </div>
+            </div>
           </div>
 
           <!-- Üretici Bilgileri -->
@@ -118,152 +212,175 @@ const RecipePage: React.FC = () => {
             </div>
           </div>
 
-          <!-- Gübreleme Programı -->
-          <div class="section">
-            <div class="section-title">Gübreleme Programı</div>
-            ${[recipe.fertilization1, recipe.fertilization2, recipe.fertilization3]
-              .filter(Boolean)
-              .map((fert, index: number) => `
-                <div class="info-card">
-                  <div class="info-label">${index + 1}. Gübreleme Uygulaması</div>
-                  <div class="info-value">${fert}</div>
-                </div>
-              `).join('')}
-            ${[recipe.fertilization1, recipe.fertilization2, recipe.fertilization3].filter(Boolean).length === 0 ? 
-              '<div class="info-card"><div class="info-value">Gübreleme programı belirtilmemiş</div></div>' : ''}
+          <!-- Ana İçerik Grid -->
+          <div class="content-grid">
+            <!-- Gübreleme Programı -->
+            <div class="section-card">
+              <div class="section-title">🌱 Gübreleme Programı</div>
+              <div class="section-subtitle">1 Dönüme / Dekara</div>
+              ${[recipe.fertilization1, recipe.fertilization2, recipe.fertilization3]
+                .filter(Boolean)
+                .map((fert, index: number) => {
+                  // Fertilization verilerini parse et
+                  const fertData = parseFertilizationData(fert);
+                  return `
+                    <div class="application-card">
+                      <div class="application-header">
+                        <span class="application-time">Saat: ${fertData.time}</span>
+                        <span class="application-date">Tarih: ${fertData.date}</span>
+                      </div>
+                      <div class="application-details">
+                        Su: ${fertData.water} ml<br>
+                        dk: ${fertData.duration} dk<br>
+                        <div class="application-products">
+                          ${fertData.products.map(product => `<span class="product-item">${product}</span>`).join(', ')}
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              ${[recipe.fertilization1, recipe.fertilization2, recipe.fertilization3].filter(Boolean).length === 0 ? 
+                '<div class="application-card"><div class="application-details">Gübreleme programı belirtilmemiş</div></div>' : ''}
+            </div>
+
+            <!-- Üstten Besleme -->
+            <div class="section-card">
+              <div class="section-title">💧 Üsten Besleme</div>
+              <div class="section-subtitle">100 lt suya</div>
+              ${recipe.topFeeding ? `
+                ${parseTopFeedingData(recipe.topFeeding).map((feed, index) => {
+                  return `
+                    <div class="application-card">
+                      <div class="application-header">
+                        <span class="application-time">Saat: ${feed.time}</span>
+                        <span class="application-date">Tarih: ${feed.date}</span>
+                      </div>
+                      <div class="application-details">
+                        <div class="application-products">
+                          ${feed.products.map(product => `<span class="product-item">${product}</span>`).join(', ')}
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              ` : '<div class="application-card"><div class="application-details">Üstten besleme belirtilmemiş</div></div>'}
+            </div>
           </div>
 
-          <!-- Üstten Besleme -->
-          ${recipe.topFeeding ? `
-            <div class="section">
-              <div class="section-title">Üstten Besleme</div>
-              <div class="info-card">
-                <div class="info-value">${recipe.topFeeding}</div>
-              </div>
-            </div>
-          ` : ''}
+          <!-- Alt Grid - Sera Kontrolleri ve Hava Durumu -->
+          <div class="content-grid">
+            <!-- Sera İçi Kontroller -->
+            <div class="section-card">
+              <div class="section-title">🔍 Sera İçi Kontroller</div>
+              ${recipe.selectedSeraKontrolData ? `
+                <div class="control-card">
+                  ${(() => {
+                    const filteredItems = recipe.selectedSeraKontrolData.items.filter((item: ChecklistItem) => {
+                      const allowedItems = [
+                        'iklim-kontrolu',
+                        'bos-su-ec-ph', 
+                        'kontrol-bitkileri-kontrolu'
+                      ];
+                      return allowedItems.includes(item.id);
+                    });
 
-          <!-- Sera İçi Kontrol Verileri -->
-          ${recipe.selectedSeraKontrolData ? `
-            <div class="section">
-              <div class="section-title">Sera İçi Kontrol Verileri</div>
-              <div class="info-card">
-                <div class="info-label">Kontrol Tarihi</div>
-                <div class="info-value">${new Date(recipe.selectedSeraKontrolData.date).toLocaleDateString('tr-TR')}</div>
-              </div>
-              <div class="info-card">
-                <div class="info-label">Kontrol Saati</div>
-                <div class="info-value">${recipe.selectedSeraKontrolData.timeFormatted || 'Belirtilmemiş'}</div>
-              </div>
-              ${recipe.selectedSeraKontrolData.items ? `
-                <table class="table">
+                    const displayData: Array<{label: string, value: string}> = [];
+
+                    filteredItems.forEach((item: ChecklistItem) => {
+                      if (item.data && Object.keys(item.data).length > 0) {
+                        if (item.id === 'iklim-kontrolu') {
+                          if (item.data.isi) displayData.push({label: 'Sera Isısı', value: `${String(item.data.isi)}°C`});
+                          if (item.data.nem) displayData.push({label: 'Sera Nemi', value: `${String(item.data.nem)}%`});
+                          if (item.data.isik) displayData.push({label: 'Ortalama ışık değerleri', value: `${String(item.data.isik)}lux`});
+                        } else if (item.id === 'bos-su-ec-ph') {
+                          if (item.data['ec-degeri']) displayData.push({label: 'Su EC', value: `${String(item.data['ec-degeri'])} dS/m`});
+                          if (item.data['ph-degeri']) displayData.push({label: 'Su pH', value: `${String(item.data['ph-degeri'])}`});
+                        } else if (item.id === 'kontrol-bitkileri-kontrolu') {
+                          if (item.data['kok-problemi']) displayData.push({label: 'Kökte problem', value: String(item.data['kok-problemi'])});
+                          if (item.data['vejetatif-kontrol-problemi']) displayData.push({label: 'Vejetatif aksamda problem', value: String(item.data['vejetatif-kontrol-problemi'])});
+                          if (item.data['generatif-kontrol-problemi']) displayData.push({label: 'Generatif aksamda problem', value: String(item.data['generatif-kontrol-problemi'])});
+                          if (item.data['brix-degeri']) displayData.push({label: 'Ortalama Brix değeri', value: `${String(item.data['brix-degeri'])}`});
+                          if (item.data['klorofil-degeri']) displayData.push({label: 'Ortalama klorofil değeri', value: `${String(item.data['klorofil-degeri'])}`});
+                        }
+                      }
+                    });
+
+                    return displayData.map(data => `
+                      <div class="control-item">
+                        <span class="control-label">${data.label}:</span>
+                        <span class="control-value">${data.value}</span>
+                      </div>
+                    `).join('');
+                  })()}
+                </div>
+                
+                <!-- Danışman Notu -->
+                <div class="control-card">
+                  <div class="control-item">
+                    <span class="control-label">Danışman Notu:</span>
+                  </div>
+                  ${recipe.notes ? `
+                    <div class="application-details">
+                      ${recipe.notes.split('\n').map(note => `• ${note}`).join('<br>')}
+                    </div>
+                  ` : `
+                    <div class="application-details">
+                      • 5 mavi tuzak asılsın<br>
+                      • 10 sarı tuzak asılsın<br>
+                      • Damlamalar 5-10 cm arası açılsın<br>
+                      • İçerideki nem %45 ten aşağıya düşerse araları nemlendirelim<br>
+                      • Sıcaklık derecesi 37°C yüksek olursa sulamayı 100 ml artıralım<br>
+                      • Toplama yapılsın<br>
+                      • Seradaki otlar temizlensin
+                    </div>
+                  `}
+                </div>
+              ` : `
+                <div class="control-card">
+                  <div class="application-details">Sera kontrol verisi bulunamadı</div>
+                </div>
+              `}
+            </div>
+
+            <!-- Hava Durumu -->
+            <div class="section-card">
+              <div class="section-title">🌤️ Hava Durumu</div>
+              <div class="section-subtitle">10 GÜNLÜK TAHMIN</div>
+              ${recipe.weatherData && recipe.weatherData.length > 0 ? `
+                <table class="weather-table">
                   <thead>
                     <tr>
-                      <th>Kontrol Alanı</th>
-                      <th>Değer</th>
+                      <th>Gün</th>
+                      <th>İkon</th>
+                      <th>Min</th>
+                      <th>Max</th>
                     </tr>
                   </thead>
                   <tbody>
-                    ${(() => {
-                      const filteredItems = recipe.selectedSeraKontrolData.items.filter((item: ChecklistItem) => {
-                        const allowedItems = [
-                          'iklim-kontrolu',
-                          'bos-su-ec-ph', 
-                          'kontrol-bitkileri-kontrolu'
-                        ];
-                        return allowedItems.includes(item.id);
-                      });
-
-                      const displayData: Array<{label: string, value: string}> = [];
-
-                      filteredItems.forEach((item: ChecklistItem) => {
-                        if (item.data && Object.keys(item.data).length > 0) {
-                          if (item.id === 'iklim-kontrolu') {
-                            if (item.data.isi) displayData.push({label: 'Sera Isısı', value: `${String(item.data.isi)}°C`});
-                            if (item.data.nem) displayData.push({label: 'Sera Nemi', value: `${String(item.data.nem)}%`});
-                            if (item.data.isik) displayData.push({label: 'Ort Işık Değeri', value: `${String(item.data.isik)} lux`});
-                          } else if (item.id === 'bos-su-ec-ph') {
-                            if (item.data['ec-degeri']) displayData.push({label: 'Su EC', value: `${String(item.data['ec-degeri'])}`});
-                            if (item.data['ph-degeri']) displayData.push({label: 'Su pH', value: `${String(item.data['ph-degeri'])}`});
-                          } else if (item.id === 'kontrol-bitkileri-kontrolu') {
-                            if (item.data['kok-problemi']) displayData.push({label: 'Kökte Problem', value: String(item.data['kok-problemi'])});
-                            if (item.data['vejetatif-kontrol-problemi']) displayData.push({label: 'Vejetatif Aksamda Problem', value: String(item.data['vejetatif-kontrol-problemi'])});
-                            if (item.data['generatif-kontrol-problemi']) displayData.push({label: 'Generatif Aksamda Problem', value: String(item.data['generatif-kontrol-problemi'])});
-                            if (item.data['brix-degeri']) displayData.push({label: 'Ortalama Brix Değeri', value: `${String(item.data['brix-degeri'])}`});
-                            if (item.data['klorofil-degeri']) displayData.push({label: 'Ort Klorofil Değeri', value: `${String(item.data['klorofil-degeri'])}`});
-                          }
-                        }
-                      });
-
-                      return displayData.map(data => `
-                        <tr>
-                          <td>${data.label}</td>
-                          <td>${data.value}</td>
-                        </tr>
-                      `).join('');
-                    })()}
+                    ${recipe.weatherData.slice(0, 10).map((weather, index) => `
+                      <tr>
+                        <td>${weather.day}</td>
+                        <td class="weather-icon">${weather.icon}</td>
+                        <td>${weather.minTemp}°</td>
+                        <td>${weather.maxTemp}°</td>
+                      </tr>
+                    `).join('')}
                   </tbody>
                 </table>
-              ` : ''}
-            </div>
-          ` : ''}
-
-          <!-- Hava Durumu -->
-          ${recipe.weatherData && recipe.weatherData.length > 0 ? `
-            <div class="section">
-              <div class="section-title">Hava Durumu Bilgileri</div>
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>Gün</th>
-                    <th>Sıcaklık</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${recipe.weatherData.slice(0, 5).map(weather => `
-                    <tr>
-                      <td>${weather.day}</td>
-                      <td>${weather.icon} ${weather.minTemp}°C - ${weather.maxTemp}°C</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
-          ` : ''}
-
-          <!-- Tuzak ve Zararlı Bilgileri -->
-          ${(recipe.tuzakBilgileri || recipe.zararlıBilgileri) ? `
-            <div class="section">
-              <div class="section-title">Tuzak ve Zararlı Bilgileri</div>
-              ${recipe.tuzakBilgileri ? `
-                <div class="info-card">
-                  <div class="info-label">Eklenen Tuzaklar</div>
-                  <div class="info-value">${recipe.tuzakBilgileri}</div>
+              ` : `
+                <div class="application-card">
+                  <div class="application-details">Hava durumu verisi bulunamadı</div>
                 </div>
-              ` : ''}
-              ${recipe.zararlıBilgileri ? `
-                <div class="info-card">
-                  <div class="info-label">Tespit Edilen Zararlılar</div>
-                  <div class="info-value">${recipe.zararlıBilgileri}</div>
-                </div>
-              ` : ''}
+              `}
             </div>
-          ` : ''}
+          </div>
 
-          <!-- Danışman Notları -->
-          ${recipe.notes ? `
-            <div class="section">
-              <div class="section-title">Danışman Notları ve Öneriler</div>
-              <div class="info-card">
-                <div class="info-value">${recipe.notes}</div>
-              </div>
-            </div>
-          ` : ''}
+
 
           <!-- Footer -->
           <div class="footer">
             <div>Bu rapor ${new Date().toLocaleString('tr-TR')} tarihinde otomatik olarak oluşturulmuştur.</div>
-            <div>Bioera Tarım Danışmanlık Sistemi</div>
+            <div>Agrovia Tarım Danışmanlık Sistemi</div>
           </div>
         </div>
       `;
@@ -300,7 +417,7 @@ const RecipePage: React.FC = () => {
           }
 
           // Download PDF
-          const fileName = `Bioera_Recete_${recipe.producerName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+          const fileName = `Agrovia_Recete_${recipe.producerName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
           pdf.save(fileName);
 
           // Clean up
