@@ -159,19 +159,49 @@ const RecipePage: React.FC = () => {
                 <table class="table">
                   <thead>
                     <tr>
-                      <th>Kontrol Maddesi</th>
-                      <th>Durum</th>
+                      <th>Kontrol Alanı</th>
+                      <th>Değer</th>
                     </tr>
                   </thead>
                   <tbody>
-                    ${recipe.selectedSeraKontrolData.items.slice(0, 8).map((item: ChecklistItem) => `
-                      <tr>
-                        <td>${item.label}</td>
-                        <td class="${item.completed ? 'status-completed' : 'status-pending'}">
-                          ${item.completed ? '✓ Tamamlandı' : '✗ Eksik'}
-                        </td>
-                      </tr>
-                    `).join('')}
+                    ${(() => {
+                      const filteredItems = recipe.selectedSeraKontrolData.items.filter((item: ChecklistItem) => {
+                        const allowedItems = [
+                          'iklim-kontrolu',
+                          'bos-su-ec-ph', 
+                          'kontrol-bitkileri-kontrolu'
+                        ];
+                        return allowedItems.includes(item.id);
+                      });
+
+                      const displayData: Array<{label: string, value: string}> = [];
+
+                      filteredItems.forEach((item: ChecklistItem) => {
+                        if (item.data && Object.keys(item.data).length > 0) {
+                          if (item.id === 'iklim-kontrolu') {
+                            if (item.data.isi) displayData.push({label: 'Sera Isısı', value: `${String(item.data.isi)}°C`});
+                            if (item.data.nem) displayData.push({label: 'Sera Nemi', value: `${String(item.data.nem)}%`});
+                            if (item.data.isik) displayData.push({label: 'Ort Işık Değeri', value: `${String(item.data.isik)} lux`});
+                          } else if (item.id === 'bos-su-ec-ph') {
+                            if (item.data['ec-degeri']) displayData.push({label: 'Su EC', value: `${String(item.data['ec-degeri'])}`});
+                            if (item.data['ph-degeri']) displayData.push({label: 'Su pH', value: `${String(item.data['ph-degeri'])}`});
+                          } else if (item.id === 'kontrol-bitkileri-kontrolu') {
+                            if (item.data['kok-problemi']) displayData.push({label: 'Kökte Problem', value: String(item.data['kok-problemi'])});
+                            if (item.data['vejetatif-kontrol-problemi']) displayData.push({label: 'Vejetatif Aksamda Problem', value: String(item.data['vejetatif-kontrol-problemi'])});
+                            if (item.data['generatif-kontrol-problemi']) displayData.push({label: 'Generatif Aksamda Problem', value: String(item.data['generatif-kontrol-problemi'])});
+                            if (item.data['brix-degeri']) displayData.push({label: 'Ortalama Brix Değeri', value: `${String(item.data['brix-degeri'])}`});
+                            if (item.data['klorofil-degeri']) displayData.push({label: 'Ort Klorofil Değeri', value: `${String(item.data['klorofil-degeri'])}`});
+                          }
+                        }
+                      });
+
+                      return displayData.map(data => `
+                        <tr>
+                          <td>${data.label}</td>
+                          <td>${data.value}</td>
+                        </tr>
+                      `).join('');
+                    })()}
                   </tbody>
                 </table>
               ` : ''}
@@ -356,6 +386,7 @@ const RecipePage: React.FC = () => {
             onSelect={handleProducerSelect}
             selectedProducer={selectedProducer}
             onAddRecipe={handleCreateRecipe}
+            showRecipeButtons={true}
           />
         </div>
       </div>
@@ -663,18 +694,48 @@ const RecipePreviewModal: React.FC<{
               
               {recipe.selectedSeraKontrolData.items && (
                 <div className="bg-gray-50 rounded-lg p-4">
-                  <h4 className="font-semibold text-slate-800 mb-3">Kontrol Maddeleri</h4>
+                  <h4 className="font-semibold text-slate-800 mb-3">Kontrol Verileri</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {recipe.selectedSeraKontrolData.items.slice(0, 8).map((item: ChecklistItem, index: number) => (
-                      <div key={index} className="bg-white rounded-lg p-3 border border-gray-200">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-slate-700">{item.label}</span>
-                          <span className={`text-sm font-bold ${item.completed ? 'text-emerald-600' : 'text-red-600'}`}>
-                            {item.completed ? '✓ Tamamlandı' : '✗ Eksik'}
-                          </span>
+                    {(() => {
+                      const filteredItems = recipe.selectedSeraKontrolData.items.filter((item: ChecklistItem) => {
+                        const allowedItems = [
+                          'iklim-kontrolu',
+                          'bos-su-ec-ph', 
+                          'kontrol-bitkileri-kontrolu'
+                        ];
+                        return allowedItems.includes(item.id);
+                      });
+
+                      const displayData: Array<{label: string, value: string}> = [];
+
+                      filteredItems.forEach((item: ChecklistItem) => {
+                        if (item.data && Object.keys(item.data).length > 0) {
+                          if (item.id === 'iklim-kontrolu') {
+                            if (item.data.isi) displayData.push({label: 'Sera Isısı', value: `${String(item.data.isi)}°C`});
+                            if (item.data.nem) displayData.push({label: 'Sera Nemi', value: `${String(item.data.nem)}%`});
+                            if (item.data.isik) displayData.push({label: 'Ort Işık Değeri', value: `${String(item.data.isik)} lux`});
+                          } else if (item.id === 'bos-su-ec-ph') {
+                            if (item.data['ec-degeri']) displayData.push({label: 'Su EC', value: `${String(item.data['ec-degeri'])}`});
+                            if (item.data['ph-degeri']) displayData.push({label: 'Su pH', value: `${String(item.data['ph-degeri'])}`});
+                          } else if (item.id === 'kontrol-bitkileri-kontrolu') {
+                            if (item.data['kok-problemi']) displayData.push({label: 'Kökte Problem', value: String(item.data['kok-problemi'])});
+                            if (item.data['vejetatif-kontrol-problemi']) displayData.push({label: 'Vejetatif Aksamda Problem', value: String(item.data['vejetatif-kontrol-problemi'])});
+                            if (item.data['generatif-kontrol-problemi']) displayData.push({label: 'Generatif Aksamda Problem', value: String(item.data['generatif-kontrol-problemi'])});
+                            if (item.data['brix-degeri']) displayData.push({label: 'Ortalama Brix Değeri', value: `${String(item.data['brix-degeri'])}`});
+                            if (item.data['klorofil-degeri']) displayData.push({label: 'Ort Klorofil Değeri', value: `${String(item.data['klorofil-degeri'])}`});
+                          }
+                        }
+                      });
+
+                      return displayData.map((data, index) => (
+                        <div key={index} className="bg-white rounded-lg p-3 border border-gray-200">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium text-slate-700">{data.label}</span>
+                            <span className="text-sm font-bold text-slate-800">{data.value}</span>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ));
+                    })()}
                   </div>
                 </div>
               )}

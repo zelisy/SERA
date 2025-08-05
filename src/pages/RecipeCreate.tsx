@@ -4,6 +4,7 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { getProducerById, getSeraKontrolRecords } from '../utils/firestoreUtils';
 import { saveRecipe } from '../utils/recipeUtils';
 import type { Producer } from '../types/producer';
+import type { ChecklistItem } from '../types/checklist';
 
 interface Fertilization {
   date: string;
@@ -401,7 +402,7 @@ const RecipeCreatePage: React.FC = () => {
                     <option value="">Sera kontrol kaydı seçin...</option>
                     {seraKontrolRecords.map((record) => (
                       <option key={record.id} value={record.id}>
-                        {record.dateFormatted} - {record.timeFormatted} ({record.items.filter((item: any) => item.completed).length}/{record.items.length} tamamlandı)
+                        {record.dateFormatted} - {record.timeFormatted} ({record.items.filter((item: ChecklistItem) => item.completed).length}/{record.items.length} tamamlandı)
                       </option>
                     ))}
                   </select>
@@ -414,29 +415,80 @@ const RecipeCreatePage: React.FC = () => {
                       Seçilen Sera Kontrol Verileri
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {selectedSeraKontrolData.items.map((item: any, index: number) => (
-                        <div key={index} className="bg-white rounded-lg p-3 border border-slate-200">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="font-medium text-slate-700 text-xs">{item.label}</span>
-                            <span className={`px-2 py-1 rounded-full text-xs ${
-                              item.completed 
-                                ? 'bg-slate-100 text-slate-700' 
-                                : 'bg-red-50 text-red-700'
-                            }`}>
-                              {item.completed ? 'Tamamlandı' : 'Eksik'}
-                            </span>
-                          </div>
-                          {item.data && Object.keys(item.data).length > 0 && (
-                            <div className="text-xs text-slate-600">
-                              {Object.entries(item.data).map(([key, value]) => (
-                                <div key={key}>
-                                  <strong>{key}:</strong> {String(value)}
-                                </div>
-                              ))}
+                      {selectedSeraKontrolData.items
+                        .filter((item: ChecklistItem) => {
+                          // Sadece belirtilen alanları göster
+                          const allowedItems = [
+                            'iklim-kontrolu', // sera ısısı, sera nemi, ort ışık değerleri
+                            'bos-su-ec-ph', // su EC, su pH
+                            'kontrol-bitkileri-kontrolu' // kökte problem, vejetatif aksamda problem, generatif aksamda problem, ortalama brix değeri, ort klorofil değeri
+                          ];
+                          return allowedItems.includes(item.id);
+                        })
+                        .map((item: ChecklistItem, index: number) => {
+                          // Her item için sadece belirtilen alanları göster
+                          let filteredData: Record<string, string> = {};
+                          
+                          if (item.data && Object.keys(item.data).length > 0) {
+                            if (item.id === 'iklim-kontrolu') {
+                              // Sera ısısı, sera nemi, ort ışık değerleri
+                              filteredData = {
+                                'Sera Isısı': item.data?.isi ? `${String(item.data.isi)}°C` : 'Belirtilmemiş',
+                                'Sera Nemi': item.data?.nem ? `${String(item.data.nem)}%` : 'Belirtilmemiş',
+                                'Ort Işık Değeri': item.data?.isik ? `${String(item.data.isik)} lux` : 'Belirtilmemiş'
+                              };
+                            } else if (item.id === 'bos-su-ec-ph') {
+                              // Su EC, su pH
+                              filteredData = {
+                                'Su EC': item.data?.['ec-degeri'] ? `${String(item.data['ec-degeri'])}` : 'Belirtilmemiş',
+                                'Su pH': item.data?.['ph-degeri'] ? `${String(item.data['ph-degeri'])}` : 'Belirtilmemiş'
+                              };
+                            } else if (item.id === 'kontrol-bitkileri-kontrolu') {
+                              // Kökte problem, vejetatif aksamda problem, generatif aksamda problem, ortalama brix değeri, ort klorofil değeri
+                              filteredData = {
+                                'Kökte Problem': item.data?.['kok-problemi'] ? String(item.data['kok-problemi']) : 'Belirtilmemiş',
+                                'Vejetatif Aksamda Problem': item.data?.['vejetatif-kontrol-problemi'] ? String(item.data['vejetatif-kontrol-problemi']) : 'Belirtilmemiş',
+                                'Generatif Aksamda Problem': item.data?.['generatif-kontrol-problemi'] ? String(item.data['generatif-kontrol-problemi']) : 'Belirtilmemiş',
+                                'Ortalama Brix Değeri': item.data?.['brix-degeri'] ? `${String(item.data['brix-degeri'])}` : 'Belirtilmemiş',
+                                'Ort Klorofil Değeri': item.data?.['klorofil-degeri'] ? `${String(item.data['klorofil-degeri'])}` : 'Belirtilmemiş'
+                              };
+                            }
+                          }
+
+                          // Sadece değeri olan alanları göster
+                          const validData = Object.entries(filteredData).filter(([, value]) => 
+                            value && value !== 'Belirtilmemiş'
+                          );
+
+                          if (validData.length === 0) return null;
+
+                          return (
+                            <div key={index} className="bg-white rounded-lg p-3 border border-slate-200">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-medium text-slate-700 text-xs">
+                                  {item.id === 'iklim-kontrolu' ? 'İklim Kontrolü' :
+                                   item.id === 'bos-su-ec-ph' ? 'Su Analizi' :
+                                   item.id === 'kontrol-bitkileri-kontrolu' ? 'Bitki Kontrolü' : item.label}
+                                </span>
+                                <span className={`px-2 py-1 rounded-full text-xs ${
+                                  item.completed 
+                                    ? 'bg-slate-100 text-slate-700' 
+                                    : 'bg-red-50 text-red-700'
+                                }`}>
+                                  {item.completed ? 'Tamamlandı' : 'Eksik'}
+                                </span>
+                              </div>
+                              <div className="text-xs text-slate-600 space-y-1">
+                                {validData.map(([key, value]) => (
+                                  <div key={key} className="flex justify-between">
+                                    <span className="font-medium">{key}:</span>
+                                    <span>{String(value)}</span>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
-                          )}
-                        </div>
-                      ))}
+                          );
+                        })}
                     </div>
                   </div>
                 )}

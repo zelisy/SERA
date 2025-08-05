@@ -17,13 +17,15 @@ interface UreticiListesiProps {
   onSelect?: (producer: Producer) => void;
   selectedProducer?: Producer | null;
   onAddRecipe?: (producerId: string) => void;
+  showRecipeButtons?: boolean;
 }
 
 const UreticiListesi: React.FC<UreticiListesiProps> = ({ 
   selectionMode = false, 
   onSelect, 
   selectedProducer,
-  onAddRecipe
+  onAddRecipe,
+  showRecipeButtons = false
 }) => {
   const [producers, setProducers] = useState<Producer[]>([]);
   const [search, setSearch] = useState('');
@@ -530,20 +532,32 @@ const UreticiListesi: React.FC<UreticiListesiProps> = ({
                         </div>
                       ) : (
                         <div className="space-y-2">
-                          <button
-                            onClick={() => onSelect && onSelect(producer)}
-                            className="w-full bg-emerald-500 text-white hover:bg-emerald-600 px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
-                          >
-                            <span>👁️</span>
-                            <span>Reçeteleri Görüntüle</span>
-                          </button>
-                          {onAddRecipe && (
+                          {showRecipeButtons ? (
+                            <>
+                              <button
+                                onClick={() => onSelect && onSelect(producer)}
+                                className="w-full bg-emerald-500 text-white hover:bg-emerald-600 px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                              >
+                                <span>👁️</span>
+                                <span>Reçeteleri Görüntüle</span>
+                              </button>
+                              {onAddRecipe && (
+                                <button
+                                  onClick={() => onAddRecipe(producer.id)}
+                                  className="w-full bg-blue-500 text-white hover:bg-blue-600 px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                                >
+                                  <span>➕</span>
+                                  <span>Yeni Reçete Ekle</span>
+                                </button>
+                              )}
+                            </>
+                          ) : (
                             <button
-                              onClick={() => onAddRecipe(producer.id)}
-                              className="w-full bg-blue-500 text-white hover:bg-blue-600 px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                              onClick={() => onSelect && onSelect(producer)}
+                              className="w-full bg-emerald-500 text-white hover:bg-emerald-600 px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
                             >
-                              <span>➕</span>
-                              <span>Yeni Reçete Ekle</span>
+                              <span>✅</span>
+                              <span>Seç</span>
                             </button>
                           )}
                         </div>
@@ -627,24 +641,36 @@ const UreticiListesi: React.FC<UreticiListesiProps> = ({
                             </div>
                           </div>
                         ) : (
-                          <div className="space-y-2">
+                                                  <div className="space-y-2">
+                          {showRecipeButtons ? (
+                            <>
+                              <button
+                                onClick={() => onSelect && onSelect(producer)}
+                                className="w-full bg-emerald-500 text-white hover:bg-emerald-600 px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                              >
+                                <span>👁️</span>
+                                <span>Reçeteleri Görüntüle</span>
+                              </button>
+                              {onAddRecipe && (
+                                <button
+                                  onClick={() => onAddRecipe(producer.id)}
+                                  className="w-full bg-blue-500 text-white hover:bg-blue-600 px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                                >
+                                  <span>➕</span>
+                                  <span>Yeni Reçete Ekle</span>
+                                </button>
+                              )}
+                            </>
+                          ) : (
                             <button
                               onClick={() => onSelect && onSelect(producer)}
                               className="w-full bg-emerald-500 text-white hover:bg-emerald-600 px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
                             >
-                              <span>👁️</span>
-                              <span>Reçeteleri Görüntüle</span>
+                              <span>✅</span>
+                              <span>Seç</span>
                             </button>
-                            {onAddRecipe && (
-                              <button
-                                onClick={() => onAddRecipe(producer.id)}
-                                className="w-full bg-blue-500 text-white hover:bg-blue-600 px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
-                              >
-                                <span>➕</span>
-                                <span>Yeni Reçete Ekle</span>
-                              </button>
-                            )}
-                          </div>
+                          )}
+                        </div>
                         )}
                       </div>
                     )}
@@ -696,22 +722,37 @@ const UreticiListesi: React.FC<UreticiListesiProps> = ({
                           <td className="px-6 py-4 text-center">
                             {selectionMode ? (
                               <div className="space-y-2">
-                                <button
-                                  onClick={() => onSelect && onSelect(producer)}
-                                  className={`w-full px-4 py-2 rounded-lg font-medium transition-colors ${
-                                    selectedProducer?.id === producer.id
-                                      ? 'bg-emerald-500 text-white'
-                                      : 'bg-emerald-500 text-white hover:bg-emerald-600'
-                                  }`}
-                                >
-                                  👁️ Reçeteleri Görüntüle
-                                </button>
-                                {onAddRecipe && (
+                                {showRecipeButtons ? (
+                                  <>
+                                    <button
+                                      onClick={() => onSelect && onSelect(producer)}
+                                      className={`w-full px-4 py-2 rounded-lg font-medium transition-colors ${
+                                        selectedProducer?.id === producer.id
+                                          ? 'bg-emerald-500 text-white'
+                                          : 'bg-emerald-500 text-white hover:bg-emerald-600'
+                                      }`}
+                                    >
+                                      👁️ Reçeteleri Görüntüle
+                                    </button>
+                                    {onAddRecipe && (
+                                      <button
+                                        onClick={() => onAddRecipe(producer.id)}
+                                        className="w-full bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-lg font-medium transition-colors"
+                                      >
+                                        ➕ Yeni Reçete Ekle
+                                      </button>
+                                    )}
+                                  </>
+                                ) : (
                                   <button
-                                    onClick={() => onAddRecipe(producer.id)}
-                                    className="w-full bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-lg font-medium transition-colors"
+                                    onClick={() => onSelect && onSelect(producer)}
+                                    className={`w-full px-4 py-2 rounded-lg font-medium transition-colors ${
+                                      selectedProducer?.id === producer.id
+                                        ? 'bg-emerald-500 text-white'
+                                        : 'bg-emerald-500 text-white hover:bg-emerald-600'
+                                    }`}
                                   >
-                                    ➕ Yeni Reçete Ekle
+                                    ✅ Seç
                                   </button>
                                 )}
                               </div>
