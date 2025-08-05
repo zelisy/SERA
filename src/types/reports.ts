@@ -10,7 +10,6 @@ export interface ReportFilters {
   period: 'day' | 'week' | 'month' | 'quarter' | 'year';
   season: string; // 2023-2024, 2024-2025 gibi
   reportTypes: ReportType[];
-  cropTypes: string[]; // Ürün türleri (domates, salatalık, etc.)
 }
 
 // Rapor Türleri
