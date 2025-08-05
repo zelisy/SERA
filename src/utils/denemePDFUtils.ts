@@ -175,7 +175,7 @@ export const exportDenemeFormToPDF = async (formData: DenemeFormData): Promise<v
       useCORS: true,
       allowTaint: true,
       backgroundColor: '#ffffff'
-    });
+    } as any);
 
     // Canvas'ı kaldır
     document.body.removeChild(pdfContent);
