@@ -98,6 +98,53 @@ const RecipeCreatePage: React.FC = () => {
     if (!producer) return;
 
     try {
+      // Tuzak ve zararlı verilerini çıkar
+      let tuzakBilgileri = '';
+      let zararlıBilgileri = '';
+
+      if (selectedSeraKontrolData) {
+        // Tuzak bilgilerini çıkar
+        const tuzakItem = selectedSeraKontrolData.items.find((item: ChecklistItem) => item.id === 'sera-kulturel-genel-kontrol');
+        if (tuzakItem && tuzakItem.data) {
+          const tuzaklar = [];
+          if (tuzakItem.data['5-adet-mavi']) tuzaklar.push('5 adet mavi tuzak');
+          if (tuzakItem.data['5-adet-sari']) tuzaklar.push('5 adet sarı tuzak');
+          if (tuzakItem.data['10-adet-mavi']) tuzaklar.push('10 adet mavi tuzak');
+          if (tuzakItem.data['10-adet-sari']) tuzaklar.push('10 adet sarı tuzak');
+          if (tuzakItem.data['15-adet-mavi']) tuzaklar.push('15 adet mavi tuzak');
+          if (tuzakItem.data['15-adet-sari']) tuzaklar.push('15 adet sarı tuzak');
+          
+          if (tuzaklar.length > 0) {
+            tuzakBilgileri = `Eklenen Tuzaklar: ${tuzaklar.join(', ')}`;
+          }
+        }
+
+        // Zararlı bilgilerini çıkar
+        const zararlıItem = selectedSeraKontrolData.items.find((item: ChecklistItem) => item.id === 'zararli-kontrol');
+        if (zararlıItem && zararlıItem.data) {
+          const zararlilar = [];
+          if (zararlıItem.data.insektisit) zararlilar.push('İnsektisit');
+          if (zararlıItem.data.beyaz_sinek) zararlilar.push('Beyaz sinek');
+          if (zararlıItem.data.thrips) zararlilar.push('Thrips');
+          if (zararlıItem.data.yesil_kurt_tuta) zararlilar.push('Yeşil kurt / Tuta');
+          if (zararlıItem.data.yaprak_biti) zararlilar.push('Yaprak biti');
+          if (zararlıItem.data.unlu_biti) zararlilar.push('Unlu biti');
+          if (zararlıItem.data.biber_gal_sinegi) zararlilar.push('Biber gal sineği');
+          if (zararlıItem.data.akarisit) zararlilar.push('Akarisit');
+          if (zararlıItem.data.kirmizi_orumcek) zararlilar.push('Kırmızı örümcek');
+          if (zararlıItem.data.sari_cay_akar) zararlilar.push('Sarı çay akar');
+          if (zararlıItem.data.fungusit) zararlilar.push('Fungusit');
+          if (zararlıItem.data.kulleme) zararlilar.push('Külleme');
+          if (zararlıItem.data.pas) zararlilar.push('Pas');
+          if (zararlıItem.data.virus) zararlilar.push('Virüs');
+          if (zararlıItem.data.bakteri) zararlilar.push('Bakteri');
+          
+          if (zararlilar.length > 0) {
+            zararlıBilgileri = `Tespit Edilen Zararlılar: ${zararlilar.join(', ')}`;
+          }
+        }
+      }
+
       // Form verilerini reçete formatına dönüştür
       const recipeData = {
         producerId: producer.id,
@@ -113,6 +160,8 @@ const RecipeCreatePage: React.FC = () => {
         notes: data.notes,
         selectedSeraKontrolId: data.selectedSeraKontrol,
         selectedSeraKontrolData: selectedSeraKontrolData,
+        tuzakBilgileri: tuzakBilgileri,
+        zararlıBilgileri: zararlıBilgileri,
         weatherData: [
           {
             date: new Date().toISOString().split('T')[0],
@@ -421,7 +470,9 @@ const RecipeCreatePage: React.FC = () => {
                           const allowedItems = [
                             'iklim-kontrolu', // sera ısısı, sera nemi, ort ışık değerleri
                             'bos-su-ec-ph', // su EC, su pH
-                            'kontrol-bitkileri-kontrolu' // kökte problem, vejetatif aksamda problem, generatif aksamda problem, ortalama brix değeri, ort klorofil değeri
+                            'kontrol-bitkileri-kontrolu', // kökte problem, vejetatif aksamda problem, generatif aksamda problem, ortalama brix değeri, ort klorofil değeri
+                            'zararli-kontrol', // zararlı türleri
+                            'sera-kulturel-genel-kontrol' // tuzak bilgileri
                           ];
                           return allowedItems.includes(item.id);
                         })
@@ -452,6 +503,41 @@ const RecipeCreatePage: React.FC = () => {
                                 'Ortalama Brix Değeri': item.data?.['brix-degeri'] ? `${String(item.data['brix-degeri'])}` : 'Belirtilmemiş',
                                 'Ort Klorofil Değeri': item.data?.['klorofil-degeri'] ? `${String(item.data['klorofil-degeri'])}` : 'Belirtilmemiş'
                               };
+                            } else if (item.id === 'zararli-kontrol') {
+                              // Zararlı türleri
+                              const zararlilar = [];
+                              if (item.data?.insektisit) zararlilar.push('İnsektisit');
+                              if (item.data?.beyaz_sinek) zararlilar.push('Beyaz sinek');
+                              if (item.data?.thrips) zararlilar.push('Thrips');
+                              if (item.data?.yesil_kurt_tuta) zararlilar.push('Yeşil kurt / Tuta');
+                              if (item.data?.yaprak_biti) zararlilar.push('Yaprak biti');
+                              if (item.data?.unlu_biti) zararlilar.push('Unlu biti');
+                              if (item.data?.biber_gal_sinegi) zararlilar.push('Biber gal sineği');
+                              if (item.data?.akarisit) zararlilar.push('Akarisit');
+                              if (item.data?.kirmizi_orumcek) zararlilar.push('Kırmızı örümcek');
+                              if (item.data?.sari_cay_akar) zararlilar.push('Sarı çay akar');
+                              if (item.data?.fungusit) zararlilar.push('Fungusit');
+                              if (item.data?.kulleme) zararlilar.push('Külleme');
+                              if (item.data?.pas) zararlilar.push('Pas');
+                              if (item.data?.virus) zararlilar.push('Virüs');
+                              if (item.data?.bakteri) zararlilar.push('Bakteri');
+                              
+                              filteredData = {
+                                'Tespit Edilen Zararlılar': zararlilar.length > 0 ? zararlilar.join(', ') : 'Zararlı tespit edilmedi'
+                              };
+                            } else if (item.id === 'sera-kulturel-genel-kontrol') {
+                              // Tuzak bilgileri
+                              const tuzaklar = [];
+                              if (item.data?.['5-adet-mavi']) tuzaklar.push('5 adet mavi tuzak');
+                              if (item.data?.['5-adet-sari']) tuzaklar.push('5 adet sarı tuzak');
+                              if (item.data?.['10-adet-mavi']) tuzaklar.push('10 adet mavi tuzak');
+                              if (item.data?.['10-adet-sari']) tuzaklar.push('10 adet sarı tuzak');
+                              if (item.data?.['15-adet-mavi']) tuzaklar.push('15 adet mavi tuzak');
+                              if (item.data?.['15-adet-sari']) tuzaklar.push('15 adet sarı tuzak');
+                              
+                              filteredData = {
+                                'Eklenen Tuzaklar': tuzaklar.length > 0 ? tuzaklar.join(', ') : 'Tuzak eklenmedi'
+                              };
                             }
                           }
 
@@ -468,7 +554,9 @@ const RecipeCreatePage: React.FC = () => {
                                 <span className="font-medium text-slate-700 text-xs">
                                   {item.id === 'iklim-kontrolu' ? 'İklim Kontrolü' :
                                    item.id === 'bos-su-ec-ph' ? 'Su Analizi' :
-                                   item.id === 'kontrol-bitkileri-kontrolu' ? 'Bitki Kontrolü' : item.label}
+                                   item.id === 'kontrol-bitkileri-kontrolu' ? 'Bitki Kontrolü' :
+                                   item.id === 'zararli-kontrol' ? 'Zararlı Kontrolü' :
+                                   item.id === 'sera-kulturel-genel-kontrol' ? 'Kültürel Kontrol' : item.label}
                                 </span>
                                 <span className={`px-2 py-1 rounded-full text-xs ${
                                   item.completed 

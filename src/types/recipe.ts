@@ -55,6 +55,8 @@ export interface Recipe {
   notes: string;
   weatherData: WeatherData[];
   selectedSeraKontrolData?: any;
+  tuzakBilgileri?: string;
+  zararlıBilgileri?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -78,5 +80,7 @@ export interface CreateRecipeData {
   notes: string;
   selectedSeraKontrolId?: string;
   selectedSeraKontrolData?: any;
+  tuzakBilgileri?: string;
+  zararlıBilgileri?: string;
   weatherData: WeatherData[];
 } 

@@ -231,6 +231,25 @@ const RecipePage: React.FC = () => {
             </div>
           ` : ''}
 
+          <!-- Tuzak ve Zararlı Bilgileri -->
+          ${(recipe.tuzakBilgileri || recipe.zararlıBilgileri) ? `
+            <div class="section">
+              <div class="section-title">Tuzak ve Zararlı Bilgileri</div>
+              ${recipe.tuzakBilgileri ? `
+                <div class="info-card">
+                  <div class="info-label">Eklenen Tuzaklar</div>
+                  <div class="info-value">${recipe.tuzakBilgileri}</div>
+                </div>
+              ` : ''}
+              ${recipe.zararlıBilgileri ? `
+                <div class="info-card">
+                  <div class="info-label">Tespit Edilen Zararlılar</div>
+                  <div class="info-value">${recipe.zararlıBilgileri}</div>
+                </div>
+              ` : ''}
+            </div>
+          ` : ''}
+
           <!-- Danışman Notları -->
           ${recipe.notes ? `
             <div class="section">
@@ -758,6 +777,30 @@ const RecipePreviewModal: React.FC<{
                     </p>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Tuzak ve Zararlı Bilgileri */}
+          {(recipe.tuzakBilgileri || recipe.zararlıBilgileri) && (
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
+                <span className="mr-2">🪤</span>
+                Tuzak ve Zararlı Bilgileri
+              </h3>
+              <div className="space-y-3">
+                {recipe.tuzakBilgileri && (
+                  <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-100">
+                    <p className="text-sm text-yellow-700 mb-1">Eklenen Tuzaklar</p>
+                    <p className="font-semibold text-yellow-800">{recipe.tuzakBilgileri}</p>
+                  </div>
+                )}
+                {recipe.zararlıBilgileri && (
+                  <div className="bg-red-50 rounded-lg p-4 border border-red-100">
+                    <p className="text-sm text-red-700 mb-1">Tespit Edilen Zararlılar</p>
+                    <p className="font-semibold text-red-800">{recipe.zararlıBilgileri}</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
