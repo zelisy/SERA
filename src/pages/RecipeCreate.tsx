@@ -170,51 +170,57 @@ const RecipeCreatePage: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-slate-900 mb-1">Yeni Reçete</h1>
-            <p className="text-slate-600 text-sm">Üretici için reçete oluşturun</p>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">✨ Yeni Reçete Oluştur</h1>
+            <p className="text-slate-600 text-lg">Seçilen üretici için detaylı reçete hazırlayın</p>
           </div>
           <button
             onClick={() => navigate('/admin/recipes')}
-            className="text-slate-600 hover:text-slate-800 transition-colors"
+            className="text-slate-600 hover:text-slate-800 transition-colors p-2 hover:bg-slate-100 rounded-lg"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
         {/* Üretici Bilgisi */}
-        <div className="bg-white rounded-xl p-6 border border-slate-200">
-          <h2 className="font-medium text-slate-900 mb-4">Üretici Bilgisi</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="text-slate-500">Ad Soyad</span>
-              <p className="font-medium text-slate-900">{producer.firstName} {producer.lastName}</p>
+        <div className="bg-gradient-to-r from-emerald-500 to-blue-500 rounded-xl p-8 border border-slate-200 text-white">
+          <h2 className="font-bold text-white mb-6 text-xl flex items-center">
+            <span className="mr-3">👨‍🌾</span>
+            Üretici Bilgisi
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+            <div className="bg-white/20 p-4 rounded-lg backdrop-blur-sm">
+              <span className="text-white/80 text-xs font-medium">Ad Soyad</span>
+              <p className="font-bold text-white text-lg">{producer.firstName} {producer.lastName}</p>
             </div>
-            <div>
-              <span className="text-slate-500">TC Kimlik No</span>
-              <p className="font-medium text-slate-900">{producer.tcNo}</p>
+            <div className="bg-white/20 p-4 rounded-lg backdrop-blur-sm">
+              <span className="text-white/80 text-xs font-medium">TC Kimlik No</span>
+              <p className="font-bold text-white text-lg">{producer.tcNo}</p>
             </div>
-            <div>
-              <span className="text-slate-500">Telefon</span>
-              <p className="font-medium text-slate-900">{producer.phone}</p>
+            <div className="bg-white/20 p-4 rounded-lg backdrop-blur-sm">
+              <span className="text-white/80 text-xs font-medium">Telefon</span>
+              <p className="font-bold text-white text-lg">{producer.phone}</p>
             </div>
-            <div>
-              <span className="text-slate-500">Adres</span>
-              <p className="font-medium text-slate-900">{producer.address}</p>
+            <div className="bg-white/20 p-4 rounded-lg backdrop-blur-sm md:col-span-2">
+              <span className="text-white/80 text-xs font-medium">Adres</span>
+              <p className="font-bold text-white text-lg">{producer.address}</p>
             </div>
           </div>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           {/* Gübreleme Programı */}
-          <div className="bg-white rounded-xl p-6 border border-slate-200">
+          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="font-medium text-slate-900">Gübreleme Programı</h2>
+              <h2 className="font-bold text-slate-900 text-xl flex items-center">
+                <span className="mr-3">🌱</span>
+                Gübreleme Programı
+              </h2>
               <button
                 type="button"
                 onClick={() => addFert({ date: '', time: '', water: '', duration: '', products: '' })}
-                className="text-slate-600 hover:text-slate-800 transition-colors text-sm"
+                className="bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600 transition-colors text-sm font-medium"
               >
                 + Ekle
               </button>
@@ -293,13 +299,16 @@ const RecipeCreatePage: React.FC = () => {
           </div>
 
           {/* Üstten Besleme */}
-          <div className="bg-white rounded-xl p-6 border border-slate-200">
+          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="font-medium text-slate-900">Üstten Besleme</h2>
+              <h2 className="font-bold text-slate-900 text-xl flex items-center">
+                <span className="mr-3">💧</span>
+                Üstten Besleme
+              </h2>
               <button
                 type="button"
                 onClick={() => addFeed({ date: '', time: '', applications: '' })}
-                className="text-slate-600 hover:text-slate-800 transition-colors text-sm"
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
               >
                 + Ekle
               </button>
@@ -358,8 +367,11 @@ const RecipeCreatePage: React.FC = () => {
           </div>
 
           {/* Sera İçi Kontrol Seçimi */}
-          <div className="bg-white rounded-xl p-6 border border-slate-200">
-            <h2 className="font-medium text-slate-900 mb-6">Sera İçi Kontrol Verileri</h2>
+          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+            <h2 className="font-bold text-slate-900 text-xl mb-6 flex items-center">
+              <span className="mr-3">🔍</span>
+              Sera İçi Kontrol Verileri
+            </h2>
             
             {seraKontrolRecords.length === 0 ? (
               <div className="text-center py-8 bg-slate-50 rounded-lg border border-slate-200">
@@ -433,8 +445,11 @@ const RecipeCreatePage: React.FC = () => {
           </div>
 
           {/* Danışman Notu */}
-          <div className="bg-white rounded-xl p-6 border border-slate-200">
-            <h2 className="font-medium text-slate-900 mb-4">Danışman Notu</h2>
+          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+            <h2 className="font-bold text-slate-900 text-xl mb-4 flex items-center">
+              <span className="mr-3">📝</span>
+              Danışman Notu
+            </h2>
             <div>
               <label className="block text-xs font-medium text-slate-700 mb-1">
                 Öneriler ve Notlar
@@ -449,19 +464,19 @@ const RecipeCreatePage: React.FC = () => {
           </div>
 
           {/* Kaydet Butonu */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-end">
+          <div className="flex flex-col sm:flex-row gap-4 justify-end">
             <button
               type="button"
               onClick={() => navigate('/admin/recipes')}
-              className="px-6 py-2.5 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors text-sm font-medium"
+              className="px-8 py-3 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 transition-colors text-base font-medium"
             >
-              İptal
+              ❌ İptal
             </button>
             <button
               type="submit"
-              className="px-6 py-2.5 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-colors text-sm font-medium"
+              className="px-8 py-3 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-xl hover:from-emerald-600 hover:to-blue-600 transition-colors text-base font-medium shadow-lg hover:shadow-xl"
             >
-              Reçeteyi Kaydet
+              💾 Reçeteyi Kaydet
             </button>
           </div>
         </form>

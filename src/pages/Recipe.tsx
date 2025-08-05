@@ -4,6 +4,7 @@ import { jsPDF } from 'jspdf';
 import UreticiListesi from '../components/UreticiListesi';
 import type { Producer } from '../types/producer';
 import type { Recipe } from '../types/recipe';
+import type { ChecklistItem } from '../types/checklist';
 import { getRecipesByProducer, deleteRecipe, getAllRecipes } from '../utils/recipeUtils';
 import { getProducerById } from '../utils/firestoreUtils';
 
@@ -176,7 +177,7 @@ const RecipePage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    ${recipe.selectedSeraKontrolData.items.slice(0, 8).map(item => `
+                    ${recipe.selectedSeraKontrolData.items.slice(0, 8).map((item: ChecklistItem) => `
                       <tr>
                         <td>${item.label}</td>
                         <td class="${item.completed ? 'status-completed' : 'status-pending'}">
@@ -240,8 +241,7 @@ const RecipePage: React.FC = () => {
           const canvas = await html2canvas(container, {
             useCORS: true,
             allowTaint: true,
-            background: '#ffffff',
-            scale: 2
+            background: '#ffffff'
           });
 
           const imgData = canvas.toDataURL('image/png');
@@ -381,7 +381,7 @@ const RecipePage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    ${recipe.selectedSeraKontrolData.items.slice(0, 8).map(item => `
+                    ${recipe.selectedSeraKontrolData.items.slice(0, 8).map((item: ChecklistItem) => `
                       <tr>
                         <td>${item.label}</td>
                         <td class="${item.completed ? 'status-completed' : 'status-pending'}">
@@ -445,8 +445,7 @@ const RecipePage: React.FC = () => {
           const canvas = await html2canvas(container, {
             useCORS: true,
             allowTaint: true,
-            background: '#ffffff',
-            scale: 2
+            background: '#ffffff'
           });
 
           const imgData = canvas.toDataURL('image/png');
@@ -539,28 +538,28 @@ const RecipePage: React.FC = () => {
   if (currentStep === 'select-producer') {
     return (
       <div className="min-h-screen bg-slate-50">
-        <div className="max-w-4xl mx-auto p-6 space-y-8">
+        <div className="w-full p-6 space-y-8">
           {/* Header */}
           <div className="text-center">
-            <h1 className="text-2xl font-semibold text-slate-900 mb-2">Reçete Yönetimi</h1>
-            <p className="text-slate-600 text-sm">Reçete işlemlerini başlatmak için önce bir üretici seçin</p>
+            <h1 className="text-3xl font-bold text-slate-900 mb-3">Reçete Yönetimi</h1>
+            <p className="text-slate-600 text-lg">Reçete işlemlerini başlatmak için önce bir üretici seçin</p>
           </div>
 
           {/* Progress Steps */}
           <div className="max-w-md mx-auto">
             <div className="flex items-center">
               <div className="flex items-center text-slate-600">
-                <div className="w-8 h-8 bg-slate-800 text-white rounded-full flex items-center justify-center text-sm font-medium">
+                <div className="w-10 h-10 bg-slate-800 text-white rounded-full flex items-center justify-center text-sm font-medium">
                   1
                 </div>
-                <span className="ml-2 font-medium text-sm">Üretici Seç</span>
+                <span className="ml-3 font-medium text-sm">Üretici Seç</span>
               </div>
               <div className="flex-1 mx-4 h-1 bg-slate-200 rounded"></div>
               <div className="flex items-center text-slate-400">
-                <div className="w-8 h-8 bg-slate-200 text-slate-600 rounded-full flex items-center justify-center text-sm font-medium">
+                <div className="w-10 h-10 bg-slate-200 text-slate-600 rounded-full flex items-center justify-center text-sm font-medium">
                   2
                 </div>
-                <span className="ml-2 text-sm">Reçete Yönetimi</span>
+                <span className="ml-3 text-sm">Reçete Yönetimi</span>
               </div>
             </div>
           </div>
@@ -569,10 +568,16 @@ const RecipePage: React.FC = () => {
           <div className="text-center">
             <button
               onClick={() => setCurrentStep('all-recipes')}
-              className="bg-slate-800 text-white px-6 py-3 rounded-lg hover:bg-slate-700 transition-colors text-sm font-medium"
+              className="bg-slate-800 text-white px-8 py-4 rounded-xl hover:bg-slate-700 transition-colors text-base font-medium shadow-lg hover:shadow-xl"
             >
-              Tüm Reçeteleri Görüntüle
+              📋 Tüm Reçeteleri Görüntüle
             </button>
+          </div>
+
+          {/* Üretici Seçimi Başlığı */}
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold text-slate-800 mb-2">Üretici Seçimi</h2>
+            <p className="text-slate-600">Aşağıdaki listeden reçetelerini görüntülemek istediğiniz üreticiyi seçin</p>
           </div>
 
           {/* Producer Selection */}
@@ -580,6 +585,7 @@ const RecipePage: React.FC = () => {
             selectionMode={true}
             onSelect={handleProducerSelect}
             selectedProducer={selectedProducer}
+            onAddRecipe={handleCreateRecipe}
           />
         </div>
       </div>
@@ -590,7 +596,7 @@ const RecipePage: React.FC = () => {
   if (currentStep === 'all-recipes') {
     return (
       <div className="min-h-screen bg-slate-50">
-        <div className="max-w-4xl mx-auto p-6 space-y-8">
+        <div className="w-full p-6 space-y-8">
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
@@ -644,68 +650,75 @@ const RecipePage: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {recipes.map((recipe) => (
-                  <div key={recipe.id} className="border border-slate-200 rounded-lg p-4">
+                  <div key={recipe.id} className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-3">
-                          <div className="w-8 h-8 bg-slate-800 rounded-lg flex items-center justify-center">
-                            <span className="text-white text-sm">📋</span>
+                        <div className="flex items-center space-x-4 mb-4">
+                          <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-blue-500 rounded-xl flex items-center justify-center">
+                            <span className="text-white text-lg">📋</span>
                           </div>
                           <div>
-                            <h3 className="font-medium text-slate-900 text-sm">
+                            <h3 className="text-lg font-semibold text-slate-900">
                               Reçete #{recipe.id.slice(-6)}
                             </h3>
-                            <p className="text-xs text-slate-600">
-                              Üretici: {recipe.producerName}
-                            </p>
-                            <p className="text-xs text-slate-600">
-                              Oluşturulma: {formatDate(recipe.createdAt)}
-                            </p>
+                            <div className="flex items-center space-x-4 text-sm text-slate-600 mt-1">
+                              <span>👨‍🌾 {recipe.producerName}</span>
+                              <span>📅 {formatDate(recipe.createdAt)}</span>
+                            </div>
                           </div>
                         </div>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-4">
                           <div>
-                            <h4 className="font-medium text-slate-700 mb-2 text-xs">Gübreleme Programı</h4>
-                            <div className="space-y-2">
+                            <h4 className="font-semibold text-slate-800 mb-3 text-sm flex items-center">
+                              <span className="mr-2">🌱</span>
+                              Gübreleme Programı
+                            </h4>
+                            <div className="space-y-3">
                               {recipe.fertilization1 && (
-                                <div className="bg-slate-50 p-2 rounded text-xs">
-                                  <span className="font-medium text-slate-700">1. Gübreleme:</span>
-                                  <p className="text-slate-600 mt-1">{recipe.fertilization1}</p>
+                                <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-200">
+                                  <span className="font-medium text-emerald-800 text-xs">1. Gübreleme:</span>
+                                  <p className="text-emerald-700 text-sm mt-1">{recipe.fertilization1}</p>
                                 </div>
                               )}
                               {recipe.fertilization2 && (
-                                <div className="bg-slate-50 p-2 rounded text-xs">
-                                  <span className="font-medium text-slate-700">2. Gübreleme:</span>
-                                  <p className="text-slate-600 mt-1">{recipe.fertilization2}</p>
+                                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                                  <span className="font-medium text-blue-800 text-xs">2. Gübreleme:</span>
+                                  <p className="text-blue-700 text-sm mt-1">{recipe.fertilization2}</p>
                                 </div>
                               )}
                               {recipe.fertilization3 && (
-                                <div className="bg-slate-50 p-2 rounded text-xs">
-                                  <span className="font-medium text-slate-700">3. Gübreleme:</span>
-                                  <p className="text-slate-600 mt-1">{recipe.fertilization3}</p>
+                                <div className="bg-purple-50 p-3 rounded-lg border border-purple-200">
+                                  <span className="font-medium text-purple-800 text-xs">3. Gübreleme:</span>
+                                  <p className="text-purple-700 text-sm mt-1">{recipe.fertilization3}</p>
                                 </div>
                               )}
                             </div>
                           </div>
                           
                           <div>
-                            <h4 className="font-medium text-slate-700 mb-2 text-xs">Üstten Besleme</h4>
+                            <h4 className="font-semibold text-slate-800 mb-3 text-sm flex items-center">
+                              <span className="mr-2">💧</span>
+                              Üstten Besleme
+                            </h4>
                             {recipe.topFeeding ? (
-                              <div className="bg-slate-50 p-2 rounded text-xs">
-                                <p className="text-slate-700">{recipe.topFeeding}</p>
+                              <div className="bg-cyan-50 p-3 rounded-lg border border-cyan-200">
+                                <p className="text-cyan-700 text-sm">{recipe.topFeeding}</p>
                               </div>
                             ) : (
-                              <p className="text-slate-500 text-xs italic">Üstten besleme bilgisi yok</p>
+                              <p className="text-slate-500 text-sm italic">Üstten besleme bilgisi yok</p>
                             )}
                             
                             {recipe.notes && (
-                              <div className="mt-3">
-                                <h4 className="font-medium text-slate-700 mb-2 text-xs">Notlar</h4>
-                                <div className="bg-slate-50 p-2 rounded text-xs">
-                                  <p className="text-slate-700">{recipe.notes}</p>
+                              <div className="mt-4">
+                                <h4 className="font-semibold text-slate-800 mb-2 text-sm flex items-center">
+                                  <span className="mr-2">📝</span>
+                                  Danışman Notları
+                                </h4>
+                                <div className="bg-amber-50 p-3 rounded-lg border border-amber-200">
+                                  <p className="text-amber-700 text-sm">{recipe.notes}</p>
                                 </div>
                               </div>
                             )}
@@ -713,34 +726,34 @@ const RecipePage: React.FC = () => {
                         </div>
                       </div>
                       
-                      <div className="flex flex-col space-y-2 ml-4">
-                        <div className="flex space-x-1">
+                      <div className="flex flex-col space-y-3 ml-6">
+                        <div className="flex space-x-2">
                           <button
                             onClick={() => previewPDF(recipe)}
-                            className="p-2 text-slate-600 hover:text-slate-800 transition-colors"
+                            className="p-3 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
                             title="PDF Önizle"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.065 7-9.542 7S3.732 16.057 2.458 12z" />
                             </svg>
                           </button>
                           <button
                             onClick={() => generatePDF(recipe)}
-                            className="p-2 text-slate-600 hover:text-slate-800 transition-colors"
+                            className="p-3 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
                             title="PDF İndir"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                           </button>
                         </div>
                         <button
                           onClick={() => handleDeleteRecipe(recipe.id)}
-                          className="p-2 text-red-600 hover:text-red-800 transition-colors"
+                          className="p-3 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
                           title="Reçeteyi Sil"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
                         </button>
@@ -760,36 +773,47 @@ const RecipePage: React.FC = () => {
   if (currentStep === 'recipe-management') {
     return (
       <div className="min-h-screen bg-slate-50">
-        <div className="max-w-4xl mx-auto p-6 space-y-8">
+        <div className="w-full p-6 space-y-8">
           {/* Header with Producer Info */}
-          <div className="bg-white rounded-xl p-6 border border-slate-200">
+          <div className="bg-gradient-to-r from-slate-800 to-slate-700 rounded-xl p-8 border border-slate-200 text-white">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex items-center space-x-4 mb-4 lg:mb-0">
-                <div className="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-lg">📋</span>
+              <div className="flex items-center space-x-6 mb-6 lg:mb-0">
+                <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                  <span className="text-white text-2xl">👨‍🌾</span>
                 </div>
                 <div>
-                  <h1 className="text-xl font-semibold text-slate-900">
+                  <h1 className="text-3xl font-bold text-white mb-2">
                     {selectedProducer?.firstName} {selectedProducer?.lastName}
                   </h1>
-                  <p className="text-slate-600 text-sm">
-                    TC: {selectedProducer?.tcNo} | Tel: {selectedProducer?.phone}
-                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-white/80">🆔</span>
+                      <span className="text-white/90">TC: {selectedProducer?.tcNo}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-white/80">📱</span>
+                      <span className="text-white/90">Tel: {selectedProducer?.phone}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-white/80">📍</span>
+                      <span className="text-white/90">{selectedProducer?.address}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={() => handleCreateRecipe(selectedProducer!.id)}
-                  className="bg-slate-800 text-white px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors text-sm font-medium"
+                  className="bg-white text-slate-800 px-6 py-3 rounded-xl hover:bg-slate-100 transition-colors text-base font-medium shadow-lg hover:shadow-xl"
                 >
-                  + Yeni Reçete
+                  ✨ Yeni Reçete Oluştur
                 </button>
                 <button
                   onClick={resetSelection}
-                  className="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg hover:bg-slate-200 transition-colors text-sm font-medium"
+                  className="bg-white/20 text-white px-6 py-3 rounded-xl hover:bg-white/30 transition-colors text-base font-medium backdrop-blur-sm"
                 >
-                  Üretici Değiştir
+                  🔄 Üretici Değiştir
                 </button>
               </div>
             </div>
@@ -850,12 +874,15 @@ const RecipePage: React.FC = () => {
                               Reçete #{recipe.id.slice(-6)}
                             </h3>
                             <p className="text-xs text-slate-600">
+                              Üretici: {recipe.producerName}
+                            </p>
+                            <p className="text-xs text-slate-600">
                               Oluşturulma: {formatDate(recipe.createdAt)}
                             </p>
                           </div>
                         </div>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
                           <div>
                             <h4 className="font-medium text-slate-700 mb-2 text-xs">Gübreleme Programı</h4>
                             <div className="space-y-2">

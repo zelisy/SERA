@@ -16,12 +16,14 @@ interface UreticiListesiProps {
   selectionMode?: boolean;
   onSelect?: (producer: Producer) => void;
   selectedProducer?: Producer | null;
+  onAddRecipe?: (producerId: string) => void;
 }
 
 const UreticiListesi: React.FC<UreticiListesiProps> = ({ 
   selectionMode = false, 
   onSelect, 
-  selectedProducer 
+  selectedProducer,
+  onAddRecipe
 }) => {
   const [producers, setProducers] = useState<Producer[]>([]);
   const [search, setSearch] = useState('');
@@ -127,7 +129,7 @@ const UreticiListesi: React.FC<UreticiListesiProps> = ({
 
 
   return (
-    <div className="p-4 lg:p-6 space-y-6">
+    <div className="w-full p-4 lg:p-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
         <div>
@@ -428,7 +430,7 @@ const UreticiListesi: React.FC<UreticiListesiProps> = ({
           {/* Mobile: Always Cards, Desktop: Table or Cards based on viewMode */}
           <div className="lg:hidden">
             {/* Mobile Cards View */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filtered.map(producer => (
                 <div
                   key={producer.id}
@@ -517,12 +519,35 @@ const UreticiListesi: React.FC<UreticiListesiProps> = ({
                     </div>
                   )}
 
-                  {selectionMode && selectedProducer?.id === producer.id && (
-                    <div className="mt-4 p-3 bg-emerald-100 rounded-lg">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-emerald-600">✅</span>
-                        <span className="text-emerald-800 font-medium text-sm">Seçildi</span>
-                      </div>
+                  {selectionMode && (
+                    <div className="mt-4 space-y-2">
+                      {selectedProducer?.id === producer.id ? (
+                        <div className="p-3 bg-emerald-100 rounded-lg">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-emerald-600">✅</span>
+                            <span className="text-emerald-800 font-medium text-sm">Seçildi</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <button
+                            onClick={() => onSelect && onSelect(producer)}
+                            className="w-full bg-emerald-500 text-white hover:bg-emerald-600 px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                          >
+                            <span>👁️</span>
+                            <span>Reçeteleri Görüntüle</span>
+                          </button>
+                          {onAddRecipe && (
+                            <button
+                              onClick={() => onAddRecipe(producer.id)}
+                              className="w-full bg-blue-500 text-white hover:bg-blue-600 px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                            >
+                              <span>➕</span>
+                              <span>Yeni Reçete Ekle</span>
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -533,7 +558,7 @@ const UreticiListesi: React.FC<UreticiListesiProps> = ({
           <div className="hidden lg:block">
             {viewMode === 'cards' ? (
               /* Desktop Cards View */
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                 {filtered.map(producer => (
                   <div
                     key={producer.id}
@@ -592,12 +617,35 @@ const UreticiListesi: React.FC<UreticiListesiProps> = ({
                       </div>
                     </div>
 
-                    {selectionMode && selectedProducer?.id === producer.id && (
-                      <div className="mt-4 p-3 bg-emerald-100 rounded-lg">
-                        <div className="flex items-center space-x-2">
-                          <span className="text-emerald-600">✅</span>
-                          <span className="text-emerald-800 font-medium text-sm">Seçildi</span>
-                        </div>
+                    {selectionMode && (
+                      <div className="mt-4 space-y-2">
+                        {selectedProducer?.id === producer.id ? (
+                          <div className="p-3 bg-emerald-100 rounded-lg">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-emerald-600">✅</span>
+                              <span className="text-emerald-800 font-medium text-sm">Seçildi</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            <button
+                              onClick={() => onSelect && onSelect(producer)}
+                              className="w-full bg-emerald-500 text-white hover:bg-emerald-600 px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                            >
+                              <span>👁️</span>
+                              <span>Reçeteleri Görüntüle</span>
+                            </button>
+                            {onAddRecipe && (
+                              <button
+                                onClick={() => onAddRecipe(producer.id)}
+                                className="w-full bg-blue-500 text-white hover:bg-blue-600 px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                              >
+                                <span>➕</span>
+                                <span>Yeni Reçete Ekle</span>
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -647,16 +695,26 @@ const UreticiListesi: React.FC<UreticiListesiProps> = ({
                           </td>
                           <td className="px-6 py-4 text-center">
                             {selectionMode ? (
-                              <button
-                                onClick={() => onSelect && onSelect(producer)}
-                                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                                  selectedProducer?.id === producer.id
-                                    ? 'bg-emerald-500 text-white'
-                                    : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
-                                }`}
-                              >
-                                {selectedProducer?.id === producer.id ? '✅ Seçildi' : 'Seç'}
-                              </button>
+                              <div className="space-y-2">
+                                <button
+                                  onClick={() => onSelect && onSelect(producer)}
+                                  className={`w-full px-4 py-2 rounded-lg font-medium transition-colors ${
+                                    selectedProducer?.id === producer.id
+                                      ? 'bg-emerald-500 text-white'
+                                      : 'bg-emerald-500 text-white hover:bg-emerald-600'
+                                  }`}
+                                >
+                                  👁️ Reçeteleri Görüntüle
+                                </button>
+                                {onAddRecipe && (
+                                  <button
+                                    onClick={() => onAddRecipe(producer.id)}
+                                    className="w-full bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-lg font-medium transition-colors"
+                                  >
+                                    ➕ Yeni Reçete Ekle
+                                  </button>
+                                )}
+                              </div>
                             ) : (
                               <>
                                 <button
