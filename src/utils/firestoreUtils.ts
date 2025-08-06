@@ -313,14 +313,13 @@ export const getAllProducers = async (): Promise<Producer[]> => {
 };
 
 // Product CRUD Functions
-export const saveProduct = async (product: Omit<Product, 'id' | 'createdAt'> & { imageUrl?: string }): Promise<string> => {
+export const saveProduct = async (product: Omit<Product, 'id'> & { imageUrl?: string }): Promise<string> => {
   try {
     const docRef = doc(collection(db, 'products'));
     const cleanData = Object.fromEntries(
       Object.entries({
         ...product,
         id: docRef.id,
-        createdAt: new Date().toISOString(),
         imageUrl: product.imageUrl || '',
       }).filter(([, value]) => value !== undefined)
     );
@@ -338,7 +337,6 @@ export const updateProduct = async (id: string, product: Partial<Product>): Prom
     const cleanData = Object.fromEntries(
       Object.entries({
         ...product,
-        updatedAt: new Date().toISOString(),
       }).filter(([, value]) => value !== undefined)
     );
     await updateDoc(docRef, cleanData);

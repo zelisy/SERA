@@ -13,7 +13,7 @@ interface Fertilization {
   time: string;
   water: string;
   duration: string;
-  products: string;
+  products: string[];
 }
 
 interface TopFeeding {
@@ -42,7 +42,38 @@ const RecipeCreatePage: React.FC = () => {
   const [userLocation, setUserLocation] = useState<string>('');
   const [locationLoading, setLocationLoading] = useState(true);
   const [lastLocation, setLastLocation] = useState<{lat: number, lon: number} | null>(null);
+  const [productCounts, setProductCounts] = useState<{[key: number]: number}>({0: 1});
 
+  // Ürün ekleme fonksiyonu
+  const addProduct = (fertIndex: number) => {
+    const currentCount = productCounts[fertIndex] || 1;
+    setProductCounts(prev => ({
+      ...prev,
+      [fertIndex]: currentCount + 1
+    }));
+    
+    // Form state'ini de güncelle
+    const currentProducts = watch(`fertilizations.${fertIndex}.products`) || [''];
+    const newProducts = [...currentProducts, ''];
+    setValue(`fertilizations.${fertIndex}.products`, newProducts);
+  };
+
+  // Ürün kaldırma fonksiyonu
+  const removeProduct = (fertIndex: number, productIndex: number) => {
+    const currentCount = productCounts[fertIndex] || 1;
+    if (currentCount > 1) {
+      setProductCounts(prev => ({
+        ...prev,
+        [fertIndex]: currentCount - 1
+      }));
+      
+      // Form'dan da kaldır
+      const currentProducts = watch(`fertilizations.${fertIndex}.products`) || [];
+      const newProducts = currentProducts.filter((_, i) => i !== productIndex);
+      setValue(`fertilizations.${fertIndex}.products`, newProducts);
+    }
+  };
+  
   // Koordinatları şehir adına çeviren fonksiyon
   const getCityNameFromCoordinates = async (latitude: number, longitude: number): Promise<string> => {
     try {
@@ -126,9 +157,9 @@ const RecipeCreatePage: React.FC = () => {
     }
   };
   
-  const { register, control, handleSubmit, watch } = useForm<FormData>({
+  const { register, control, handleSubmit, watch, setValue } = useForm<FormData>({
     defaultValues: {
-      fertilizations: [{ date: '', time: '', water: '', duration: '', products: '' }],
+      fertilizations: [{ date: '', time: '', water: '', duration: '', products: [''] }],
       topFeedings: [{ date: '', time: '', applications: '' }],
       selectedSeraKontrol: '',
       notes: '',
@@ -351,11 +382,11 @@ const RecipeCreatePage: React.FC = () => {
         producerId: producer.id,
         producerName: `${producer.firstName} ${producer.lastName}`,
         fertilization1: data.fertilizations[0] ? 
-          `${data.fertilizations[0].date} ${data.fertilizations[0].time} - Su: ${data.fertilizations[0].water}ml, Süre: ${data.fertilizations[0].duration}dk, Ürünler: ${data.fertilizations[0].products}` : '',
+          `${data.fertilizations[0].date} ${data.fertilizations[0].time} - Su: ${data.fertilizations[0].water}ml, Süre: ${data.fertilizations[0].duration}dk, Ürünler: ${(data.fertilizations[0].products || []).filter(p => p && p.trim()).join(', ')}` : '',
         fertilization2: data.fertilizations[1] ? 
-          `${data.fertilizations[1].date} ${data.fertilizations[1].time} - Su: ${data.fertilizations[1].water}ml, Süre: ${data.fertilizations[1].duration}dk, Ürünler: ${data.fertilizations[1].products}` : '',
+          `${data.fertilizations[1].date} ${data.fertilizations[1].time} - Su: ${data.fertilizations[1].water}ml, Süre: ${data.fertilizations[1].duration}dk, Ürünler: ${(data.fertilizations[1].products || []).filter(p => p && p.trim()).join(', ')}` : '',
         fertilization3: data.fertilizations[2] ? 
-          `${data.fertilizations[2].date} ${data.fertilizations[2].time} - Su: ${data.fertilizations[2].water}ml, Süre: ${data.fertilizations[2].duration}dk, Ürünler: ${data.fertilizations[2].products}` : '',
+          `${data.fertilizations[2].date} ${data.fertilizations[2].time} - Su: ${data.fertilizations[2].water}ml, Süre: ${data.fertilizations[2].duration}dk, Ürünler: ${(data.fertilizations[2].products || []).filter(p => p && p.trim()).join(', ')}` : '',
         topFeeding: data.topFeedings.length > 0 ? 
           data.topFeedings.map(feed => `${feed.date} ${feed.time} - ${feed.applications}`).join('; ') : '',
         notes: data.notes,
@@ -461,7 +492,14 @@ const RecipeCreatePage: React.FC = () => {
               </h2>
               <button
                 type="button"
-                onClick={() => addFert({ date: '', time: '', water: '', duration: '', products: '' })}
+                onClick={() => {
+                  const newIndex = fertFields.length;
+                  addFert({ date: '', time: '', water: '', duration: '', products: [''] });
+                  setProductCounts(prev => ({
+                    ...prev,
+                    [newIndex]: 1
+                  }));
+                }}
                 className="bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600 transition-colors text-sm font-medium"
               >
                 + Ekle
@@ -476,7 +514,20 @@ const RecipeCreatePage: React.FC = () => {
                     {fertFields.length > 1 && (
                       <button
                         type="button"
-                        onClick={() => removeFert(index)}
+                        onClick={() => {
+                          removeFert(index);
+                          // productCounts state'inden de kaldır
+                          setProductCounts(prev => {
+                            const newCounts = { ...prev };
+                            delete newCounts[index];
+                            // Diğer indeksleri yeniden düzenle
+                            const reorderedCounts: {[key: number]: number} = {};
+                            Object.keys(newCounts).forEach((key, newIndex) => {
+                              reorderedCounts[newIndex] = newCounts[parseInt(key)];
+                            });
+                            return reorderedCounts;
+                          });
+                        }}
                         className="text-slate-400 hover:text-slate-600 transition-colors"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -486,7 +537,7 @@ const RecipeCreatePage: React.FC = () => {
                     )}
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                     <div>
                       <label className="block text-xs font-medium text-slate-700 mb-1">Tarih</label>
                       <input
@@ -524,15 +575,51 @@ const RecipeCreatePage: React.FC = () => {
                         className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-1 focus:ring-slate-400 focus:border-slate-400 transition-colors"
                       />
                     </div>
+                  </div>
+
+                  {/* Ürünler Bölümü */}
+                  <div className="border-t border-slate-200 pt-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <label className="block text-xs font-medium text-slate-700">Ürünler</label>
+                      <button
+                        type="button"
+                        onClick={() => addProduct(index)}
+                        className="text-emerald-600 hover:text-emerald-700 text-xs font-medium flex items-center"
+                      >
+                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        Ürün Ekle
+                      </button>
+                    </div>
                     
-                    <div>
-                      <label className="block text-xs font-medium text-slate-700 mb-1">Ürünler</label>
-                      <input
-                        {...register(`fertilizations.${index}.products`)}
-                        type="text"
-                        placeholder="Gübre adları"
-                        className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-1 focus:ring-slate-400 focus:border-slate-400 transition-colors"
-                      />
+                    <div className="space-y-2">
+                      {Array.from({ length: productCounts[index] || 1 }, (_, productIndex) => (
+                        <div key={productIndex} className="flex items-center space-x-2">
+                          <input
+                            {...register(`fertilizations.${index}.products.${productIndex}`)}
+                            type="text"
+                            placeholder={`Ürün ${productIndex + 1} (örn: NPK, Demir, Çinko)`}
+                            className="flex-1 px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-1 focus:ring-slate-400 focus:border-slate-400 transition-colors"
+                          />
+                          {productIndex > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => removeProduct(index, productIndex)}
+                              className="text-red-500 hover:text-red-700 p-1"
+                              title="Ürünü Kaldır"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      
+                      <p className="text-xs text-slate-500">
+                        Birden fazla ürün eklemek için "Ürün Ekle" butonunu kullanın
+                      </p>
                     </div>
                   </div>
                 </div>

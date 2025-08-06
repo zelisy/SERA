@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 const AdminProducts: React.FC = () => {
   const [showForm, setShowForm] = useState(true);
-  const [form, setForm] = useState({ name: '', description: '', price: '', imageUrl: '' });
+  const [form, setForm] = useState({ name: '', description: '', imageUrl: '' });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
@@ -38,7 +38,6 @@ const AdminProducts: React.FC = () => {
         await updateProduct(editId, {
           name: form.name,
           description: form.description,
-          price: Number(form.price),
           imageUrl: form.imageUrl,
         });
         setMessage('Ürün güncellendi!');
@@ -46,12 +45,11 @@ const AdminProducts: React.FC = () => {
         await saveProduct({
           name: form.name,
           description: form.description,
-          price: Number(form.price),
           imageUrl: form.imageUrl,
         });
         setMessage('Ürün başarıyla eklendi!');
       }
-      setForm({ name: '', description: '', price: '', imageUrl: '' });
+      setForm({ name: '', description: '', imageUrl: '' });
       setShowForm(false);
       setEditId(null);
       fetchProducts();
@@ -65,7 +63,6 @@ const AdminProducts: React.FC = () => {
     setForm({
       name: product.name,
       description: product.description,
-      price: String(product.price),
       imageUrl: product.imageUrl,
     });
     setShowForm(true);
@@ -119,7 +116,7 @@ const AdminProducts: React.FC = () => {
             className="bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-semibold py-2 px-6 rounded-xl hover:from-emerald-600 hover:to-blue-600 transition-all duration-200 shadow-lg"
             onClick={() => {
               setShowForm(!showForm);
-              setForm({ name: '', description: '', price: '', imageUrl: '' });
+              setForm({ name: '', description: '', imageUrl: '' });
               setEditId(null);
             }}
           >
@@ -150,19 +147,6 @@ const AdminProducts: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Fiyat (₺)</label>
-              <input
-                type="number"
-                name="price"
-                value={form.price}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500"
-                required
-                min="0"
-                step="0.01"
-              />
-            </div>
-            <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">Görsel URL</label>
               <input
                 type="text"
@@ -189,7 +173,6 @@ const AdminProducts: React.FC = () => {
                 <th className="px-4 py-2 text-left">Görsel</th>
                 <th className="px-4 py-2 text-left">Adı</th>
                 <th className="px-4 py-2 text-left">Açıklama</th>
-                <th className="px-4 py-2 text-left">Fiyat</th>
                 <th className="px-4 py-2 text-left">İşlemler</th>
               </tr>
             </thead>
@@ -203,7 +186,6 @@ const AdminProducts: React.FC = () => {
                   </td>
                   <td className="px-4 py-2 font-semibold">{product.name}</td>
                   <td className="px-4 py-2">{product.description}</td>
-                  <td className="px-4 py-2 text-emerald-700 font-bold">₺{product.price}</td>
                   <td className="px-4 py-2 space-x-2">
                     <button
                       className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
