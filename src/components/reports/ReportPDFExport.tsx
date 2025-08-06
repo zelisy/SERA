@@ -29,21 +29,21 @@ const ReportPDFExport: React.FC<ReportPDFExportProps> = ({
     container.innerHTML = `
       <style>
         .pdf-container { max-width: 170mm; margin: 0 auto; }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #10b981; padding-bottom: 20px; }
-        .title { font-size: 24px; font-weight: bold; color: #1f2937; margin-bottom: 10px; }
-        .subtitle { font-size: 14px; color: #6b7280; margin-bottom: 5px; }
-        .date { font-size: 12px; color: #9ca3af; }
-        .section { margin-bottom: 25px; }
-        .section-title { font-size: 16px; font-weight: bold; color: #1f2937; margin-bottom: 15px; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; }
-        .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-        .kpi-card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; background: #f9fafb; }
-        .kpi-label { font-size: 10px; color: #6b7280; margin-bottom: 5px; }
-        .kpi-value { font-size: 16px; font-weight: bold; color: #1f2937; }
-        .table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-        .table th, .table td { border: 1px solid #d1d5db; padding: 8px; text-align: left; font-size: 11px; }
+        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #10b981; padding-bottom: 10px; }
+        .title { font-size: 20px; font-weight: bold; color: #1f2937; margin-bottom: 8px; }
+        .subtitle { font-size: 12px; color: #6b7280; margin-bottom: 4px; }
+        .date { font-size: 10px; color: #9ca3af; }
+        .section { margin-bottom: 15px; max-height: 80mm; overflow: auto; }
+        .section-title { font-size: 14px; font-weight: bold; color: #1f2937; margin-bottom: 10px; border-bottom: 1px solid #e5e7eb; padding-bottom: 3px; }
+        .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
+        .kpi-card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px; background: #f9fafb; }
+        .kpi-label { font-size: 9px; color: #6b7280; margin-bottom: 3px; }
+        .kpi-value { font-size: 13px; font-weight: bold; color: #1f2937; }
+        .table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+        .table th, .table td { border: 1px solid #d1d5db; padding: 6px; text-align: left; font-size: 9px; }
         .table th { background: #f3f4f6; font-weight: bold; }
         .table tr:nth-child(even) { background: #f9fafb; }
-        .footer { margin-top: 30px; text-align: center; font-size: 10px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 15px; }
+        .footer { margin-top: 15px; text-align: center; font-size: 9px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 8px; }
         .page-break { page-break-before: always; }
       </style>
       
@@ -100,7 +100,7 @@ const ReportPDFExport: React.FC<ReportPDFExportProps> = ({
               </tr>
             </thead>
             <tbody>
-              ${reportData.producerPerformances.slice(0, 10).map(p => `
+              ${reportData.producerPerformances.slice(0, 5).map(p => `
                 <tr>
                   <td>${p.producer.firstName} ${p.producer.lastName}</td>
                   <td>${formatWeight(p.production)}</td>
@@ -127,7 +127,7 @@ const ReportPDFExport: React.FC<ReportPDFExportProps> = ({
               </tr>
             </thead>
             <tbody>
-              ${reportData.greenhousePerformances.slice(0, 10).map(gh => `
+              ${reportData.greenhousePerformances.slice(0, 5).map(gh => `
                 <tr>
                   <td>${gh.greenhouse.mahalle}</td>
                   <td>${gh.greenhouse.urunIsmi}</td>
@@ -156,7 +156,7 @@ const ReportPDFExport: React.FC<ReportPDFExportProps> = ({
                 </tr>
               </thead>
               <tbody>
-                ${reportData.cropAnalyses.map(crop => `
+                ${reportData.cropAnalyses.slice(0, 5).map(crop => `
                   <tr>
                     <td>${crop.cropType}</td>
                     <td>${formatWeight(crop.totalProduction)}</td>
@@ -203,7 +203,7 @@ const ReportPDFExport: React.FC<ReportPDFExportProps> = ({
                   </tr>
                 </thead>
                 <tbody>
-                  ${reportData.trends.map(trend => `
+                  ${reportData.trends.slice(0, 5).map(trend => `
                     <tr>
                       <td>${trend.metric}</td>
                       <td>${trend.change > 0 ? '+' : ''}${formatPercentage(trend.change)}</td>
@@ -220,7 +220,6 @@ const ReportPDFExport: React.FC<ReportPDFExportProps> = ({
         <!-- Footer -->
         <div class="footer">
           <div>Bu rapor ${new Date().toLocaleString('tr-TR')} tarihinde otomatik olarak oluşturulmuştur.</div>
-          <div>Sera Yönetim Sistemi - Rapor ID: ${reportData.reportId}</div>
         </div>
       </div>
     `;
@@ -241,25 +240,28 @@ const ReportPDFExport: React.FC<ReportPDFExportProps> = ({
          background: '#ffffff'
        });
 
-      // Canvas'ı PDF'e çevir
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 295; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
 
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+      // Canvas'ı A4 boyutuna ölçekle
+      const pageWidth = 210; // mm
+      const pageHeight = 295; // mm
+      const a4PxWidth = 2480; // 210mm @ 300dpi
+      const a4PxHeight = 3508; // 295mm @ 300dpi
 
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+      // Ölçekli canvas oluştur
+      const scale = Math.min(a4PxWidth / canvas.width, a4PxHeight / canvas.height);
+      const scaledWidth = canvas.width * scale;
+      const scaledHeight = canvas.height * scale;
+      const scaledCanvas = document.createElement('canvas');
+      scaledCanvas.width = scaledWidth;
+      scaledCanvas.height = scaledHeight;
+      const ctx = scaledCanvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(canvas, 0, 0, scaledWidth, scaledHeight);
       }
+
+      const imgData = scaledCanvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, pageHeight);
 
       // PDF'i indir
       const filename = `sera-raporu-${new Date().toISOString().split('T')[0]}.pdf`;

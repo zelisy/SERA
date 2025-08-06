@@ -152,7 +152,7 @@ const RecipePage: React.FC = () => {
           .section-subtitle { font-size: 12px; color: #6b7280; margin-bottom: 15px; font-weight: 500; }
           
           /* Application Cards */
-          .application-card { background: #10b981; border-radius: 8px; padding: 12px; margin-bottom: 10px; color: white; }
+          .application-card { background: #10b981; border-radius: 8px; padding: 7px 8px; margin-bottom: 6px; color: white; font-size: 9px; }
           .application-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
           .application-time { font-size: 11px; font-weight: 600; }
           .application-date { font-size: 11px; font-weight: 600; }
@@ -214,29 +214,31 @@ const RecipePage: React.FC = () => {
             <div class="section-card">
               <div class="section-title">🌱 Gübreleme Programı</div>
               <div class="section-subtitle">1 Dönüme / Dekara</div>
-                              ${[recipe.fertilization1, recipe.fertilization2, recipe.fertilization3]
+              <div style="max-height: 80mm; overflow: auto;">
+                ${[recipe.fertilization1, recipe.fertilization2, recipe.fertilization3]
                   .filter(Boolean)
+                  .slice(0, 3)
                   .map((fert) => {
-                  // Fertilization verilerini parse et
-                  const fertData = parseFertilizationData(fert);
-                  return `
-                    <div class="application-card">
-                      <div class="application-header">
-                        <span class="application-time">Saat: ${fertData.time}</span>
-                        <span class="application-date">Tarih: ${fertData.date}</span>
-                      </div>
-                      <div class="application-details">
-                        Su: ${fertData.water} ml<br>
-                        dk: ${fertData.duration} dk<br>
-                        <div class="application-products">
-                          ${fertData.products.map(product => `<span class="product-item">${product}</span>`).join(', ')}
+                    const fertData = parseFertilizationData(fert);
+                    return `
+                      <div class="application-card">
+                        <div class="application-header">
+                          <span class="application-time">Saat: ${fertData.time}</span>
+                          <span class="application-date">Tarih: ${fertData.date}</span>
+                        </div>
+                        <div class="application-details">
+                          Su: ${fertData.water} ml<br>
+                          dk: ${fertData.duration} dk<br>
+                          <div class="application-products">
+                            ${fertData.products.map(product => `<span class="product-item">${product}</span>`).join(', ')}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  `;
-                }).join('')}
-              ${[recipe.fertilization1, recipe.fertilization2, recipe.fertilization3].filter(Boolean).length === 0 ? 
-                '<div class="application-card"><div class="application-details">Gübreleme programı belirtilmemiş</div></div>' : ''}
+                    `;
+                  }).join('')}
+                ${[recipe.fertilization1, recipe.fertilization2, recipe.fertilization3].filter(Boolean).length === 0 ? 
+                  '<div class="application-card"><div class="application-details">Gübreleme programı belirtilmemiş</div></div>' : ''}
+              </div>
             </div>
 
             <!-- Üstten Besleme -->
