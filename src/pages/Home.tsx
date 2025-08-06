@@ -264,7 +264,7 @@ const Home = () => {
                        <p className="text-gray-300 mb-2 md:mb-3 text-xs md:text-sm leading-relaxed line-clamp-2">{product.description}</p>
                                               <div className="flex items-center justify-between">
                           <div className="text-emerald-400 font-bold text-lg md:text-xl">₺{product.price}</div>
-                          <div className="text-xs text-gray-400">{new Date(product.createdAt).toLocaleDateString('tr-TR')}</div>
+                          <div className="text-xs text-gray-400">{new Date(product.createdAt ?? Date.now()).toLocaleDateString('tr-TR')}</div>
                         </div>
                     </div>
                   ))}

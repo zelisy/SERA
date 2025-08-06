@@ -22,7 +22,6 @@ const SeraKontrol: React.FC = () => {
   const [savedRecords, setSavedRecords] = useState<any[]>([]);
   const [editingRecord, setEditingRecord] = useState<any | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [plantControlData, setPlantControlData] = useState<any>(null);
 
   useEffect(() => {
     if (selectedProducer) {
@@ -282,8 +281,6 @@ const SeraKontrol: React.FC = () => {
 
   const handlePlantControlComplete = async (data: { dekar: number; plants: any[] }) => {
     if (!selectedProducer) return;
-    
-    setPlantControlData(data);
     
     try {
       // Update the checklist item with plant control data

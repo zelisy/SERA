@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaCalendar as Calendar, FaFilter as Filter, FaUsers as Users, FaBuilding as Building, FaArrowUp as TrendingUp, FaDownload as Download, FaCog, FaChevronDown, FaChevronUp, FaSearch } from 'react-icons/fa';
+import { FaCalendar as Calendar, FaFilter as Filter, FaUsers as Users, FaArrowUp as TrendingUp, FaDownload as Download, FaCog, FaChevronDown, FaChevronUp, FaSearch } from 'react-icons/fa';
 import type { ReportFilters, ReportType } from '../../types/reports';
 import type { Producer } from '../../types/producer';
 import { getAllProducers } from '../../utils/firestoreUtils';

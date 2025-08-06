@@ -56,7 +56,7 @@ export const generateMockWeatherData = (): WeatherData[] => {
 
 // Kullanıcının konumunu al
 export const getUserLocation = (): Promise<{lat: number, lon: number}> => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     if (!navigator.geolocation) {
       console.log('Geolocation desteklenmiyor. Varsayılan konum kullanılıyor.');
       resolve({ lat: 41.0082, lon: 28.9784 }); // İstanbul varsayılan

@@ -78,7 +78,7 @@ const Products: React.FC = () => {
                       <h3 className="text-lg font-bold text-white mb-2">{product.name}</h3>
                       <p className="text-gray-300 mb-2 text-center">{product.description}</p>
                       <div className="text-emerald-400 font-semibold text-lg mb-1">₺{product.price}</div>
-                      <div className="text-xs text-gray-400">{new Date(product.createdAt).toLocaleDateString()}</div>
+                       <div className="text-xs text-gray-400">{new Date(product.createdAt ?? Date.now()).toLocaleDateString()}</div>
                     </div>
                   ))}
                 </div>
