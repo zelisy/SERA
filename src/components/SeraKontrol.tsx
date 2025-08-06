@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import ChecklistItem from './ChecklistItem';
 import UreticiListesi from './UreticiListesi';
+import PlantControlStep from './PlantControlStep';
 import { seraKontrolConfig } from '../data/seraKontrolConfig';
 import { loadChecklistData, updateChecklistItem, saveChecklistData } from '../utils/firestoreUtils';
 import type { ChecklistSection } from '../types/checklist';
@@ -9,13 +10,19 @@ import type { Producer } from '../types/producer';
 const SeraKontrol: React.FC = () => {
   const [checklistData, setChecklistData] = useState<ChecklistSection>(seraKontrolConfig);
   const [loading, setLoading] = useState(true);
+  
+  // Debug loading state changes
+  useEffect(() => {
+    console.log('Loading state changed to:', loading);
+  }, [loading]);
   const [error, setError] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [selectedProducer, setSelectedProducer] = useState<Producer | null>(null);
-  const [currentStep, setCurrentStep] = useState<'select-producer' | 'list' | 'checklist'>('select-producer');
+  const [currentStep, setCurrentStep] = useState<'select-producer' | 'list' | 'checklist' | 'plant-control'>('select-producer');
   const [savedRecords, setSavedRecords] = useState<any[]>([]);
   const [editingRecord, setEditingRecord] = useState<any | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [plantControlData, setPlantControlData] = useState<any>(null);
 
   useEffect(() => {
     if (selectedProducer) {
@@ -69,7 +76,7 @@ const SeraKontrol: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedProducer]);
 
   const handleItemUpdate = async (
     itemId: string, 
@@ -77,6 +84,11 @@ const SeraKontrol: React.FC = () => {
     data?: Record<string, string | number | boolean | string[] | { selected: boolean; photo: string; } | { selected: boolean; note: string; }>
   ) => {
     if (!selectedProducer) return;
+    
+    // Skip checkbox update for plant control step - it's handled by the button
+    if (itemId === 'kontrol-bitkileri-kontrolu') {
+      return;
+    }
     
     try {
       setChecklistData(prev => ({
@@ -93,7 +105,10 @@ const SeraKontrol: React.FC = () => {
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Güncelleme başarısız');
-      await loadInitialData();
+      // Only reload data if we're not editing a record
+      if (!editingRecord) {
+        await loadInitialData();
+      }
     }
   };
 
@@ -152,12 +167,16 @@ const SeraKontrol: React.FC = () => {
   };
 
   const handleEditRecord = (record: any) => {
+    console.log('handleEditRecord called with:', record);
     setEditingRecord(record);
     setChecklistData({
       ...seraKontrolConfig,
       items: record.items
     });
     setCurrentStep('checklist');
+    setLoading(false); // Ensure loading is false when editing
+    setError(null); // Clear any previous errors
+    console.log('handleEditRecord completed, loading should be false');
   };
 
   const handleDeleteRecord = async (recordId: string) => {
@@ -261,10 +280,55 @@ const SeraKontrol: React.FC = () => {
     console.log('startNewRecord completed, currentStep should be checklist');
   };
 
+  const handlePlantControlComplete = async (data: { dekar: number; plants: any[] }) => {
+    if (!selectedProducer) return;
+    
+    setPlantControlData(data);
+    
+    try {
+      // Update the checklist item with plant control data
+      const updatedItems = checklistData.items.map(item => {
+        if (item.id === 'kontrol-bitkileri-kontrolu') {
+          return {
+            ...item,
+            completed: true,
+            data: {
+              ...item.data,
+              dekar: data.dekar,
+              plants: data.plants
+            }
+          };
+        }
+        return item;
+      });
+      
+      setChecklistData(prev => ({ ...prev, items: updatedItems }));
+      
+      // Save to Firestore
+      const dataKey = `sera-kontrol-${selectedProducer.id}`;
+      const plantControlItem = updatedItems.find(item => item.id === 'kontrol-bitkileri-kontrolu');
+      if (plantControlItem) {
+        await updateChecklistItem(dataKey, plantControlItem.id, true, plantControlItem.data);
+      }
+      
+      setCurrentStep('checklist');
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Bitki kontrolü kaydedilemedi');
+    }
+  };
+
+  const handlePlantControlBack = () => {
+    setCurrentStep('checklist');
+  };
+
   // useEffect for loading initial data when editing
   useEffect(() => {
     if (selectedProducer && currentStep === 'checklist' && editingRecord) {
-      loadInitialData();
+      console.log('useEffect triggered for editing record, setting loading to false');
+      // When editing, we don't need to load from Firestore since we already have the data
+      // Just set loading to false to show the form
+      setLoading(false);
     }
   }, [currentStep, editingRecord, selectedProducer?.id]);
 
@@ -447,7 +511,28 @@ const SeraKontrol: React.FC = () => {
   const stats = getCompletionStats();
   const categoryStats = getCategoryStats();
 
+  // Plant Control Step
+  if (currentStep === 'plant-control') {
+    // Get existing plant control data if editing
+    const plantControlItem = checklistData.items.find(item => item.id === 'kontrol-bitkileri-kontrolu');
+    const initialPlantData = plantControlItem?.data?.dekar && plantControlItem?.data?.plants 
+      ? { 
+          dekar: Number(plantControlItem.data.dekar), 
+          plants: plantControlItem.data.plants as any[] 
+        }
+      : undefined;
+
+    return (
+      <PlantControlStep
+        onComplete={handlePlantControlComplete}
+        onBack={handlePlantControlBack}
+        initialData={initialPlantData}
+      />
+    );
+  }
+
   if (loading) {
+    console.log('Loading state is true, showing loading screen');
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4">
         <div className="max-w-6xl mx-auto">
@@ -601,6 +686,7 @@ const SeraKontrol: React.FC = () => {
                     <ChecklistItem
                       item={item}
                       onUpdate={handleItemUpdate}
+                      onPlantControlClick={() => setCurrentStep('plant-control')}
                     />
                   </div>
                 )}

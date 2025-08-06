@@ -83,7 +83,7 @@ export const seraKontrolConfig: ChecklistSection = {
     },
     {
       id: 'kontrol-bitkileri-kontrolu',
-      label: '4) Kontrol Bitkileri Kontrolü',
+      label: '4) Kontrol Bitkileri Kontrolü (Dekar & Bitki Sayısı)',
       completed: false,
       hasDetails: true,
       detailFields: [
@@ -396,6 +396,12 @@ export const seraKontrolConfig: ChecklistSection = {
           required: false
         },
         {
+          id: 'makro-elementler-foto',
+          label: '📷 Makro Elementler Fotoğrafları',
+          type: 'multiple-files',
+          required: false
+        },
+        {
           id: 'azot',
           label: 'Azot',
           type: 'checkbox',
@@ -435,6 +441,12 @@ export const seraKontrolConfig: ChecklistSection = {
           id: 'mikro-elementler',
           label: 'Mikro Elementler:',
           type: 'subheader',
+          required: false
+        },
+        {
+          id: 'mikro-elementler-foto',
+          label: '📷 Mikro Elementler Fotoğrafları',
+          type: 'multiple-files',
           required: false
         },
         {

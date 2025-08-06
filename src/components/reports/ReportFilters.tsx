@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaCalendar as Calendar, FaFilter as Filter, FaUsers as Users, FaBuilding as Building, FaArrowUp as TrendingUp, FaDownload as Download, FaCog, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { FaCalendar as Calendar, FaFilter as Filter, FaUsers as Users, FaBuilding as Building, FaArrowUp as TrendingUp, FaDownload as Download, FaCog, FaChevronDown, FaChevronUp, FaSearch } from 'react-icons/fa';
 import type { ReportFilters, ReportType } from '../../types/reports';
 import type { Producer } from '../../types/producer';
 import { getAllProducers } from '../../utils/firestoreUtils';
@@ -23,6 +23,7 @@ const ReportFilters: React.FC<ReportFiltersProps> = ({
   const [producers, setProducers] = useState<Producer[]>([]);
   const [isExpanded, setIsExpanded] = useState(!isMobile); // Mobilde kapalı başla
   const [loading, setLoading] = useState(true);
+  const [producerSearchTerm, setProducerSearchTerm] = useState('');
 
   // Rapor türleri
   const reportTypes: { value: ReportType; label: string; icon: string }[] = [
@@ -127,6 +128,13 @@ const ReportFilters: React.FC<ReportFiltersProps> = ({
       endDate
     });
   };
+
+  // Filtered producers based on search term
+  const filteredProducers = producers.filter(producer => {
+    const fullName = `${producer.firstName} ${producer.lastName}`.toLowerCase();
+    const searchTerm = producerSearchTerm.toLowerCase();
+    return fullName.includes(searchTerm);
+  });
 
   if (loading) {
     return (
@@ -291,6 +299,20 @@ const ReportFilters: React.FC<ReportFiltersProps> = ({
                   <span className="text-xs text-slate-500">({filters.producers.length} seçili)</span>
                 </div>
                 
+                {/* Search Bar */}
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FaSearch className="h-4 w-4 text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Üretici ara..."
+                    value={producerSearchTerm}
+                    onChange={(e) => setProducerSearchTerm(e.target.value)}
+                    className={`w-full ${isMobile ? 'pl-10 pr-3 py-2 text-sm' : 'pl-10 pr-3 py-2'} border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500`}
+                  />
+                </div>
+                
                 <div className={`max-h-${isMobile ? '32' : '40'} overflow-y-auto space-y-2 border border-gray-200 rounded-lg p-3`}>
                   <label className="flex items-center space-x-2 cursor-pointer p-2 hover:bg-gray-50 rounded">
                     <input
@@ -302,19 +324,27 @@ const ReportFilters: React.FC<ReportFiltersProps> = ({
                     <span className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium text-slate-700`}>Tüm Üreticiler</span>
                   </label>
                   
-                  {producers.map(producer => (
-                    <label key={producer.id} className="flex items-center space-x-2 cursor-pointer p-2 hover:bg-gray-50 rounded">
-                      <input
-                        type="checkbox"
-                        checked={filters.producers.includes(producer.id)}
-                        onChange={() => handleProducerToggle(producer.id)}
-                        className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
-                      />
-                      <span className={`${isMobile ? 'text-xs' : 'text-sm'} text-slate-700`}>
-                        {producer.firstName} {producer.lastName}
-                      </span>
-                    </label>
-                  ))}
+                  {filteredProducers.length > 0 ? (
+                    filteredProducers.map(producer => (
+                      <label key={producer.id} className="flex items-center space-x-2 cursor-pointer p-2 hover:bg-gray-50 rounded">
+                        <input
+                          type="checkbox"
+                          checked={filters.producers.includes(producer.id)}
+                          onChange={() => handleProducerToggle(producer.id)}
+                          className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+                        />
+                        <span className={`${isMobile ? 'text-xs' : 'text-sm'} text-slate-700`}>
+                          {producer.firstName} {producer.lastName}
+                        </span>
+                      </label>
+                    ))
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-500`}>
+                        {producerSearchTerm ? 'Arama kriterine uygun üretici bulunamadı' : 'Üretici bulunamadı'}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

@@ -4,13 +4,15 @@ import * as Yup from 'yup';
 import type { FormField, ChecklistItem as ChecklistItemType } from '../types/checklist';
 import { uploadToCloudinaryDirect, validateImageFile } from '../utils/tempCloudinaryUtils';
 import MobileCameraButton from './MobileCameraButton';
+import PlantControlButton from './PlantControlButton';
 
 interface ChecklistItemProps {
   item: ChecklistItemType;
   onUpdate: (itemId: string, completed: boolean, data?: Record<string, string | number | boolean | string[] | { selected: boolean; photo: string; } | { selected: boolean; note: string; }>) => void;
+  onPlantControlClick?: () => void;
 }
 
-const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate }) => {
+const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate, onPlantControlClick }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [uploadingFiles, setUploadingFiles] = useState<Set<string>>(new Set());
 
@@ -607,19 +609,48 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate }) => {
     <div className="bg-white rounded-xl lg:rounded-2xl shadow-sm border border-gray-100 transition-all duration-200 hover:shadow-md">
       <div className="p-4 lg:p-6">
         <div className="flex items-start lg:items-center space-x-3 lg:space-x-4">
-          <input
-            type="checkbox"
-            checked={item.completed}
-            onChange={(e) => handleStatusChange(e.target.checked)}
-            className="h-4 w-4 lg:h-5 lg:w-5 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500 cursor-pointer mt-1 lg:mt-0 flex-shrink-0"
-          />
-          <span className={`flex-1 text-sm lg:text-base xl:text-lg font-medium transition-all duration-200 leading-relaxed ${
-            item.completed 
-              ? 'text-gray-500 line-through' 
-              : 'text-gray-800'
-          }`}>
-            {item.label}
-          </span>
+          {item.id === 'kontrol-bitkileri-kontrolu' ? (
+            <>
+              <div className="flex-shrink-0">
+                <div className={`w-4 h-4 lg:w-5 lg:h-5 rounded-full border-2 ${
+                  item.completed 
+                    ? 'bg-emerald-500 border-emerald-500' 
+                    : 'border-gray-300'
+                } flex items-center justify-center`}>
+                  {item.completed && <span className="text-white text-xs">✓</span>}
+                </div>
+              </div>
+              <span className={`flex-1 text-sm lg:text-base xl:text-lg font-medium transition-all duration-200 leading-relaxed ${
+                item.completed 
+                  ? 'text-gray-500' 
+                  : 'text-gray-800'
+              }`}>
+                {item.label}
+              </span>
+              {onPlantControlClick && (
+                <PlantControlButton
+                  onClick={onPlantControlClick}
+                  isCompleted={item.completed}
+                />
+              )}
+            </>
+          ) : (
+            <>
+              <input
+                type="checkbox"
+                checked={item.completed}
+                onChange={(e) => handleStatusChange(e.target.checked)}
+                className="h-4 w-4 lg:h-5 lg:w-5 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500 cursor-pointer mt-1 lg:mt-0 flex-shrink-0"
+              />
+              <span className={`flex-1 text-sm lg:text-base xl:text-lg font-medium transition-all duration-200 leading-relaxed ${
+                item.completed 
+                  ? 'text-gray-500 line-through' 
+                  : 'text-gray-800'
+              }`}>
+                {item.label}
+              </span>
+            </>
+          )}
         </div>
 
         {showDetails && item.detailFields && (
