@@ -1,4 +1,20 @@
-import { doc, setDoc, getDoc, updateDoc, serverTimestamp, collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc, updateDoc, serverTimestamp, collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
+
+// Firestore'da uretimAlanlari koleksiyonunda producerId ile sorgu
+export async function getProducerProductionAreas(producerId: string): Promise<any[]> {
+  try {
+    const db = getFirestore();
+    const q = query(collection(db, 'uretimAlanlari'), where('producerId', '==', producerId));
+    const querySnapshot = await getDocs(q);
+    const areas: any[] = [];
+    querySnapshot.forEach((doc) => {
+      areas.push({ id: doc.id, ...doc.data() });
+    });
+    return areas;
+  } catch (err) {
+    return [];
+  }
+}
 import { db } from '../firebase/config';
 import type { ChecklistSection, UretimAlani, HasatBilgisi } from '../types/checklist';
 import type { Producer } from '../types/producer';

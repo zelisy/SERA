@@ -3,25 +3,30 @@ import ChecklistItem from './ChecklistItem';
 import UreticiListesi from './UreticiListesi';
 import { dikimOncesiConfig } from '../data/dikimOncesiConfig';
 import { loadChecklistData, updateChecklistItem, saveChecklistData } from '../utils/firestoreUtils';
+import { getProducerProductionAreas } from '../utils/firestoreUtils';
 import type { ChecklistSection } from '../types/checklist';
 import type { Producer } from '../types/producer';
+
 
 const DikimOncesiDonem: React.FC = () => {
   const [checklistData, setChecklistData] = useState<ChecklistSection>(dikimOncesiConfig);
   const [selectedProducer, setSelectedProducer] = useState<Producer | null>(null);
-  const [currentStep, setCurrentStep] = useState<'select-producer' | 'list' | 'checklist'>('select-producer');
+  const [selectedProductionArea, setSelectedProductionArea] = useState<any | null>(null);
+  const [productionAreas, setProductionAreas] = useState<any[]>([]);
+  const [currentStep, setCurrentStep] = useState<'select-producer' | 'select-production-area' | 'list' | 'checklist'>('select-producer');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [savedRecords, setSavedRecords] = useState<any[]>([]);
   const [editingRecord, setEditingRecord] = useState<any | null>(null);
   const [showForm, setShowForm] = useState(false);
 
+
   useEffect(() => {
-    if (selectedProducer) {
+    if (selectedProducer && selectedProductionArea) {
       loadInitialData();
       loadSavedRecords();
     }
-  }, [selectedProducer]);
+  }, [selectedProducer, selectedProductionArea]);
 
   const loadInitialData = async () => {
     if (!selectedProducer) return;
@@ -66,8 +71,25 @@ const DikimOncesiDonem: React.FC = () => {
     }
   };
 
-  const handleProducerSelect = (producer: Producer) => {
+
+
+  const handleProducerSelect = async (producer: Producer) => {
     setSelectedProducer(producer);
+    setCurrentStep('select-production-area');
+    // Üreticiye ait üretim alanlarını Firebase'den çek
+    try {
+      const areas = await getProducerProductionAreas(producer.id);
+      console.log('Firebase productionAreas:', areas);
+      setProductionAreas(Array.isArray(areas) ? areas : []);
+    } catch (err) {
+      console.error('Alanlar çekilemedi:', err);
+      setProductionAreas([]);
+    }
+  };
+
+  // Üretim Alanı Seçimi
+  const handleProductionAreaSelect = (area: any) => {
+    setSelectedProductionArea(area);
     setCurrentStep('list');
   };
 
@@ -100,8 +122,9 @@ const DikimOncesiDonem: React.FC = () => {
     }
   };
 
+
   const handleSaveRecord = async () => {
-    if (!selectedProducer) return;
+    if (!selectedProducer || !selectedProductionArea) return;
 
     try {
       if (editingRecord) {
@@ -110,9 +133,9 @@ const DikimOncesiDonem: React.FC = () => {
           ...editingRecord,
           checklistData: checklistData,
           completionStats: getCompletionStats(),
-          date: new Date().toISOString()
+          date: new Date().toISOString(),
+          productionArea: selectedProductionArea
         };
-        
         setSavedRecords(prev => prev.map(r => r.id === editingRecord.id ? updatedRecord : r));
         setEditingRecord(null);
       } else {
@@ -123,9 +146,9 @@ const DikimOncesiDonem: React.FC = () => {
           producerName: `${selectedProducer.firstName} ${selectedProducer.lastName}`,
           date: new Date().toISOString(),
           checklistData: checklistData,
-          completionStats: getCompletionStats()
+          completionStats: getCompletionStats(),
+          productionArea: selectedProductionArea
         };
-
         setSavedRecords(prev => [...prev, newRecord]);
       }
 
@@ -139,9 +162,11 @@ const DikimOncesiDonem: React.FC = () => {
     }
   };
 
+
   const handleEditRecord = (record: any) => {
     setEditingRecord(record);
     setChecklistData(record.checklistData);
+    setSelectedProductionArea(record.productionArea || null);
     setShowForm(true);
     setCurrentStep('checklist');
   };
@@ -166,8 +191,10 @@ const DikimOncesiDonem: React.FC = () => {
     return { totalItems, completedItems, percentage };
   };
 
+
   const resetSelection = () => {
     setSelectedProducer(null);
+    setSelectedProductionArea(null);
     setCurrentStep('select-producer');
     setChecklistData(dikimOncesiConfig);
     setError(null);
@@ -176,14 +203,12 @@ const DikimOncesiDonem: React.FC = () => {
     setShowForm(false);
   };
 
+
   // Producer Selection Step
   if (currentStep === 'select-producer') {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="p-4 lg:p-6">
-          {/* Geri Gitme Butonu */}
-
-          
           {/* Header */}
           <div className="mb-6 text-center">
             <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-2">
@@ -193,7 +218,6 @@ const DikimOncesiDonem: React.FC = () => {
               Kontrol işlemlerini başlatmak için önce bir üretici seçin
             </p>
           </div>
-
           {/* Progress Steps */}
           <div className="mb-8 max-w-md mx-auto">
             <div className="flex items-center">
@@ -208,30 +232,114 @@ const DikimOncesiDonem: React.FC = () => {
                 <div className="w-8 h-8 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-sm font-bold">
                   2
                 </div>
+                <span className="ml-2">Üretim Alanı Seç</span>
+              </div>
+              <div className="flex-1 mx-4 h-1 bg-gray-200 rounded"></div>
+              <div className="flex items-center text-gray-400">
+                <div className="w-8 h-8 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-sm font-bold">
+                  3
+                </div>
                 <span className="ml-2">Kontrol Listesi</span>
               </div>
             </div>
           </div>
-
           {/* Producer Selection */}
           <UreticiListesi 
             selectionMode={true}
             onSelect={handleProducerSelect}
             selectedProducer={selectedProducer}
           />
+          {/* Geri Butonu (Varsa ana sayfaya veya üst menüye dönmek için) */}
+          <div className="mt-8 text-center">
+            <button
+              onClick={() => window.history.back()}
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
+            >
+              ← Geri
+            </button>
+          </div>
         </div>
       </div>
     );
   }
+
+  // Production Area Selection Step
+
+  if (currentStep === 'select-production-area') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="p-4 lg:p-6">
+          <div className="mb-6 text-center">
+            <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-2">
+              Üretim Alanı Seçimi
+            </h1>
+            <p className="text-slate-600 text-lg">
+              Lütfen kontrol yapılacak üretim alanını seçin
+            </p>
+          </div>
+          {/* Geri Butonu */}
+          <div className="mb-4 text-left">
+            <button
+              onClick={() => setCurrentStep('select-producer')}
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
+            >
+              ← Geri
+            </button>
+          </div>
+          <div className="mb-8 max-w-md mx-auto">
+            <div className="flex items-center">
+              <div className="flex items-center text-emerald-600">
+                <div className="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                  2
+                </div>
+                <span className="ml-2 font-medium">Üretim Alanı Seç</span>
+              </div>
+              <div className="flex-1 mx-4 h-1 bg-gray-200 rounded"></div>
+              <div className="flex items-center text-gray-400">
+                <div className="w-8 h-8 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-sm font-bold">
+                  3
+                </div>
+                <span className="ml-2">Kontrol Listesi</span>
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-md mx-auto">
+            {productionAreas.length === 0 ? (
+              <div className="col-span-2 text-center text-slate-600">Bu üreticiye ait üretim alanı bulunamadı.</div>
+            ) : (
+              productionAreas.map(area => (
+                <button
+                  key={area.id}
+                  onClick={() => handleProductionAreaSelect(area)}
+                  className={`px-6 py-4 rounded-xl border border-gray-300 bg-white text-gray-700 hover:bg-emerald-50 font-semibold transition-colors shadow-lg text-left`}
+                >
+                  <div className="font-bold text-lg mb-1">{area.urunIsmi || 'Ürün Bilgisi Yok'}</div>
+                  <div className="text-sm text-slate-700 mb-1">Seratype: {area.seraType || '-'} | Parsel: {area.parsel || '-'} </div>
+                  <div className="text-xs text-slate-500">Ada: {area.ada || '-'} | Tip: {area.siraType || '-'} | Alan ID: {area.id}</div>
+                </button>
+              ))
+            )}
+          </div>
+          <div className="mt-8 text-center">
+            <button
+              onClick={resetSelection}
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
+            >
+              ← Üretici Değiştir
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
 
   // Records List Step
   if (currentStep === 'list') {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="p-4 lg:p-6 space-y-6">
-
-          
-          {/* Header with Producer Info */}
+          {/* Header with Producer & Production Area Info */}
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-center space-x-4 mb-4 lg:mb-0">
@@ -247,9 +355,11 @@ const DikimOncesiDonem: React.FC = () => {
                   <p className="text-slate-600">
                     TC: {selectedProducer?.tcNo} | Tel: {selectedProducer?.phone}
                   </p>
+                  <p className="text-slate-600 mt-1">
+                    <span className="font-semibold">Üretim Alanı:</span> {selectedProductionArea?.urunIsmi || selectedProductionArea?.id || '-'}
+                  </p>
                 </div>
               </div>
-
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={() => {
@@ -263,6 +373,12 @@ const DikimOncesiDonem: React.FC = () => {
                   + Yeni Kayıt Ekle
                 </button>
                 <button
+                  onClick={() => setCurrentStep('select-production-area')}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
+                >
+                  ← Geri
+                </button>
+                <button
                   onClick={resetSelection}
                   className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
                 >
@@ -271,7 +387,6 @@ const DikimOncesiDonem: React.FC = () => {
               </div>
             </div>
           </div>
-
           {/* Error Message */}
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-xl p-4">
@@ -281,11 +396,9 @@ const DikimOncesiDonem: React.FC = () => {
               </div>
             </div>
           )}
-
           {/* Saved Records List */}
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
             <h2 className="text-xl font-bold text-slate-800 mb-6">📋 Kayıtlı Kontrol Kayıtları</h2>
-            
             {savedRecords.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">📝</div>
@@ -330,7 +443,6 @@ const DikimOncesiDonem: React.FC = () => {
                           </button>
                         </div>
                       </div>
-                      
                       <div className="mb-3">
                         <div className="flex items-center justify-between text-sm mb-1">
                           <span>İlerleme</span>
@@ -347,10 +459,10 @@ const DikimOncesiDonem: React.FC = () => {
                           />
                         </div>
                       </div>
-                      
                       <div className="text-xs text-slate-500 space-y-1">
                         <div>Tamamlanan: {stats.completedItems}/{stats.totalItems}</div>
                         <div>Saat: {new Date(record.date).toLocaleTimeString('tr-TR')}</div>
+                        <div>Alan: {record.productionArea?.urunIsmi || record.productionArea?.id || '-'}</div>
                       </div>
                     </div>
                   );
