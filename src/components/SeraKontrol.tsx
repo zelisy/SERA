@@ -10,7 +10,8 @@ import type { Producer } from '../types/producer';
 const SeraKontrol: React.FC = () => {
   const [checklistData, setChecklistData] = useState<ChecklistSection>(seraKontrolConfig);
   const [loading, setLoading] = useState(true);
-  
+  // Üretim alanları için state
+  const [uretimAlanlari, setUretimAlanlari] = useState<any[]>([]);
   // Debug loading state changes
   useEffect(() => {
     console.log('Loading state changed to:', loading);
@@ -18,16 +19,35 @@ const SeraKontrol: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [selectedProducer, setSelectedProducer] = useState<Producer | null>(null);
-  const [currentStep, setCurrentStep] = useState<'select-producer' | 'list' | 'checklist' | 'plant-control'>('select-producer');
+  const [selectedUretimAlani, setSelectedUretimAlani] = useState<any | null>(null);
+  const [currentStep, setCurrentStep] = useState<'select-producer' | 'list' | 'select-area' | 'hasat-list' | 'hasat-form' | 'checklist' | 'plant-control'>('select-producer');
   const [savedRecords, setSavedRecords] = useState<any[]>([]);
   const [editingRecord, setEditingRecord] = useState<any | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  // Hasat kayıtları state
+  const [hasatKayitlari, setHasatKayitlari] = useState<any[]>([]);
+  const [hasatLoading, setHasatLoading] = useState(false);
+  const [hasatError, setHasatError] = useState<string | null>(null);
 
   useEffect(() => {
     if (selectedProducer) {
       loadSavedRecords();
+      loadUretimAlanlari();
+      setCurrentStep('select-area');
     }
   }, [selectedProducer]);
+
+  // Üretim alanlarını çek
+  const loadUretimAlanlari = async () => {
+    if (!selectedProducer) return;
+    try {
+      const { getUretimAlanlariByProducer } = await import('../utils/firestoreUtils');
+      const alanlar = await getUretimAlanlariByProducer(selectedProducer.id);
+      setUretimAlanlari(alanlar);
+    } catch (err) {
+      setUretimAlanlari([]);
+    }
+  };
 
 
 
@@ -245,7 +265,30 @@ const SeraKontrol: React.FC = () => {
 
   const handleProducerSelect = (producer: Producer) => {
     setSelectedProducer(producer);
-    setCurrentStep('list');
+    setCurrentStep('select-area');
+  };
+
+  // Üretim alanı seçimi
+  const handleUretimAlaniSelect = (area: any) => {
+    setSelectedUretimAlani(area);
+    fetchHasatKayitlari(area.id);
+    setCurrentStep('hasat-list');
+  };
+
+  // Seçilen üretim alanına ait hasat kayıtlarını çek
+  const fetchHasatKayitlari = async (uretimAlaniId: string) => {
+    setHasatLoading(true);
+    setHasatError(null);
+    try {
+      const { getHasatBilgileriByUretimAlani } = await import('../utils/firestoreUtils');
+      const kayitlar = await getHasatBilgileriByUretimAlani(uretimAlaniId);
+      setHasatKayitlari(kayitlar);
+    } catch (err) {
+      setHasatError('Hasat kayıtları yüklenemedi');
+      setHasatKayitlari([]);
+    } finally {
+      setHasatLoading(false);
+    }
   };
 
   const resetSelection = () => {
@@ -334,51 +377,200 @@ const SeraKontrol: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="p-4 lg:p-6">
-          {/* Header */}
           <div className="mb-6 text-center">
-            <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-2">
-               Sera Kontrol Sistemi
-            </h1>
-            <p className="text-slate-600 text-lg">
-              Sera kontrol işlemlerini başlatmak için önce bir üretici seçin
-            </p>
+            <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-2">Sera Kontrol Sistemi</h1>
+            <p className="text-slate-600 text-lg">Sera kontrol işlemlerini başlatmak için önce bir üretici seçin</p>
           </div>
-          
-          {/* Progress Steps */}
-          <div className="mb-8 max-w-md mx-auto">
-            <div className="flex items-center">
-              <div className="flex items-center text-emerald-600">
-                <div className="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                  1
-                </div>
-                <span className="ml-2 font-medium">Üretici Seç</span>
-              </div>
-              <div className="flex-1 mx-4 h-1 bg-gray-200 rounded"></div>
-              <div className="flex items-center text-gray-400">
-                <div className="w-8 h-8 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-sm font-bold">
-                  2
-                </div>
-                <span className="ml-2">Kontrol Listesi</span>
-              </div>
+          <UreticiListesi selectionMode={true} onSelect={handleProducerSelect} selectedProducer={selectedProducer} />
+        </div>
+      </div>
+    );
+  }
+
+  // Üretim Alanı Seçim Step
+  if (currentStep === 'select-area') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="p-4 lg:p-6">
+          <div className="mb-6 text-center">
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">Üretim Alanı Seç</h2>
+            <p className="text-slate-600 text-lg">Lütfen üreticiye ait bir üretim alanı seçin</p>
+          </div>
+          {uretimAlanlari.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">🏭</div>
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">Üretim alanı bulunamadı</h3>
+              <p className="text-gray-600 mb-4">Bu üreticiye ait üretim alanı yok.</p>
             </div>
-          </div>
+          ) : (
+            <div className="max-w-2xl mx-auto">
+              <div className="mb-4 text-center text-lg font-semibold text-emerald-700">Üretim Alanı Listesi</div>
+              <ul className="space-y-4">
+                {uretimAlanlari.map((area) => (
+                  <li key={area.id}>
+                    <button
+                      className={`w-full text-left border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow cursor-pointer ${selectedUretimAlani?.id === area.id ? 'bg-emerald-50 border-emerald-400' : 'bg-white'}`}
+                      onClick={() => handleUretimAlaniSelect(area)}
+                    >
+                      <div className="font-bold text-lg text-emerald-700 mb-1">{area.urunIsmi} - {area.cesitIsmi}</div>
+                      <div className="text-sm text-gray-600">Alan: {area.alanM2} m²</div>
+                      <div className="text-xs text-gray-500">Dikim Tarihi: {area.dikimTarihi}</div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
-          {/* Back Button */}
-          <div className="mb-4 max-w-md mx-auto flex justify-start">
-            <button
-              onClick={() => window.history.back()}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
-            >
-              ← Geri Dön
-            </button>
+  // Hasat Listesi Step
+  if (currentStep === 'hasat-list') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="p-4 lg:p-6">
+          <div className="mb-6 text-center">
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">Hasat Kayıtları</h2>
+            <p className="text-slate-600 text-lg">Seçilen üretim alanına ait hasat kayıtları</p>
           </div>
+          <div className="mb-4">
+            <button onClick={() => setCurrentStep('select-area')} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 font-medium">← Üretim Alanı Değiştir</button>
+            <button onClick={() => setCurrentStep('hasat-form')} className="ml-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-xl font-medium hover:from-emerald-600 hover:to-blue-600">+ Hasat Kaydı Ekle</button>
+          </div>
+          {hasatLoading ? (
+            <div className="text-center py-8">Yükleniyor...</div>
+          ) : hasatError ? (
+            <div className="text-center py-8 text-red-600">{hasatError}</div>
+          ) : hasatKayitlari.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">🌾</div>
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">Henüz hasat kaydı yok</h3>
+              <p className="text-gray-600 mb-4">İlk hasat kaydınızı oluşturmak için "Hasat Kaydı Ekle" butonuna tıklayın.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Hasat Tarihi</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Sezon</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Kasa Adeti</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Kg</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Fiyat</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Kazanç</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {hasatKayitlari.map((record) => (
+                    <tr key={record.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-4 py-3">{new Date(record.dikimTarihi).toLocaleDateString('tr-TR')}</td>
+                      <td className="px-4 py-3">{record.donem}</td>
+                      <td className="px-4 py-3">{record.kasaAdeti ? String(record.kasaAdeti) : ''}</td>
+                      <td className="px-4 py-3">{(Number(record.tonajDa) * Number(record.kacDa) * 1000).toLocaleString()} kg</td>
+                      <td className="px-4 py-3">₺{record.ortalamaFiyat ? String(record.ortalamaFiyat) : ''}</td>
+                      <td className="px-4 py-3 font-bold text-emerald-600">₺{record.kazanc ? Number(record.kazanc).toLocaleString() : ''}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
-          {/* Producer Selection */}
-          <UreticiListesi
-            selectionMode={true}
-            onSelect={handleProducerSelect}
-            selectedProducer={selectedProducer}
-          />
+  // Hasat Form Step
+  if (currentStep === 'hasat-form') {
+    // Hasat formu için state
+    const [form, setForm] = useState({
+      dikimTarihi: '',
+      donem: '',
+      kasaAdeti: '',
+      tonajDa: '',
+      kacDa: '',
+      ortalamaFiyat: '',
+      kazanc: ''
+    });
+    const [formError, setFormError] = useState<string | null>(null);
+    const [formLoading, setFormLoading] = useState(false);
+
+    // Form submit handler
+    const handleHasatSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setFormError(null);
+      setFormLoading(true);
+      if (!selectedUretimAlani) {
+        setFormError('Üretim alanı seçilmedi!');
+        setFormLoading(false);
+        return;
+      }
+      try {
+        const { addHasatBilgisi } = await import('../utils/firestoreUtils');
+        // Hesaplama
+        const kg = Number(form.tonajDa) * Number(form.kacDa) * 1000;
+        const kazanc = kg * Number(form.ortalamaFiyat);
+        const newRecord = {
+          ...form,
+          id: Date.now().toString(),
+          dikimTarihi: form.dikimTarihi,
+          uretimAlaniId: selectedUretimAlani.id,
+          kg,
+          kazanc,
+        };
+        await addHasatBilgisi(selectedUretimAlani.id, newRecord);
+        setFormLoading(false);
+        // Kayıt sonrası listeyi güncelle
+        await fetchHasatKayitlari(selectedUretimAlani.id);
+        setCurrentStep('hasat-list');
+      } catch (err) {
+        setFormError('Kayıt eklenemedi');
+        setFormLoading(false);
+      }
+    };
+
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="p-4 lg:p-6">
+          <div className="mb-6 text-center">
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">Hasat Kaydı Ekle</h2>
+            <p className="text-slate-600 text-lg">Seçilen üretim alanına yeni hasat kaydı ekleyin</p>
+          </div>
+          <form className="max-w-xl mx-auto space-y-4" onSubmit={handleHasatSubmit}>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Hasat Tarihi</label>
+              <input type="date" className="mt-1 block w-full border rounded-xl px-3 py-2" value={form.dikimTarihi} onChange={e => setForm(f => ({ ...f, dikimTarihi: e.target.value }))} required />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Sezon/Dönem</label>
+              <input type="text" className="mt-1 block w-full border rounded-xl px-3 py-2" value={form.donem} onChange={e => setForm(f => ({ ...f, donem: e.target.value }))} required />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Kasa Adeti</label>
+              <input type="number" className="mt-1 block w-full border rounded-xl px-3 py-2" value={form.kasaAdeti} onChange={e => setForm(f => ({ ...f, kasaAdeti: e.target.value }))} required min={0} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Tonaj (da başına)</label>
+              <input type="number" step="0.01" className="mt-1 block w-full border rounded-xl px-3 py-2" value={form.tonajDa} onChange={e => setForm(f => ({ ...f, tonajDa: e.target.value }))} required min={0} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Kaç Da</label>
+              <input type="number" className="mt-1 block w-full border rounded-xl px-3 py-2" value={form.kacDa} onChange={e => setForm(f => ({ ...f, kacDa: e.target.value }))} required min={0} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Ortalama Fiyat (₺/kg)</label>
+              <input type="number" step="0.01" className="mt-1 block w-full border rounded-xl px-3 py-2" value={form.ortalamaFiyat} onChange={e => setForm(f => ({ ...f, ortalamaFiyat: e.target.value }))} required min={0} />
+            </div>
+            {formError && <div className="text-red-600 text-center">{formError}</div>}
+            <div className="flex gap-4 justify-center mt-6">
+              <button type="button" onClick={() => setCurrentStep('hasat-list')} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 font-medium">← Kayıt Listesine Dön</button>
+              <button type="submit" disabled={formLoading} className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-xl font-medium hover:from-emerald-600 hover:to-blue-600 disabled:opacity-50">
+                {formLoading ? 'Kaydediliyor...' : 'Kaydet'}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     );

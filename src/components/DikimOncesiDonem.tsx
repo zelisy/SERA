@@ -3,7 +3,7 @@ import ChecklistItem from './ChecklistItem';
 import UreticiListesi from './UreticiListesi';
 import { dikimOncesiConfig } from '../data/dikimOncesiConfig';
 import { loadChecklistData, updateChecklistItem, saveChecklistData } from '../utils/firestoreUtils';
-import { getProducerProductionAreas } from '../utils/firestoreUtils';
+import { getUretimAlanlariByProducer } from '../utils/firestoreUtils';
 import type { ChecklistSection } from '../types/checklist';
 import type { Producer } from '../types/producer';
 
@@ -78,7 +78,7 @@ const DikimOncesiDonem: React.FC = () => {
     setCurrentStep('select-production-area');
     // Üreticiye ait üretim alanlarını Firebase'den çek
     try {
-      const areas = await getProducerProductionAreas(producer.id);
+      const areas = await getUretimAlanlariByProducer(producer.id);
       console.log('Firebase productionAreas:', areas);
       setProductionAreas(Array.isArray(areas) ? areas : []);
     } catch (err) {

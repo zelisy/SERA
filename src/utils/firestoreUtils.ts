@@ -1,20 +1,46 @@
+// Belirli bir üretim alanına yeni hasat kaydı ekle
+export const addHasatBilgisi = async (uretimAlaniId: string, hasatData: any): Promise<string> => {
+  try {
+    const docRef = doc(collection(db, 'hasatBilgileri'));
+    const cleanData = {
+      ...hasatData,
+      id: docRef.id,
+      uretimAlaniId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    await setDoc(docRef, cleanData);
+    return docRef.id;
+  } catch (error) {
+    console.error('Hasat bilgisi ekleme hatası:', error);
+    throw new Error('Hasat bilgisi eklenemedi');
+  }
+};
+// Belirli bir üretim alanına ait hasat kayıtlarını getir
+export const getHasatBilgileriByUretimAlani = async (uretimAlaniId: string): Promise<HasatBilgisi[]> => {
+  try {
+    const q = query(collection(db, 'hasatBilgileri'), where('uretimAlaniId', '==', uretimAlaniId));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => doc.data() as HasatBilgisi);
+  } catch (error) {
+    console.error('Üretim alanına ait hasat bilgileri yükleme hatası:', error);
+    throw new Error('Hasat bilgileri yüklenemedi');
+  }
+};
 import { getFirestore, doc, setDoc, getDoc, updateDoc, serverTimestamp, collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
 
 // Firestore'da uretimAlanlari koleksiyonunda producerId ile sorgu
-export async function getProducerProductionAreas(producerId: string): Promise<any[]> {
+// Tek ve doğru tanım
+export const getUretimAlanlariByProducer = async (producerId: string): Promise<UretimAlani[]> => {
   try {
-    const db = getFirestore();
     const q = query(collection(db, 'uretimAlanlari'), where('producerId', '==', producerId));
     const querySnapshot = await getDocs(q);
-    const areas: any[] = [];
-    querySnapshot.forEach((doc) => {
-      areas.push({ id: doc.id, ...doc.data() });
-    });
-    return areas;
-  } catch (err) {
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as UretimAlani));
+  } catch (error) {
+    console.error('Üretim alanları yükleme hatası:', error);
     return [];
   }
-}
+};
 import { db } from '../firebase/config';
 import type { ChecklistSection, UretimAlani, HasatBilgisi } from '../types/checklist';
 import type { Producer } from '../types/producer';
@@ -138,20 +164,6 @@ export const getUretimAlani = async (id: string): Promise<UretimAlani | null> =>
   }
 };
 
-export const getUretimAlanlariByProducer = async (producerId: string): Promise<UretimAlani[]> => {
-  try {
-    const q = query(
-      collection(db, 'uretimAlanlari'),
-      where('producerId', '==', producerId)
-    );
-    const querySnapshot = await getDocs(q);
-
-    return querySnapshot.docs.map(doc => doc.data() as UretimAlani);
-  } catch (error) {
-    console.error('Üretim alanları yükleme hatası:', error);
-    throw new Error('Üretim alanları yüklenemedi');
-  }
-};
 
 export const deleteUretimAlani = async (id: string): Promise<void> => {
   try {
