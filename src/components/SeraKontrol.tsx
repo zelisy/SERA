@@ -363,6 +363,16 @@ const SeraKontrol: React.FC = () => {
             </div>
           </div>
 
+          {/* Back Button */}
+          <div className="mb-4 max-w-md mx-auto flex justify-start">
+            <button
+              onClick={() => window.history.back()}
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
+            >
+              ← Geri Dön
+            </button>
+          </div>
+
           {/* Producer Selection */}
           <UreticiListesi
             selectionMode={true}
@@ -520,11 +530,23 @@ const SeraKontrol: React.FC = () => {
       : undefined;
 
     return (
-      <PlantControlStep
-        onComplete={handlePlantControlComplete}
-        onBack={handlePlantControlBack}
-        initialData={initialPlantData}
-      />
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4">
+        <div className="max-w-3xl mx-auto space-y-6">
+          <div className="mb-4 flex justify-start">
+            <button
+              onClick={handlePlantControlBack}
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
+            >
+              ← Geri Dön
+            </button>
+          </div>
+          <PlantControlStep
+            onComplete={handlePlantControlComplete}
+            onBack={handlePlantControlBack}
+            initialData={initialPlantData}
+          />
+        </div>
+      </div>
     );
   }
 
@@ -738,4 +760,4 @@ const SeraKontrol: React.FC = () => {
   );
 };
 
-export default SeraKontrol; 
+export default SeraKontrol;
