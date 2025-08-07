@@ -513,31 +513,31 @@ export const seraKontrolConfig: ChecklistSection = {
         },
         {
           id: 'dolama-yapilmis-mi',
-          label: 'Dolama yapıldı',
+          label: 'Dolama yapılsın',
           type: 'checkbox',
           required: false
         },
         {
           id: 'toplama-yapilmis-mi',
-          label: 'Toplama yapıldı',
+          label: 'Toplama yapılsın',
           type: 'checkbox',
           required: false
         },
         {
           id: 'nemlendirme-yapilmis-mi',
-          label: 'Nemlendirme yapıldı',
+          label: 'Nemlendirme yapılsın',
           type: 'checkbox',
           required: false
         },
         {
           id: 'budama-yapilmis-mi',
-          label: 'Budama yapıldı',
+          label: 'Budama yapılsın',
           type: 'checkbox',
           required: false
         },
         {
           id: 'ip-baglama-yapilmis-mi',
-          label: 'İp bağlama yapıldı',
+          label: 'İp bağlama yapılsın',
           type: 'checkbox',
           required: false
         },
