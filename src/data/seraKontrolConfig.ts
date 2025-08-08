@@ -196,7 +196,16 @@ export const seraKontrolConfig: ChecklistSection = {
           label: 'Damla mesafesi',
           type: 'radio',
           required: false,
-          options: ['5 cm açık', '10 cm açık', '15 cm açık']
+          options: ['5 cm aç', '10 cm aç', '15 cm aç', 'Diğer']
+        },
+        {
+          id: 'damla-mesafesi-diger',
+          label: 'Diğer Damla Mesafesi',
+          type: 'number',
+          required: false,
+          placeholder: 'cm',
+          dependsOn: 'damla-mesafesi',
+          showWhen: 'Diğer'
         },
         {
           id: 'su-miktari',
@@ -347,7 +356,7 @@ export const seraKontrolConfig: ChecklistSection = {
         },
         {
           id: 'fungusit',
-          label: 'Fungusit',
+          label: 'Nematod',
           type: 'checkbox',
           required: false
         },

@@ -3,7 +3,7 @@ import ChecklistItem from './ChecklistItem';
 import UreticiListesi from './UreticiListesi';
 import PlantControlStep from './PlantControlStep';
 import { seraKontrolConfig } from '../data/seraKontrolConfig';
-import { loadChecklistData, updateChecklistItem, saveChecklistData, saveSeraKontrolRecord, getSeraKontrolRecordsByUretimAlani } from '../utils/firestoreUtils';
+import { loadChecklistData, updateChecklistItem, saveChecklistData, saveSeraKontrolRecord, getSeraKontrolRecordsByUretimAlani, updateSeraKontrolRecord, deleteSeraKontrolRecord } from '../utils/firestoreUtils';
 import type { ChecklistSection } from '../types/checklist';
 import type { Producer } from '../types/producer';
 
@@ -123,25 +123,35 @@ const SeraKontrol: React.FC = () => {
     
     try {
       const currentDate = new Date();
-      const newRecord = {
-        producerId: selectedProducer.id,
-        uretimAlaniId: selectedUretimAlani.id,
-        items: checklistData.items,
-        date: currentDate.toISOString(),
-        dateFormatted: currentDate.toLocaleDateString('tr-TR'),
-        timeFormatted: currentDate.toLocaleTimeString('tr-TR'),
-        producerName: `${selectedProducer.firstName} ${selectedProducer.lastName}`
-      };
+      if (editingRecord && editingRecord.id) {
+        // Mevcut kaydı güncelle
+        await updateSeraKontrolRecord(editingRecord.id, {
+          items: checklistData.items,
+        });
 
-      // Veritabanına kaydet
-      await saveSeraKontrolRecord(newRecord);
+        // Local state'i güncelle (tarihi koru)
+        const locallyUpdated = savedRecords.map(record =>
+          record.id === editingRecord.id
+            ? { ...record, items: checklistData.items, updatedAt: currentDate.toISOString() }
+            : record
+        );
+        setSavedRecords(locallyUpdated);
+      } else {
+        const newRecord = {
+          producerId: selectedProducer.id,
+          uretimAlaniId: selectedUretimAlani.id,
+          items: checklistData.items,
+          date: currentDate.toISOString(),
+          dateFormatted: currentDate.toLocaleDateString('tr-TR'),
+          timeFormatted: currentDate.toLocaleTimeString('tr-TR'),
+          producerName: `${selectedProducer.firstName} ${selectedProducer.lastName}`
+        };
+        // Veritabanına yeni kayıt ekle
+        const newId = await saveSeraKontrolRecord(newRecord);
+        // Local state'e ekle
+        setSavedRecords([...savedRecords, { ...newRecord, id: newId }]);
+      }
 
-      // Local state'i güncelle
-      const updatedHistory = editingRecord 
-        ? savedRecords.map(record => record.id === editingRecord.id ? { ...newRecord, id: editingRecord.id } : record)
-        : [...savedRecords, { ...newRecord, id: Date.now().toString() }];
-
-      setSavedRecords(updatedHistory);
       setEditingRecord(null);
       setSaveSuccess(true);
       setCurrentStep('list');
@@ -184,18 +194,10 @@ const SeraKontrol: React.FC = () => {
   };
 
   const handleDeleteRecord = async (recordId: string) => {
-    if (!selectedProducer || !window.confirm('Bu kaydı silmek istediğinizden emin misiniz?')) return;
-    
+    if (!window || !window.confirm('Bu kaydı silmek istediğinizden emin misiniz?')) return;
     try {
-      const updatedHistory = savedRecords.filter(record => record.id !== recordId);
-      const dataKey = `sera-kontrol-${selectedProducer.id}`;
-      
-      await saveChecklistData(dataKey, {
-        ...seraKontrolConfig,
-        history: updatedHistory
-      });
-      
-      setSavedRecords(updatedHistory);
+      await deleteSeraKontrolRecord(recordId);
+      setSavedRecords(prev => prev.filter(record => record.id !== recordId));
     } catch (err) {
       setError('Kayıt silinemedi');
     }
@@ -233,8 +235,8 @@ const SeraKontrol: React.FC = () => {
   // Üretim alanı seçimi
   const handleUretimAlaniSelect = (area: any) => {
     setSelectedUretimAlani(area);
-    setCurrentStep('checklist');
-    setLoading(false); // Set loading to false when transitioning to checklist
+    setCurrentStep('list');
+    setLoading(false);
   };
 
   // Seçilen üretim alanına ait hasat kayıtlarını çek
@@ -334,11 +336,10 @@ const SeraKontrol: React.FC = () => {
     }
   }, [currentStep, editingRecord, selectedProducer?.id]);
 
-  // useEffect to handle loading state when transitioning to checklist
+  // Kayıt listesi ve checklist ekranına girildiğinde mevcut kayıtları yükle
   useEffect(() => {
-    if (currentStep === 'checklist' && selectedUretimAlani) {
+    if ((currentStep === 'checklist' || currentStep === 'list') && selectedUretimAlani) {
       setLoading(false);
-      // Load saved records for this production area
       const loadRecords = async () => {
         try {
           const records = await getSeraKontrolRecordsByUretimAlani(selectedUretimAlani.id);
