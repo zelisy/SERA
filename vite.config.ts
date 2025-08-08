@@ -14,4 +14,27 @@ export default defineConfig({
     port: 3000,
     open: true,
   },
+  build: {
+    // Build optimizasyonları
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor chunk'ları ayır
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          // Firebase chunk'ı ayır
+          firebase: ['firebase/app', 'firebase/firestore', 'firebase/storage'],
+          // PDF chunk'ı ayır
+          pdf: ['jspdf', 'html2canvas']
+        }
+      }
+    },
+    // Chunk boyutu uyarı limitini artır
+    chunkSizeWarningLimit: 1000,
+    // Source map'leri production'da kapat
+    sourcemap: false
+  },
+  // Mobil optimizasyonları
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom']
+  }
 })

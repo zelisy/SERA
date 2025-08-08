@@ -6,10 +6,43 @@ body {
   font-family: 'Inter', Arial, sans-serif;
   background: #fff;
   color: #14532d;
+  /* Mobil optimizasyonları */
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* Touch optimizasyonu */
+  -webkit-tap-highlight-color: transparent;
+  /* Smooth scrolling */
+  scroll-behavior: smooth;
 }
 
 #root {
   min-height: 100vh;
+}
+
+/* Mobil cihazlar için viewport optimizasyonu */
+@media (max-width: 768px) {
+  body {
+    font-size: 16px; /* iOS zoom'u önlemek için */
+  }
+  
+  /* Mobil cihazlarda daha büyük dokunma alanları */
+  button, a, input, select, textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Mobil cihazlarda daha iyi okunabilirlik */
+  p, div, span {
+    line-height: 1.6;
+  }
+}
+
+/* Mobil cihazlarda form elemanları için daha iyi görünüm */
+@media (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important; /* iOS zoom'u önlemek için */
+  }
 }
 
 #hasat-pdf-table, #hasat-pdf-table * {
@@ -17,4 +50,16 @@ body {
   background: #fff !important;
   border-color: #222 !important;
   box-shadow: none !important;
+}
+
+/* Mobil cihazlarda PDF tablosu için optimizasyon */
+@media (max-width: 768px) {
+  #hasat-pdf-table {
+    font-size: 12px !important;
+  }
+  
+  #hasat-pdf-table th,
+  #hasat-pdf-table td {
+    padding: 4px 2px !important;
+  }
 }

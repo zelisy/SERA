@@ -50,17 +50,7 @@ const SeraKontrol: React.FC = () => {
 
 
 
-  const loadSavedRecords = async () => {
-    if (!selectedProducer || !selectedUretimAlani) return;
-    
-    try {
-      const records = await getSeraKontrolRecordsByUretimAlani(selectedUretimAlani.id);
-      setSavedRecords(records);
-    } catch (err) {
-      setError('Kayıtlı kayıtlar yüklenemedi');
-      setSavedRecords([]);
-    }
-  };
+  // Removed unused loadSavedRecords function
 
   const loadInitialData = useCallback(async () => {
     if (!selectedProducer) return;
@@ -231,32 +221,9 @@ const SeraKontrol: React.FC = () => {
     return { totalItems, completedItems, percentage };
   };
 
-  const getCategoryStats = () => {
-    const categories = {
-      preparation: checklistData.items.slice(0, 4),
-      analysis: checklistData.items.slice(4, 6),
-      control: checklistData.items.slice(6, 9),
-      documentation: checklistData.items.slice(9, 11)
-    };
+  // Removed unused getCategoryStats function
 
-    return Object.entries(categories).map(([key, items]) => ({
-      key,
-      name: getCategoryName(key),
-      completed: items.filter(item => item.completed).length,
-      total: items.length,
-      percentage: Math.round((items.filter(item => item.completed).length / items.length) * 100)
-    }));
-  };
-
-  const getCategoryName = (key: string) => {
-    const names = {
-      preparation: 'Hazırlık',
-      analysis: 'Analiz & Ölçüm',
-      control: 'Kontrol & Mücadele',
-      documentation: 'Belgelendirme'
-    };
-    return names[key as keyof typeof names] || key;
-  };
+  // Removed unused getCategoryName function
 
   const handleProducerSelect = (producer: Producer) => {
     setSelectedProducer(producer);
@@ -764,7 +731,7 @@ const SeraKontrol: React.FC = () => {
   }
 
   const stats = getCompletionStats();
-  const categoryStats = getCategoryStats();
+  // Removed unused categoryStats variable
 
   // Plant Control Step
   if (currentStep === 'plant-control') {
@@ -883,7 +850,7 @@ const SeraKontrol: React.FC = () => {
             <h2 className="text-lg font-semibold text-gray-800">Kontrol Listesi</h2>
           </div>
           <div className="divide-y divide-gray-200">
-            {checklistData.items.map((item, index) => {
+            {checklistData.items.map((item) => {
               const isExpanded = expandedSections.has(item.id);
               
               return (
