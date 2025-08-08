@@ -35,19 +35,19 @@ const HasatBilgisiComponent = () => {
   const [selectedUretimAlani, setSelectedUretimAlani] = useState<any | null>(null);
 
   // Validation Schema
-  const validationSchema = Yup.object({
-    donem: Yup.string(),
-    cesit: Yup.string(),
-    dikimTarihi: Yup.date(),
-    tonajDa: Yup.number().positive('Pozitif sayı olmalı'),
-    ciroDa: Yup.number().positive('Pozitif sayı olmalı'),
-    ortalamaFiyat: Yup.number().positive('Pozitif sayı olmalı'),
-    kacDa: Yup.number().positive('Pozitif sayı olmalı'),
-    kasaAdeti: Yup.number().positive('Pozitif sayı olmalı'),
-    kasaFiyati: Yup.number().positive('Pozitif sayı olmalı'),
-    teknikEkipNotu: Yup.string(),
-    ciftciNotu: Yup.string()
-  });
+    const validationSchema = Yup.object({
+      donem: Yup.string(),
+      cesit: Yup.string(),
+      dikimTarihi: Yup.date(),
+      tonajDa: Yup.number(),
+      ciroDa: Yup.number(),
+      ortalamaFiyat: Yup.number(),
+      kacDa: Yup.number(),
+      kasaAdeti: Yup.number(),
+      kasaFiyati: Yup.number(),
+      teknikEkipNotu: Yup.string(),
+      ciftciNotu: Yup.string()
+    });
 
   const getInitialValues = () => ({
     donem: editingHasat?.donem || '',
@@ -968,7 +968,7 @@ const HasatBilgisiComponent = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-slate-700 mb-2">
-                          Kasa Fiyatı
+                          Kilogram Fiyatı
                         </label>
                         <Field
                           type="number"
