@@ -564,3 +564,78 @@ export const deleteSeraKontrolRecord = async (id: string): Promise<void> => {
     throw new Error('SeraKontrol kaydı silinemedi');
   }
 };
+
+// Dikim Öncesi Kayıtları (producer ve üretim alanına göre kayıt saklama)
+export interface DikimOncesiRecord {
+  id: string;
+  producerId: string;
+  producerName: string;
+  date: string;
+  checklistData: ChecklistSection;
+  completionStats: { totalItems: number; completedItems: number; percentage: number };
+  productionArea: UretimAlani;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export const saveDikimOncesiRecord = async (
+  record: Omit<DikimOncesiRecord, 'id' | 'createdAt' | 'updatedAt'>
+): Promise<string> => {
+  try {
+    const docRef = doc(collection(db, 'dikimOncesiRecords'));
+    const cleanData = Object.fromEntries(
+      Object.entries({
+        ...record,
+        id: docRef.id,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }).filter(([, value]) => value !== undefined)
+    );
+    await setDoc(docRef, cleanData);
+    return docRef.id;
+  } catch (error) {
+    console.error('Dikim öncesi kayıt hatası:', error);
+    throw new Error('Dikim öncesi kaydı eklenemedi');
+  }
+};
+
+export const getDikimOncesiRecordsByProducer = async (
+  producerId: string
+): Promise<DikimOncesiRecord[]> => {
+  try {
+    const q = query(collection(db, 'dikimOncesiRecords'), where('producerId', '==', producerId));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map((d) => ({ id: d.id, ...d.data() } as DikimOncesiRecord));
+  } catch (error) {
+    console.error('Dikim öncesi kayıtları yükleme hatası:', error);
+    throw new Error('Dikim öncesi kayıtları yüklenemedi');
+  }
+};
+
+export const updateDikimOncesiRecord = async (
+  id: string,
+  record: Partial<DikimOncesiRecord>
+): Promise<void> => {
+  try {
+    const docRef = doc(db, 'dikimOncesiRecords', id);
+    const cleanData = Object.fromEntries(
+      Object.entries({
+        ...record,
+        updatedAt: new Date().toISOString(),
+      }).filter(([, value]) => value !== undefined)
+    );
+    await updateDoc(docRef, cleanData);
+  } catch (error) {
+    console.error('Dikim öncesi kayıt güncelleme hatası:', error);
+    throw new Error('Dikim öncesi kaydı güncellenemedi');
+  }
+};
+
+export const deleteDikimOncesiRecord = async (id: string): Promise<void> => {
+  try {
+    await deleteDoc(doc(db, 'dikimOncesiRecords', id));
+  } catch (error) {
+    console.error('Dikim öncesi kayıt silme hatası:', error);
+    throw new Error('Dikim öncesi kaydı silinemedi');
+  }
+};

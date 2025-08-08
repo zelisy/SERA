@@ -14,7 +14,10 @@ interface ChecklistItemProps {
 }
 
 const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate, onPlantControlClick }) => {
-  const [showDetails, setShowDetails] = useState(false);
+  const [showDetails, setShowDetails] = useState<boolean>(() => {
+    const hasSavedData = Boolean(item.data && Object.keys(item.data).length > 0);
+    return Boolean(item.hasDetails && (item.completed || hasSavedData));
+  });
   const [uploadingFiles, setUploadingFiles] = useState<Set<string>>(new Set());
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
@@ -79,28 +82,37 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate, onPlantCo
     const values: Record<string, string | number | boolean | string[] | { selected: boolean; photo: string; } | { selected: boolean; note: string; }> = {};
     fields.forEach(field => {
       const savedValue = item.data?.[field.id];
-      if (Array.isArray(savedValue)) {
-        values[field.id] = savedValue.join(', ');
-      } else {
-        if (field.type === 'boolean') {
-          values[field.id] = savedValue || false;
-        } else if (field.type === 'number') {
-          values[field.id] = savedValue || '';
-        } else if (field.type === 'pest-control') {
-          values[field.id] = savedValue || { selected: false, photo: '' };
-        } else if (field.type === 'development-stage') {
-          values[field.id] = savedValue || { selected: false, note: '' };
-        } else if (field.type === 'multiple-files') {
-          values[field.id] = savedValue || [];
-        } else if (field.type === 'radio') {
-          values[field.id] = savedValue || '';
-        } else if (field.type === 'checkbox') {
-          values[field.id] = savedValue || false;
-        } else if (field.type === 'subheader') {
-          values[field.id] = savedValue || '';
-        } else {
-          values[field.id] = savedValue || '';
-        }
+      switch (field.type) {
+        case 'boolean':
+          values[field.id] = (typeof savedValue === 'boolean') ? savedValue : false;
+          break;
+        case 'number':
+          values[field.id] = (typeof savedValue === 'number') ? savedValue : '';
+          break;
+        case 'pest-control':
+          values[field.id] = (savedValue && typeof savedValue === 'object') ? (savedValue as { selected: boolean; photo: string }) : { selected: false, photo: '' };
+          break;
+        case 'development-stage':
+          values[field.id] = (savedValue && typeof savedValue === 'object') ? (savedValue as { selected: boolean; note: string }) : { selected: false, note: '' };
+          break;
+        case 'multiple-files':
+          values[field.id] = Array.isArray(savedValue) ? (savedValue as string[]) : [];
+          break;
+        case 'radio':
+        case 'select':
+        case 'text':
+        case 'date':
+        case 'file':
+          values[field.id] = (typeof savedValue === 'string') ? savedValue : '';
+          break;
+        case 'checkbox':
+          values[field.id] = (typeof savedValue === 'boolean') ? savedValue : false;
+          break;
+        case 'subheader':
+          values[field.id] = (typeof savedValue === 'string') ? savedValue : '';
+          break;
+        default:
+          values[field.id] = (typeof savedValue === 'string') ? savedValue : '';
       }
     });
     return values;
@@ -219,11 +231,18 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate, onPlantCo
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               {field.label}
             </label>
-            <Field
-              as="textarea"
-              {...commonProps}
+            <textarea
+              id={commonProps.id}
+              name={commonProps.name}
+              placeholder={commonProps.placeholder}
               rows={4}
               className={`${commonProps.className} resize-vertical min-h-[100px]`}
+              value={String(values[field.id] ?? '')}
+              onChange={(e) => {
+                const v = e.target.value;
+                setFieldValue(field.id, v);
+                // Form submit sırasında onUpdate çağrılıyor; değişimde çağırmak focus kaybına yol açtığı için kaldırıldı
+              }}
             />
             <div className="text-red-500 text-xs lg:text-sm mt-1">
               <ErrorMessage name={field.id} />
@@ -237,12 +256,22 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate, onPlantCo
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               {field.label}
             </label>
-            <Field as="select" {...commonProps} className={`${commonProps.className} bg-white`}>
+            <select
+              id={commonProps.id}
+              name={commonProps.name}
+              className={`${commonProps.className} bg-white`}
+              value={String(values[field.id] ?? '')}
+              onChange={(e) => {
+                const v = e.target.value;
+                setFieldValue(field.id, v);
+                // Değişimde persist etmiyoruz; submit'te kaydedilecek
+              }}
+            >
               <option value="">Seçiniz...</option>
               {field.options?.map(option => (
                 <option key={option} value={option}>{option}</option>
               ))}
-            </Field>
+            </select>
             {/* Eğer Diğer seçiliyse input göster */}
             {values[field.id] === 'Diğer' && (
               <input
@@ -263,9 +292,14 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate, onPlantCo
         return (
           <div key={field.id} className={fieldWidth}>
             <label className="flex items-start lg:items-center space-x-3 cursor-pointer p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
-              <Field
+              <input
                 type="checkbox"
-                name={field.id}
+                checked={Boolean(values[field.id])}
+                onChange={(e) => {
+                  const v = e.target.checked;
+                  setFieldValue(field.id, v);
+                  // Değişimde persist etmiyoruz; submit'te kaydedilecek
+                }}
                 className="h-4 w-4 lg:h-5 lg:w-5 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500 mt-0.5 lg:mt-0 flex-shrink-0"
               />
               <div className="flex-1">
@@ -316,7 +350,9 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate, onPlantCo
                   </button>
                   <button
                     type="button"
-                    onClick={() => setFieldValue(field.id, '')}
+                    onClick={() => {
+                      setFieldValue(field.id, '');
+                    }}
                     className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity touch-manipulation"
                     style={{ minWidth: '36px', minHeight: '36px' }}
                   >
@@ -404,6 +440,7 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate, onPlantCo
                     onChange={(e) => {
                       const newValue = { ...pestValue, selected: e.target.checked };
                       setFieldValue(field.id, newValue);
+                      // Submit'te kaydedilecek
                     }}
                     className="h-4 w-4 lg:h-5 lg:w-5 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500 mt-0.5 lg:mt-0 flex-shrink-0"
                   />
@@ -456,6 +493,7 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate, onPlantCo
                           onClick={() => {
                             const newValue = { ...pestValue, photo: '' };
                             setFieldValue(field.id, newValue);
+                            // Submit'te kaydedilecek
                           }}
                           className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity touch-manipulation"
                           style={{ minWidth: '36px', minHeight: '36px' }}
@@ -487,6 +525,8 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate, onPlantCo
                     onChange={(e) => {
                       const newValue = { ...stageValue, selected: e.target.checked };
                       setFieldValue(field.id, newValue);
+                      const newValues = { ...values, [field.id]: newValue };
+                      onUpdate(item.id, true, newValues);
                     }}
                     className="h-4 w-4 lg:h-5 lg:w-5 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500 mt-0.5 lg:mt-0 flex-shrink-0"
                   />
@@ -509,6 +549,7 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate, onPlantCo
                         onChange={(e) => {
                           const newValue = { ...stageValue, note: e.target.value };
                           setFieldValue(field.id, newValue);
+                          // Submit'te kaydedilecek
                         }}
                         placeholder="Gübreleme önerisi ve notlarınızı buraya yazın..."
                         className="w-full px-3 py-2.5 lg:px-4 lg:py-3 border border-gray-300 rounded-lg lg:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 text-sm lg:text-base resize-vertical min-h-[100px]"
@@ -599,9 +640,19 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate, onPlantCo
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               {field.label}
             </label>
-            <Field
+            <input
               type={field.type}
-              {...commonProps}
+              id={commonProps.id}
+              name={commonProps.name}
+              placeholder={commonProps.placeholder}
+              className={commonProps.className}
+              value={typeof values[field.id] === 'string' || typeof values[field.id] === 'number' ? (values[field.id] as string | number) : ''}
+              onChange={(e) => {
+                const raw = e.target.value;
+                const nextValue: string | number = field.type === 'number' ? (raw === '' ? '' : Number(raw)) : raw;
+                setFieldValue(field.id, nextValue);
+                // Submit'te kaydedilecek
+              }}
             />
             <div className="text-red-500 text-xs lg:text-sm mt-1">
               <ErrorMessage name={field.id} />
@@ -671,6 +722,8 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate, onPlantCo
         {showDetails && item.detailFields && (
           <div className="mt-4 lg:mt-6 bg-gray-50 rounded-lg lg:rounded-xl p-4 lg:p-6">
             <Formik
+              key={`${item.id}-${JSON.stringify(item.data ?? {})}`}
+              enableReinitialize
               initialValues={getInitialValues(item.detailFields)}
               validationSchema={createValidationSchema(item.detailFields)}
               onSubmit={(values) => {

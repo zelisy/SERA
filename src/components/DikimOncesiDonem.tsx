@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ChecklistItem from './ChecklistItem';
 import UreticiListesi from './UreticiListesi';
 import { dikimOncesiConfig } from '../data/dikimOncesiConfig';
-import { loadChecklistData, updateChecklistItem, saveChecklistData } from '../utils/firestoreUtils';
-import { getUretimAlanlariByProducer } from '../utils/firestoreUtils';
+import { loadChecklistData, updateChecklistItem, saveChecklistData, getUretimAlanlariByProducer, saveDikimOncesiRecord, getDikimOncesiRecordsByProducer, updateDikimOncesiRecord, deleteDikimOncesiRecord } from '../utils/firestoreUtils';
 import type { ChecklistSection, UretimAlani, ChecklistItem as ChecklistItemType } from '../types/checklist';
 import type { Producer } from '../types/producer';
 import ImageLightbox from './ImageLightbox';
@@ -75,9 +74,8 @@ const DikimOncesiDonem: React.FC = () => {
     if (!selectedProducer) return;
     
     try {
-      // Burada Firestore'dan kayıtlı kayıtları çekebilirsiniz
-      // Şimdilik boş array olarak bırakıyorum
-      setSavedRecords([]);
+      const records = await getDikimOncesiRecordsByProducer(selectedProducer.id);
+      setSavedRecords(records);
     } catch {
       setError('Kayıtlı kayıtlar yüklenemedi');
     }
@@ -150,6 +148,7 @@ const DikimOncesiDonem: React.FC = () => {
           productionArea: selectedProductionArea
         };
         setSavedRecords(prev => prev.map(r => r.id === editingRecord.id ? updatedRecord : r));
+        await updateDikimOncesiRecord(editingRecord.id, updatedRecord);
         setEditingRecord(null);
       } else {
         // Yeni kayıt oluştur
@@ -162,7 +161,15 @@ const DikimOncesiDonem: React.FC = () => {
           completionStats: getCompletionStats(),
           productionArea: selectedProductionArea
         };
-        setSavedRecords(prev => [...prev, newRecord]);
+        const id = await saveDikimOncesiRecord({
+          producerId: newRecord.producerId,
+          producerName: newRecord.producerName,
+          date: newRecord.date,
+          checklistData: newRecord.checklistData,
+          completionStats: newRecord.completionStats,
+          productionArea: newRecord.productionArea
+        });
+        setSavedRecords(prev => [...prev, { ...newRecord, id }]);
       }
 
       // Burada Firestore'a kaydetme işlemi yapılabilir
@@ -188,7 +195,7 @@ const DikimOncesiDonem: React.FC = () => {
     if (!window.confirm('Bu kaydı silmek istediğinize emin misiniz?')) return;
 
     try {
-      // Burada Firestore'dan silme işlemi yapılabilir
+      await deleteDikimOncesiRecord(recordId);
       setSavedRecords(prev => prev.filter(r => r.id !== recordId));
       setError(null);
     } catch {
@@ -433,25 +440,24 @@ const DikimOncesiDonem: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {savedRecords.map((record) => {
                   const stats = record.completionStats;
-                  // Fotoğrafları topla
-                  const photoFields = record.checklistData?.items?.filter((item: ChecklistItemType) => {
-                    // Tekli fotoğraf
-                    if (item.data && typeof item.data === 'object') {
-                      if (typeof item.data.photo === 'string' && item.data.photo) return true;
-                      // Çoklu fotoğraf
-                      if (Array.isArray(item.data)) return true;
-                      if (Array.isArray(item.data.photos) && item.data.photos.length > 0) return true;
-                    }
-                    return false;
-                  }) || [];
                   // Tüm fotoğraf url'lerini sırala
-                  const allPhotos: string[] = photoFields.flatMap((item: ChecklistItemType) => {
-                    if (item.data) {
-                      if (typeof item.data.photo === 'string' && item.data.photo) return [item.data.photo];
-                      if (Array.isArray(item.data)) return item.data;
-                      if (Array.isArray(item.data.photos)) return item.data.photos;
-                    }
-                    return [];
+                  const allPhotos: string[] = (record.checklistData?.items || []).flatMap((item: ChecklistItemType) => {
+                    const urls: string[] = [];
+                    const data = item.data as Record<string, unknown> | undefined;
+                    if (!data) return urls;
+                    Object.values(data).forEach((val) => {
+                      if (typeof val === 'string') {
+                        if (val.startsWith('http')) urls.push(val);
+                      } else if (Array.isArray(val)) {
+                        (val as unknown[]).forEach((v) => {
+                          if (typeof v === 'string' && v.startsWith('http')) urls.push(v);
+                        });
+                      } else if (val && typeof val === 'object') {
+                        const vObj = val as { photo?: unknown };
+                        if (typeof vObj.photo === 'string' && vObj.photo.startsWith('http')) urls.push(vObj.photo);
+                      }
+                    });
+                    return urls;
                   });
                   return (
                     <div key={record.id} className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
