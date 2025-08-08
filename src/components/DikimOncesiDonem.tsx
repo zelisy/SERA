@@ -17,6 +17,7 @@ const DikimOncesiDonem: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [savedRecords, setSavedRecords] = useState<any[]>([]);
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const [editingRecord, setEditingRecord] = useState<any | null>(null);
   const [showForm, setShowForm] = useState(false);
 
@@ -420,6 +421,26 @@ const DikimOncesiDonem: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {savedRecords.map((record) => {
                   const stats = record.completionStats;
+                  // Fotoğrafları topla
+                  const photoFields = record.checklistData?.items?.filter((item: any) => {
+                    // Tekli fotoğraf
+                    if (item.data && typeof item.data === 'object') {
+                      if (typeof item.data.photo === 'string' && item.data.photo) return true;
+                      // Çoklu fotoğraf
+                      if (Array.isArray(item.data)) return true;
+                      if (Array.isArray(item.data.photos) && item.data.photos.length > 0) return true;
+                    }
+                    return false;
+                  }) || [];
+                  // Tüm fotoğraf url'lerini sırala
+                  const allPhotos = photoFields.flatMap((item: any) => {
+                    if (item.data) {
+                      if (typeof item.data.photo === 'string' && item.data.photo) return [item.data.photo];
+                      if (Array.isArray(item.data)) return item.data;
+                      if (Array.isArray(item.data.photos)) return item.data.photos;
+                    }
+                    return [];
+                  });
                   return (
                     <div key={record.id} className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
                       <div className="flex items-center justify-between mb-3">
@@ -459,14 +480,44 @@ const DikimOncesiDonem: React.FC = () => {
                           />
                         </div>
                       </div>
-                      <div className="text-xs text-slate-500 space-y-1">
+                      <div className="text-xs text-slate-500 space-y-1 mb-2">
                         <div>Tamamlanan: {stats.completedItems}/{stats.totalItems}</div>
                         <div>Saat: {new Date(record.date).toLocaleTimeString('tr-TR')}</div>
                         <div>Alan: {record.productionArea?.urunIsmi || record.productionArea?.id || '-'}</div>
                       </div>
+                      {/* Fotoğraflar grid */}
+                      {allPhotos.length > 0 && (
+                        <div className="mb-2">
+                          <div className="font-semibold text-slate-700 mb-1">Eklenen Fotoğraflar</div>
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                            {allPhotos.map((url: any, idx: any) => (
+                              <button key={idx} type="button" onClick={() => setPreviewImageUrl(url)} className="focus:outline-none">
+                                <img src={url} alt={`Fotoğraf ${idx + 1}`} className="w-full h-20 object-cover rounded-lg border border-gray-200 hover:scale-105 transition-transform duration-200 cursor-pointer" />
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
+      {/* Fotoğraf büyük önizleme modalı */}
+      {previewImageUrl && typeof previewImageUrl === 'string' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70" onClick={() => setPreviewImageUrl(null)}>
+          <div className="relative">
+            <img src={previewImageUrl || ''} alt="Büyük Önizleme" className="max-w-[90vw] max-h-[80vh] rounded-xl shadow-2xl border-4 border-white" />
+            <button
+              type="button"
+              onClick={() => setPreviewImageUrl(null)}
+              className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-2 shadow-lg hover:bg-red-700 focus:outline-none"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
               </div>
             )}
           </div>

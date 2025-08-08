@@ -15,6 +15,7 @@ interface ChecklistItemProps {
 const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate, onPlantControlClick }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [uploadingFiles, setUploadingFiles] = useState<Set<string>>(new Set());
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
   const createValidationSchema = (fields: FormField[]) => {
     // Hiçbir alan zorunlu olmasın - tüm alanları optional yap
@@ -297,21 +298,21 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate, onPlantCo
                 }}
                 disabled={uploadingFiles.has(field.id)}
               />
-              
               {uploadingFiles.has(field.id) && (
                 <div className="flex items-center space-x-2 text-emerald-600 bg-emerald-50 p-3 rounded-lg">
                   <div className="animate-spin h-4 w-4 border-2 border-emerald-600 border-t-transparent rounded-full"></div>
                   <span className="text-xs lg:text-sm font-medium">Fotoğraf yükleniyor...</span>
                 </div>
               )}
-              
               {values[field.id] && (
                 <div className="relative group">
-                  <img 
-                    src={values[field.id] as string} 
-                    alt="Preview" 
-                    className="w-full max-w-xs lg:max-w-sm max-h-32 lg:max-h-48 object-cover rounded-lg shadow-md border border-gray-200"
-                  />
+                  <button type="button" onClick={() => setPreviewImageUrl(values[field.id] as string)} className="focus:outline-none">
+                    <img 
+                      src={values[field.id] as string} 
+                      alt="Preview" 
+                      className="w-full max-w-xs lg:max-w-sm max-h-32 lg:max-h-48 object-cover rounded-lg shadow-md border border-gray-200 hover:scale-105 transition-transform duration-200 cursor-pointer"
+                    />
+                  </button>
                   <button
                     type="button"
                     onClick={() => setFieldValue(field.id, '')}
@@ -346,23 +347,23 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate, onPlantCo
                   multiple={true}
                   disabled={uploadingFiles.has(field.id)}
                 />
-                
                 {uploadingFiles.has(field.id) && (
                   <div className="flex items-center space-x-2 text-emerald-600 bg-emerald-50 p-3 rounded-lg">
                     <div className="animate-spin h-4 w-4 border-2 border-emerald-600 border-t-transparent rounded-full"></div>
                     <span className="text-xs lg:text-sm font-medium">Fotoğraflar yükleniyor...</span>
                   </div>
                 )}
-                
                 {currentUrls.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                     {currentUrls.map((url, index) => (
                       <div key={index} className="relative group">
-                        <img 
-                          src={url} 
-                          alt={`Fotoğraf ${index + 1}`} 
-                          className="w-full h-24 lg:h-32 object-cover rounded-lg shadow-md border border-gray-200"
-                        />
+                        <button type="button" onClick={() => setPreviewImageUrl(url)} className="focus:outline-none">
+                          <img 
+                            src={url} 
+                            alt={`Fotoğraf ${index + 1}`} 
+                            className="w-full h-24 lg:h-32 object-cover rounded-lg shadow-md border border-gray-200 hover:scale-105 transition-transform duration-200 cursor-pointer"
+                          />
+                        </button>
                         <button
                           type="button"
                           onClick={() => {
@@ -387,6 +388,23 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate, onPlantCo
             </div>
           );
         }
+  {/* Fotoğraf büyük önizleme modalı */}
+  {previewImageUrl && typeof previewImageUrl === 'string' && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70" onClick={() => setPreviewImageUrl(null)}>
+      <div className="relative">
+        <img src={previewImageUrl || ''} alt="Büyük Önizleme" className="max-w-[90vw] max-h-[80vh] rounded-xl shadow-2xl border-4 border-white" />
+        <button
+          type="button"
+          onClick={() => setPreviewImageUrl(null)}
+          className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-2 shadow-lg hover:bg-red-700 focus:outline-none"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  )}
 
       case 'pest-control':
         {

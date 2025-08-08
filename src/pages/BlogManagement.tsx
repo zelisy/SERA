@@ -22,6 +22,7 @@ const BlogManagement: React.FC = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
+  const [modalImg, setModalImg] = useState<string | null>(null);
 
   // Blog kategorileri
   const categories = [
@@ -356,13 +357,16 @@ const BlogManagement: React.FC = () => {
                         Kapak Resmi
                       </label>
                       <div className="space-y-3">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageSelect}
-                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 file:cursor-pointer"
-                          disabled={uploadingImage}
-                        />
+                        <label className="block w-full max-w-xs cursor-pointer bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-bold py-3 px-5 rounded-xl text-center text-base shadow-xl hover:from-emerald-600 hover:to-blue-600 transition-all duration-200 transform hover:scale-105 border-4 border-emerald-400">
+                          📷 Kapak Fotoğrafı Seç / Yükle
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageSelect}
+                            className="hidden"
+                            disabled={uploadingImage}
+                          />
+                        </label>
                         {uploadingImage && (
                           <div className="flex items-center space-x-2 text-emerald-600">
                             <div className="animate-spin h-4 w-4 border-2 border-emerald-600 border-t-transparent rounded-full"></div>
@@ -371,11 +375,13 @@ const BlogManagement: React.FC = () => {
                         )}
                         {imagePreview && (
                           <div className="relative">
-                            <img
-                              src={imagePreview}
-                              alt="Önizleme"
-                              className="w-full max-w-xs h-32 object-cover rounded-lg border border-gray-200"
-                            />
+                            <button type="button" onClick={() => setModalImg(imagePreview)} className="focus:outline-none">
+                              <img
+                                src={imagePreview}
+                                alt="Önizleme"
+                                className="w-full max-w-xs h-32 object-cover rounded-lg border border-gray-200 hover:scale-105 transition-transform duration-200 cursor-pointer"
+                              />
+                            </button>
                             <button
                               type="button"
                               onClick={() => {
@@ -521,11 +527,13 @@ const BlogManagement: React.FC = () => {
                       <td className="px-6 py-4">
                         <div className="flex items-center space-x-3">
                           {blog.imageUrl && (
-                            <img
-                              src={blog.imageUrl}
-                              alt={blog.title}
-                              className="w-12 h-12 object-cover rounded-lg"
-                            />
+                            <button type="button" onClick={() => setModalImg(blog.imageUrl || '')} className="focus:outline-none">
+                              <img
+                                src={blog.imageUrl}
+                                alt={blog.title}
+                                className="w-12 h-12 object-cover rounded-lg hover:scale-105 transition-transform duration-200 cursor-pointer"
+                              />
+                            </button>
                           )}
                           <div>
                             <div className="text-sm font-medium text-gray-900 line-clamp-2">
@@ -597,6 +605,23 @@ const BlogManagement: React.FC = () => {
           )}
         </div>
       </div>
+      {/* Modal for large image preview */}
+      {modalImg && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80" onClick={() => setModalImg(null)}>
+          <div className="relative">
+            <img src={modalImg} alt="Büyük Önizleme" className="max-w-[90vw] max-h-[80vh] rounded-xl shadow-2xl border-4 border-white" />
+            <button
+              type="button"
+              onClick={() => setModalImg(null)}
+              className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-2 shadow-lg hover:bg-red-700 focus:outline-none"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
