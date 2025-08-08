@@ -1008,6 +1008,17 @@ const RecipeCreatePage: React.FC = () => {
                 placeholder="Üretici için öneriler, dikkat edilmesi gerekenler ve diğer notlarınızı buraya yazın..."
                 rows={4}
                 className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-1 focus:ring-slate-400 focus:border-slate-400 transition-colors resize-none"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    const textarea = e.target as HTMLTextAreaElement;
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+                    const value = textarea.value;
+                    textarea.value = value.substring(0, start) + '\n' + value.substring(end);
+                    textarea.selectionStart = textarea.selectionEnd = start + 1;
+                  }
+                }}
               />
             </div>
           </div>

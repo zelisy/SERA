@@ -77,6 +77,7 @@ const DenemeComponent: React.FC = () => {
   const [imageModalIndex, setImageModalIndex] = React.useState<number>(0);
   const [imageModalImages, setImageModalImages] = React.useState<string[]>([]);
   const [isExportingPDF, setIsExportingPDF] = React.useState(false);
+  const [previewImageUrl, setPreviewImageUrl] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     getAllDenemeProducers().then(setProducers).catch(() => setProducers([]));
@@ -343,6 +344,17 @@ const DenemeComponent: React.FC = () => {
                         className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white resize-none" 
                         rows={3}
                         placeholder="Tam adres bilgisi..."
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            const textarea = e.target as HTMLTextAreaElement;
+                            const start = textarea.selectionStart;
+                            const end = textarea.selectionEnd;
+                            const value = textarea.value;
+                            textarea.value = value.substring(0, start) + '\n' + value.substring(end);
+                            textarea.selectionStart = textarea.selectionEnd = start + 1;
+                          }
+                        }}
                       />
                     </div>
                   </div>
@@ -528,6 +540,17 @@ const DenemeComponent: React.FC = () => {
                     onChange={handleChange} 
                     className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none" 
                     rows={3} 
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        const textarea = e.target as HTMLTextAreaElement;
+                        const start = textarea.selectionStart;
+                        const end = textarea.selectionEnd;
+                        const value = textarea.value;
+                        textarea.value = value.substring(0, start) + '\n' + value.substring(end);
+                        textarea.selectionStart = textarea.selectionEnd = start + 1;
+                      }
+                    }}
                   />
                 </div>
               </div>
@@ -580,6 +603,17 @@ const DenemeComponent: React.FC = () => {
                   className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none" 
                   rows={3} 
                   placeholder="Evrim bilgileri..." 
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      const textarea = e.target as HTMLTextAreaElement;
+                      const start = textarea.selectionStart;
+                      const end = textarea.selectionEnd;
+                      const value = textarea.value;
+                      textarea.value = value.substring(0, start) + '\n' + value.substring(end);
+                      textarea.selectionStart = textarea.selectionEnd = start + 1;
+                    }
+                  }}
                 />
               </div>
             </div>
@@ -602,7 +636,7 @@ const DenemeComponent: React.FC = () => {
                   src={url} 
                   alt={`görsel${i}`} 
                   className="w-24 h-24 md:w-32 md:h-32 object-cover rounded-lg shadow cursor-pointer hover:scale-105 transition-transform duration-200" 
-                  onClick={e => { e.stopPropagation(); setImageModalImages(form.goruntuler); setImageModalIndex(i); setImageModalOpen(true); }} 
+                  onClick={e => { e.stopPropagation(); setPreviewImageUrl(url); }} 
                 />
               ))}
             </div>
@@ -689,7 +723,8 @@ const DenemeComponent: React.FC = () => {
                                 key={i} 
                                 src={url} 
                                 alt={`görsel${i}`} 
-                                className="w-12 h-12 object-cover rounded-lg border border-gray-200" 
+                                className="w-12 h-12 object-cover rounded-lg border border-gray-200 cursor-pointer hover:scale-105 transition-transform duration-200" 
+                                onClick={e => { e.stopPropagation(); setPreviewImageUrl(url); }}
                               />
                             ))}
                             {item.goruntuler.length > 3 && (
@@ -709,8 +744,8 @@ const DenemeComponent: React.FC = () => {
         </div>
         {/* Detaylı Pop-up Modal */}
         {modalOpen && modalData && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full p-6 md:p-8 relative animate-fade-in max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setModalOpen(false)}>
+            <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full p-6 md:p-8 relative animate-fade-in max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
               <button className="absolute top-4 right-4 text-2xl text-gray-400 hover:text-emerald-600 z-10" onClick={() => setModalOpen(false)}>&times;</button>
               
               {/* Header Section - PDF Style */}
@@ -846,6 +881,20 @@ const DenemeComponent: React.FC = () => {
                 disabled={imageModalImages.length < 2}
               >&#8594;</button>
               <button className="absolute top-2 md:top-8 right-2 md:right-8 text-2xl md:text-4xl text-white bg-black/40 rounded-full px-2 md:px-3 py-1 hover:bg-black/70 min-w-[44px] min-h-[44px] flex items-center justify-center" onClick={() => setImageModalOpen(false)}>&times;</button>
+            </div>
+          </div>
+        )}
+        
+        {/* Fotoğraf büyük önizleme modalı */}
+        {previewImageUrl && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70" onClick={() => setPreviewImageUrl(null)}>
+            <div className="relative" onClick={e => e.stopPropagation()}>
+              <img src={previewImageUrl} alt="Büyük Önizleme" className="max-w-[90vw] max-h-[80vh] rounded-xl shadow-2xl border-4 border-white" />
+              <button
+                type="button"
+                onClick={() => setPreviewImageUrl(null)}
+                className="absolute top-8 right-8 text-white text-3xl font-bold bg-black bg-opacity-50 rounded-full px-4 py-2"
+              >×</button>
             </div>
           </div>
         )}

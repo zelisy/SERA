@@ -504,7 +504,7 @@ const DikimOncesiDonem: React.FC = () => {
       {/* Fotoğraf büyük önizleme modalı */}
       {previewImageUrl && typeof previewImageUrl === 'string' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70" onClick={() => setPreviewImageUrl(null)}>
-          <div className="relative">
+          <div className="relative" onClick={e => e.stopPropagation()}>
             <img src={previewImageUrl || ''} alt="Büyük Önizleme" className="max-w-[90vw] max-h-[80vh] rounded-xl shadow-2xl border-4 border-white" />
             <button
               type="button"

@@ -872,6 +872,17 @@ const UretimAlanBilgisi: React.FC = () => {
                          rows={4}
                          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 resize-vertical min-h-[100px]"
                          placeholder="Teknik ekip değerlendirmesi ve önerileri..."
+                         onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+                           if (e.key === 'Enter' && !e.shiftKey) {
+                             e.preventDefault();
+                             const textarea = e.target as HTMLTextAreaElement;
+                             const start = textarea.selectionStart;
+                             const end = textarea.selectionEnd;
+                             const value = textarea.value;
+                             textarea.value = value.substring(0, start) + '\n' + value.substring(end);
+                             textarea.selectionStart = textarea.selectionEnd = start + 1;
+                           }
+                         }}
                        />
                        <ErrorMessage name="teknikDegerlendirme" component="div" className="text-red-500 text-xs mt-1" />
                      </div>

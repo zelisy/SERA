@@ -395,11 +395,13 @@ const PlantDetailControl: React.FC<{
           {/* Modal for image preview */}
           {modalImg && (
             <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50" onClick={() => setModalImg(null)}>
-              <img src={modalImg} alt="Büyük önizleme" className="max-w-full max-h-full rounded-xl shadow-lg border-4 border-white" />
-              <button
-                className="absolute top-8 right-8 text-white text-3xl font-bold bg-black bg-opacity-50 rounded-full px-4 py-2"
-                onClick={() => setModalImg(null)}
-              >×</button>
+              <div className="relative" onClick={e => e.stopPropagation()}>
+                <img src={modalImg} alt="Büyük önizleme" className="max-w-full max-h-full rounded-xl shadow-lg border-4 border-white" />
+                <button
+                  className="absolute top-8 right-8 text-white text-3xl font-bold bg-black bg-opacity-50 rounded-full px-4 py-2"
+                  onClick={() => setModalImg(null)}
+                >×</button>
+              </div>
             </div>
           )}
         </div>

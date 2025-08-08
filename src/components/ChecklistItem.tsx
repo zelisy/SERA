@@ -391,7 +391,7 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate, onPlantCo
   {/* Fotoğraf büyük önizleme modalı */}
   {previewImageUrl && typeof previewImageUrl === 'string' && (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70" onClick={() => setPreviewImageUrl(null)}>
-      <div className="relative">
+      <div className="relative" onClick={e => e.stopPropagation()}>
         <img src={previewImageUrl || ''} alt="Büyük Önizleme" className="max-w-[90vw] max-h-[80vh] rounded-xl shadow-2xl border-4 border-white" />
         <button
           type="button"
@@ -527,6 +527,17 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate, onPlantCo
                         placeholder="Gübreleme önerisi ve notlarınızı buraya yazın..."
                         className="w-full px-3 py-2.5 lg:px-4 lg:py-3 border border-gray-300 rounded-lg lg:rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 text-sm lg:text-base resize-vertical min-h-[100px]"
                         rows={4}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            const textarea = e.target as HTMLTextAreaElement;
+                            const start = textarea.selectionStart;
+                            const end = textarea.selectionEnd;
+                            const value = textarea.value;
+                            textarea.value = value.substring(0, start) + '\n' + value.substring(end);
+                            textarea.selectionStart = textarea.selectionEnd = start + 1;
+                          }
+                        }}
                       />
                     </div>
                   </div>

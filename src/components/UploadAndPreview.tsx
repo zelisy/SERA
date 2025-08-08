@@ -89,7 +89,7 @@ const UploadAndPreview = () => {
       {/* Modal for large image preview */}
       {modalImg && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80" onClick={() => setModalImg(null)}>
-          <div className="relative">
+          <div className="relative" onClick={e => e.stopPropagation()}>
             <img src={modalImg} alt="Büyük Önizleme" className="max-w-[90vw] max-h-[80vh] rounded-xl shadow-2xl border-4 border-white" />
             <button
               type="button"

@@ -1034,7 +1034,7 @@ const HasatBilgisiComponent = () => {
       {/* Fotoğraf büyük önizleme modalı */}
       {previewImageUrl && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70" onClick={() => setPreviewImageUrl(null)}>
-          <div className="relative">
+          <div className="relative" onClick={e => e.stopPropagation()}>
             <img src={previewImageUrl} alt="Büyük Önizleme" className="max-w-[90vw] max-h-[80vh] rounded-xl shadow-2xl border-4 border-white" />
             <button
               type="button"
@@ -1067,6 +1067,17 @@ const HasatBilgisiComponent = () => {
                           rows={4}
                           placeholder="Teknik ekip değerlendirmesi..."
                           className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm resize-none"
+                          onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              const textarea = e.target as HTMLTextAreaElement;
+                              const start = textarea.selectionStart;
+                              const end = textarea.selectionEnd;
+                              const value = textarea.value;
+                              textarea.value = value.substring(0, start) + '\n' + value.substring(end);
+                              textarea.selectionStart = textarea.selectionEnd = start + 1;
+                            }
+                          }}
                         />
                       </div>
 
@@ -1080,6 +1091,17 @@ const HasatBilgisiComponent = () => {
                           rows={4}
                           placeholder="Çiftçi notları..."
                           className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm resize-none"
+                          onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              const textarea = e.target as HTMLTextAreaElement;
+                              const start = textarea.selectionStart;
+                              const end = textarea.selectionEnd;
+                              const value = textarea.value;
+                              textarea.value = value.substring(0, start) + '\n' + value.substring(end);
+                              textarea.selectionStart = textarea.selectionEnd = start + 1;
+                            }
+                          }}
                         />
                       </div>
                     </div>

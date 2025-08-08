@@ -263,6 +263,17 @@ const Contact = () => {
                       className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 resize-vertical text-white placeholder-gray-400"
                       placeholder="Mesajınızı buraya yazınız..."
                       required
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          const textarea = e.target as HTMLTextAreaElement;
+                          const start = textarea.selectionStart;
+                          const end = textarea.selectionEnd;
+                          const value = textarea.value;
+                          textarea.value = value.substring(0, start) + '\n' + value.substring(end);
+                          textarea.selectionStart = textarea.selectionEnd = start + 1;
+                        }
+                      }}
                     />
                   </div>
 

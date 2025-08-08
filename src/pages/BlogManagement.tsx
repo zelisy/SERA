@@ -299,6 +299,17 @@ const BlogManagement: React.FC = () => {
                         rows={3}
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors"
                         placeholder="Blog özetini girin..."
+                        onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            const textarea = e.target as HTMLTextAreaElement;
+                            const start = textarea.selectionStart;
+                            const end = textarea.selectionEnd;
+                            const value = textarea.value;
+                            textarea.value = value.substring(0, start) + '\n' + value.substring(end);
+                            textarea.selectionStart = textarea.selectionEnd = start + 1;
+                          }
+                        }}
                       />
                       <ErrorMessage name="excerpt" component="div" className="text-red-500 text-sm mt-1" />
                     </div>
@@ -432,6 +443,17 @@ const BlogManagement: React.FC = () => {
                       rows={12}
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors"
                       placeholder="Blog içeriğini girin..."
+                      onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          const textarea = e.target as HTMLTextAreaElement;
+                          const start = textarea.selectionStart;
+                          const end = textarea.selectionEnd;
+                          const value = textarea.value;
+                          textarea.value = value.substring(0, start) + '\n' + value.substring(end);
+                          textarea.selectionStart = textarea.selectionEnd = start + 1;
+                        }
+                      }}
                     />
                     <ErrorMessage name="content" component="div" className="text-red-500 text-sm mt-1" />
                   </div>
@@ -608,7 +630,7 @@ const BlogManagement: React.FC = () => {
       {/* Modal for large image preview */}
       {modalImg && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80" onClick={() => setModalImg(null)}>
-          <div className="relative">
+          <div className="relative" onClick={e => e.stopPropagation()}>
             <img src={modalImg} alt="Büyük Önizleme" className="max-w-[90vw] max-h-[80vh] rounded-xl shadow-2xl border-4 border-white" />
             <button
               type="button"

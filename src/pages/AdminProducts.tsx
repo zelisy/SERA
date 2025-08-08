@@ -144,6 +144,17 @@ const AdminProducts: React.FC = () => {
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500"
                 required
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    const textarea = e.target as HTMLTextAreaElement;
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+                    const value = textarea.value;
+                    textarea.value = value.substring(0, start) + '\n' + value.substring(end);
+                    textarea.selectionStart = textarea.selectionEnd = start + 1;
+                  }
+                }}
               />
             </div>
             <div>
