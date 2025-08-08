@@ -102,6 +102,7 @@ export interface UretimAlani {
 export interface HasatBilgisi {
   id: string;
   producerId: string; // Üretici ID'si
+  uretimAlaniId?: string; // Üretim alanı ID'si
   
   // Dönem Bilgisi
   donem: string; // 2023-2024, 2024-2025, vb.

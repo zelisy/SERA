@@ -3,7 +3,7 @@ import ChecklistItem from './ChecklistItem';
 import UreticiListesi from './UreticiListesi';
 import PlantControlStep from './PlantControlStep';
 import { seraKontrolConfig } from '../data/seraKontrolConfig';
-import { loadChecklistData, updateChecklistItem, saveChecklistData } from '../utils/firestoreUtils';
+import { loadChecklistData, updateChecklistItem, saveChecklistData, saveSeraKontrolRecord, getSeraKontrolRecordsByUretimAlani } from '../utils/firestoreUtils';
 import type { ChecklistSection } from '../types/checklist';
 import type { Producer } from '../types/producer';
 
@@ -31,7 +31,6 @@ const SeraKontrol: React.FC = () => {
 
   useEffect(() => {
     if (selectedProducer) {
-      loadSavedRecords();
       loadUretimAlanlari();
       setCurrentStep('select-area');
     }
@@ -52,16 +51,11 @@ const SeraKontrol: React.FC = () => {
 
 
   const loadSavedRecords = async () => {
-    if (!selectedProducer) return;
+    if (!selectedProducer || !selectedUretimAlani) return;
     
     try {
-      const dataKey = `sera-kontrol-${selectedProducer.id}`;
-      const savedData = await loadChecklistData(dataKey);
-      if (savedData && savedData.history) {
-        setSavedRecords(savedData.history);
-      } else {
-        setSavedRecords([]);
-      }
+      const records = await getSeraKontrolRecordsByUretimAlani(selectedUretimAlani.id);
+      setSavedRecords(records);
     } catch (err) {
       setError('Kayıtlı kayıtlar yüklenemedi');
       setSavedRecords([]);
@@ -132,54 +126,54 @@ const SeraKontrol: React.FC = () => {
   };
 
   const handleSaveRecord = async () => {
-    if (!selectedProducer) return;
+    if (!selectedProducer || !selectedUretimAlani) return;
     
     setLoading(true);
     setError(null);
-    const dataKey = `sera-kontrol-${selectedProducer.id}`;
     
     try {
       const currentDate = new Date();
       const newRecord = {
-        id: Date.now().toString(),
+        producerId: selectedProducer.id,
+        uretimAlaniId: selectedUretimAlani.id,
+        items: checklistData.items,
         date: currentDate.toISOString(),
         dateFormatted: currentDate.toLocaleDateString('tr-TR'),
         timeFormatted: currentDate.toLocaleTimeString('tr-TR'),
-        items: checklistData.items,
-        producerId: selectedProducer.id,
         producerName: `${selectedProducer.firstName} ${selectedProducer.lastName}`
       };
 
-      const updatedHistory = editingRecord 
-        ? savedRecords.map(record => record.id === editingRecord.id ? newRecord : record)
-        : [...savedRecords, newRecord];
+      // Veritabanına kaydet
+      await saveSeraKontrolRecord(newRecord);
 
-      await saveChecklistData(dataKey, {
-        ...seraKontrolConfig,
-        items: checklistData.items,
-        history: updatedHistory
-      });
+      // Local state'i güncelle
+      const updatedHistory = editingRecord 
+        ? savedRecords.map(record => record.id === editingRecord.id ? { ...newRecord, id: editingRecord.id } : record)
+        : [...savedRecords, { ...newRecord, id: Date.now().toString() }];
 
       setSavedRecords(updatedHistory);
       setEditingRecord(null);
       setSaveSuccess(true);
       setCurrentStep('list');
       
-      // Formu tamamen temizle
-      const cleanConfig = {
-        ...seraKontrolConfig,
-        items: seraKontrolConfig.items.map(item => ({
-          ...item,
-          completed: false,
-          data: {}
-        }))
-      };
-      setChecklistData(cleanConfig);
-      setExpandedSections(new Set());
+      // Sadece yeni kayıt oluştururken formu temizle, düzenleme sırasında temizleme
+      if (!editingRecord) {
+        const cleanConfig = {
+          ...seraKontrolConfig,
+          items: seraKontrolConfig.items.map(item => ({
+            ...item,
+            completed: false,
+            data: {}
+          }))
+        };
+        setChecklistData(cleanConfig);
+        setExpandedSections(new Set());
+      }
       
       setTimeout(() => setSaveSuccess(false), 2000);
     } catch (err) {
-      setError('Kayıt kaydedilemedi');
+      setError('Kayıt başarısız');
+      console.error('Kayıt hatası:', err);
     } finally {
       setLoading(false);
     }
@@ -188,6 +182,7 @@ const SeraKontrol: React.FC = () => {
   const handleEditRecord = (record: any) => {
     console.log('handleEditRecord called with:', record);
     setEditingRecord(record);
+    // Düzenleme sırasında kayıtlı verileri yükle
     setChecklistData({
       ...seraKontrolConfig,
       items: record.items
@@ -271,8 +266,8 @@ const SeraKontrol: React.FC = () => {
   // Üretim alanı seçimi
   const handleUretimAlaniSelect = (area: any) => {
     setSelectedUretimAlani(area);
-    fetchHasatKayitlari(area.id);
-    setCurrentStep('hasat-list');
+    setCurrentStep('checklist');
+    setLoading(false); // Set loading to false when transitioning to checklist
   };
 
   // Seçilen üretim alanına ait hasat kayıtlarını çek
@@ -304,13 +299,13 @@ const SeraKontrol: React.FC = () => {
   const startNewRecord = () => {
     console.log('startNewRecord called');
     setEditingRecord(null);
-    // Reset to completely clean config - no previous data
+    // Yeni kayıt oluştururken formu temizle
     const cleanConfig = {
       ...seraKontrolConfig,
       items: seraKontrolConfig.items.map(item => ({
         ...item,
         completed: false,
-        data: {} // Boş obje kullan
+        data: {}
       }))
     };
     setChecklistData(cleanConfig);
@@ -372,6 +367,24 @@ const SeraKontrol: React.FC = () => {
     }
   }, [currentStep, editingRecord, selectedProducer?.id]);
 
+  // useEffect to handle loading state when transitioning to checklist
+  useEffect(() => {
+    if (currentStep === 'checklist' && selectedUretimAlani) {
+      setLoading(false);
+      // Load saved records for this production area
+      const loadRecords = async () => {
+        try {
+          const records = await getSeraKontrolRecordsByUretimAlani(selectedUretimAlani.id);
+          setSavedRecords(records);
+        } catch (err) {
+          setError('Kayıtlı kayıtlar yüklenemedi');
+          setSavedRecords([]);
+        }
+      };
+      loadRecords();
+    }
+  }, [currentStep, selectedUretimAlani]);
+
   // Producer Selection Step
   if (currentStep === 'select-producer') {
     return (
@@ -396,11 +409,54 @@ const SeraKontrol: React.FC = () => {
             <h2 className="text-2xl font-bold text-slate-800 mb-2">Üretim Alanı Seç</h2>
             <p className="text-slate-600 text-lg">Lütfen üreticiye ait bir üretim alanı seçin</p>
           </div>
+          
+          {/* Progress Steps */}
+          <div className="max-w-md mx-auto mb-8">
+            <div className="flex items-center">
+              <div className="flex items-center text-emerald-600">
+                <div className="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                  1
+                </div>
+                <span className="ml-2 font-medium">Üretici Seç</span>
+              </div>
+              <div className="flex-1 mx-4 h-1 bg-emerald-500 rounded"></div>
+              <div className="flex items-center text-emerald-600">
+                <div className="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                  2
+                </div>
+                <span className="ml-2 font-medium">Üretim Alanı Seç</span>
+              </div>
+              <div className="flex-1 mx-4 h-1 bg-gray-200 rounded"></div>
+              <div className="flex items-center text-gray-400">
+                <div className="w-8 h-8 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-sm font-bold">
+                  3
+                </div>
+                <span className="ml-2">Sera Kontrol</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Geri Dönüş Butonu */}
+          <div className="mb-6">
+            <button
+              onClick={resetSelection}
+              className="text-slate-600 hover:text-slate-800 transition-colors flex items-center"
+            >
+              ← Geri Dön
+            </button>
+          </div>
+
           {uretimAlanlari.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-6xl mb-4">🏭</div>
               <h3 className="text-lg font-semibold text-gray-700 mb-2">Üretim alanı bulunamadı</h3>
               <p className="text-gray-600 mb-4">Bu üreticiye ait üretim alanı yok.</p>
+              <button
+                onClick={resetSelection}
+                className="px-6 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-colors"
+              >
+                Başka Üretici Seç
+              </button>
             </div>
           ) : (
             <div className="max-w-2xl mx-auto">
@@ -413,8 +469,8 @@ const SeraKontrol: React.FC = () => {
                       onClick={() => handleUretimAlaniSelect(area)}
                     >
                       <div className="font-bold text-lg text-emerald-700 mb-1">{area.urunIsmi} - {area.cesitIsmi}</div>
-                      <div className="text-sm text-gray-600">Alan: {area.alanM2} m²</div>
-                      <div className="text-xs text-gray-500">Dikim Tarihi: {area.dikimTarihi}</div>
+                      <div className="text-sm text-gray-600">Alan: {area.alanM2} m² | Parsel: {area.parsel} | Ada: {area.ada}</div>
+                      <div className="text-xs text-gray-500">Dikim Tarihi: {area.dikimTarihi} | Sera Tipi: {area.seraType}</div>
                     </button>
                   </li>
                 ))}
@@ -763,179 +819,157 @@ const SeraKontrol: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="max-w-4xl mx-auto space-y-6">
         {/* Header with Producer Info */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
-            <div className="flex items-center space-x-4 mb-4 lg:mb-0">
-              <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-xl flex items-center justify-center">
-                <span className="text-white text-xl">🏠</span>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4">
+            <div className="flex items-center space-x-3 mb-4 lg:mb-0">
+              <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                <span className="text-white text-lg">🏠</span>
               </div>
               <div>
-                <h1 className="text-xl lg:text-2xl font-bold text-gray-800">
+                <h1 className="text-xl font-semibold text-gray-800">
                   {editingRecord ? 'Sera Kontrol Kaydını Düzenle' : 'Yeni Sera Kontrol Kaydı'} - {selectedProducer?.firstName} {selectedProducer?.lastName}
                 </h1>
                 {!editingRecord && (
-                  <p className="text-gray-600 text-sm mt-1">
+                  <p className="text-gray-500 text-sm mt-1">
                     Tarih: {new Date().toLocaleDateString('tr-TR')} - Saat: {new Date().toLocaleTimeString('tr-TR')}
                   </p>
                 )}
-                <p className="text-gray-600">
+                <p className="text-gray-600 text-sm">
                   TC: {selectedProducer?.tcNo} | Tel: {selectedProducer?.phone}
                 </p>
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col sm:flex-row gap-2">
               <button
                 onClick={() => setCurrentStep('list')}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium text-sm"
               >
                 ← Listeye Dön
               </button>
             </div>
           </div>
           
-          {/* Main Progress */}
-          <div className="bg-gradient-to-r from-green-500 to-blue-500 rounded-2xl p-6 text-white mb-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-              <div>
-                <h2 className="text-xl font-semibold mb-2">Genel İlerleme</h2>
-                <p className="text-green-100">
-                  {stats.completedItems}/{stats.totalItems} görev tamamlandı
-                </p>
-              </div>
-              <div className="mt-4 md:mt-0">
-                <div className="text-3xl font-bold">{stats.percentage}%</div>
-              </div>
+          {/* Simple Progress */}
+          <div className="bg-gray-50 rounded-lg p-4 mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-lg font-semibold text-gray-800">Genel İlerleme</h2>
+              <span className="text-2xl font-bold text-blue-600">{stats.percentage}%</span>
             </div>
-            <div className="mt-4 bg-white/20 rounded-full h-3 overflow-hidden">
+            <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
-                className="bg-white h-full transition-all duration-500 ease-out"
+                className="bg-blue-500 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${stats.percentage}%` }}
               />
             </div>
-          </div>
-
-          {/* Category Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {categoryStats.map((category) => (
-              <div key={category.key} className="bg-gray-50 rounded-xl p-4 text-center">
-                <div className="text-sm font-medium text-gray-600 mb-2">
-                  {category.name}
-                </div>
-                <div className="text-lg font-bold text-gray-800">
-                  {category.completed}/{category.total}
-                </div>
-                <div className="text-xs text-gray-500">
-                  %{category.percentage}
-                </div>
-              </div>
-            ))}
+            <p className="text-sm text-gray-600 mt-1">
+              {stats.completedItems}/{stats.totalItems} görev tamamlandı
+            </p>
           </div>
 
           {error && (
-            <div className="mt-6 bg-red-50 border border-red-200 rounded-xl p-4 flex items-center">
+            <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
               <span className="text-red-500 mr-2">⚠️</span>
               <span className="text-red-700">{error}</span>
             </div>
           )}
         </div>
 
-        {/* Checklist Sections */}
-        <div className="grid gap-6">
-          {checklistData.items.map((item, index) => {
-            const isExpanded = expandedSections.has(item.id);
-            const categoryIndex = Math.floor(index / 3);
-            const categoryColors = [
-              'from-blue-500 to-purple-500',
-              'from-green-500 to-teal-500', 
-              'from-orange-500 to-red-500',
-              'from-purple-500 to-pink-500'
-            ];
-            
-            return (
-              <div 
-                key={item.id} 
-                className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl"
-              >
-                <div 
-                  className={`bg-gradient-to-r ${categoryColors[categoryIndex % categoryColors.length]} p-4 md:p-6 cursor-pointer`}
-                  onClick={() => toggleSection(item.id)}
-                >
-                  <div className="flex items-center justify-between">
+        {/* Simple Checklist */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="p-6 border-b border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-800">Kontrol Listesi</h2>
+          </div>
+          <div className="divide-y divide-gray-200">
+            {checklistData.items.map((item, index) => {
+              const isExpanded = expandedSections.has(item.id);
+              
+              return (
+                <div key={item.id} className="hover:bg-gray-50 transition-colors">
+                  <div 
+                    className="flex items-center justify-between p-4 cursor-pointer"
+                    onClick={() => toggleSection(item.id)}
+                  >
                     <div className="flex items-center space-x-3">
-                      <div className={`w-6 h-6 rounded-full border-2 border-white flex items-center justify-center ${item.completed ? 'bg-white' : 'bg-transparent'}`}>
-                        {item.completed && <span className="text-green-500 text-sm">✓</span>}
+                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                        item.completed 
+                          ? 'bg-blue-500 border-blue-500' 
+                          : 'border-gray-300 bg-white'
+                      }`}>
+                        {item.completed && (
+                          <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        )}
                       </div>
-                      <h3 className="text-white font-semibold text-lg">
+                      <span className={`font-medium ${item.completed ? 'text-gray-500 line-through' : 'text-gray-800'}`}>
                         {item.label}
-                      </h3>
+                      </span>
                     </div>
                     <div className="flex items-center space-x-2">
                       {item.completed && (
-                        <span className="bg-white/20 text-white px-3 py-1 rounded-full text-sm">
+                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
                           Tamamlandı
                         </span>
                       )}
-                      <button className="text-white">
-                        <svg 
-                          className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                          fill="none" 
-                          stroke="currentColor" 
-                          viewBox="0 0 24 24"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
+                      <svg 
+                        className={`w-4 h-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
                     </div>
                   </div>
+                  
+                  {isExpanded && (
+                    <div className="px-4 pb-4 bg-gray-50">
+                      <ChecklistItem
+                        item={item}
+                        onUpdate={handleItemUpdate}
+                        onPlantControlClick={() => setCurrentStep('plant-control')}
+                      />
+                    </div>
+                  )}
                 </div>
-                
-                {isExpanded && (
-                  <div className="p-6">
-                    <ChecklistItem
-                      item={item}
-                      onUpdate={handleItemUpdate}
-                      onPlantControlClick={() => setCurrentStep('plant-control')}
-                    />
-                  </div>
-                )}
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
         {/* Completion Badge */}
         {stats.percentage === 100 && (
-          <div className="bg-gradient-to-r from-green-400 to-blue-500 rounded-2xl p-8 text-center text-white shadow-2xl">
-            <div className="text-6xl mb-4">🎉</div>
-            <h2 className="text-2xl md:text-3xl font-bold mb-2">
+          <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
+            <div className="text-4xl mb-2">🎉</div>
+            <h2 className="text-xl font-bold text-green-800 mb-1">
               Tebrikler!
             </h2>
-            <p className="text-lg opacity-90">
+            <p className="text-green-700">
               {selectedProducer?.firstName} {selectedProducer?.lastName} için sera kontrol detaylı kontrolleri başarıyla tamamlandı!
             </p>
           </div>
         )}
 
-        {/* Save Button at Bottom */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8">
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        {/* Save Button */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
               onClick={() => setCurrentStep('list')}
-              className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
+              className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
             >
               ← Listeye Dön
             </button>
             <button
               onClick={handleSaveRecord}
               disabled={loading}
-              className="px-8 py-3 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-xl hover:from-emerald-600 hover:to-blue-600 transition-colors font-medium disabled:opacity-50 shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="px-8 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <div className="flex items-center space-x-2">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   <span>Kaydediliyor...</span>
                 </div>
               ) : (

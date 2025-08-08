@@ -8,7 +8,8 @@ import {
   updateHasatBilgisi,
   getHasatBilgileriByProducer,
   deleteHasatBilgisi,
-  getProducerById
+  getProducerById,
+  getUretimAlanlariByProducer
 } from '../utils/firestoreUtils';
 import type { HasatBilgisi } from '../types/checklist';
 import type { Producer } from '../types/producer';
@@ -17,7 +18,7 @@ import type { Producer } from '../types/producer';
 
 const HasatBilgisiComponent = () => {
   const [selectedProducer, setSelectedProducer] = useState<Producer | null>(null);
-  const [currentStep, setCurrentStep] = useState<'select-producer' | 'list' | 'form'>('select-producer');
+  const [currentStep, setCurrentStep] = useState<'select-producer' | 'select-area' | 'list' | 'form'>('select-producer');
   const [hasatKayitlari, setHasatKayitlari] = useState<HasatBilgisi[]>([]);
   const [editingHasat, setEditingHasat] = useState<HasatBilgisi | null>(null);
   const [loading, setLoading] = useState(false);
@@ -29,18 +30,21 @@ const HasatBilgisiComponent = () => {
   // Filtreleme state'leri
   const [selectedSeason, setSelectedSeason] = useState<string>('');
   const [filteredRecords, setFilteredRecords] = useState<HasatBilgisi[]>([]);
+  // Üretim alanları için state
+  const [uretimAlanlari, setUretimAlanlari] = useState<any[]>([]);
+  const [selectedUretimAlani, setSelectedUretimAlani] = useState<any | null>(null);
 
   // Validation Schema
   const validationSchema = Yup.object({
-    donem: Yup.string().required('Dönem gerekli'),
-    cesit: Yup.string().required('Çeşit gerekli'),
-    dikimTarihi: Yup.date().required('Dikim tarihi gerekli'),
-    tonajDa: Yup.number().positive('Pozitif sayı olmalı').required('Tonaj/da gerekli'),
-    ciroDa: Yup.number().positive('Pozitif sayı olmalı').required('Ciro/da gerekli'),
-    ortalamaFiyat: Yup.number().positive('Pozitif sayı olmalı').required('Ortalama fiyat gerekli'),
-    kacDa: Yup.number().positive('Pozitif sayı olmalı').required('Kaç da gerekli'),
-    kasaAdeti: Yup.number().positive('Pozitif sayı olmalı').required('Kasa adeti gerekli'),
-    kasaFiyati: Yup.number().positive('Pozitif sayı olmalı').required('Kasa fiyatı gerekli'),
+    donem: Yup.string(),
+    cesit: Yup.string(),
+    dikimTarihi: Yup.date(),
+    tonajDa: Yup.number().positive('Pozitif sayı olmalı'),
+    ciroDa: Yup.number().positive('Pozitif sayı olmalı'),
+    ortalamaFiyat: Yup.number().positive('Pozitif sayı olmalı'),
+    kacDa: Yup.number().positive('Pozitif sayı olmalı'),
+    kasaAdeti: Yup.number().positive('Pozitif sayı olmalı'),
+    kasaFiyati: Yup.number().positive('Pozitif sayı olmalı'),
     teknikEkipNotu: Yup.string(),
     ciftciNotu: Yup.string()
   });
@@ -64,8 +68,20 @@ const HasatBilgisiComponent = () => {
   useEffect(() => {
     if (selectedProducer) {
       loadHasatKayitlari();
+      loadUretimAlanlari();
     }
   }, [selectedProducer]);
+
+  // Üretim alanlarını çek
+  const loadUretimAlanlari = async () => {
+    if (!selectedProducer) return;
+    try {
+      const alanlar = await getUretimAlanlariByProducer(selectedProducer.id);
+      setUretimAlanlari(alanlar);
+    } catch (err) {
+      setUretimAlanlari([]);
+    }
+  };
 
   // Hasat kayıtları yüklendiğinde üretici bilgilerini getir
   useEffect(() => {
@@ -87,13 +103,15 @@ const HasatBilgisiComponent = () => {
   }, [hasatKayitlari]);
 
   const loadHasatKayitlari = async () => {
-    if (!selectedProducer) return;
+    if (!selectedProducer || !selectedUretimAlani) return;
     
     setLoading(true);
     try {
       const kayitlar = await getHasatBilgileriByProducer(selectedProducer.id);
-      setHasatKayitlari(kayitlar);
-      setFilteredRecords(kayitlar); // Başlangıçta tüm kayıtları göster
+      // Üretim alanına göre filtrele
+      const filteredKayitlar = kayitlar.filter(kayit => !kayit.uretimAlaniId || kayit.uretimAlaniId === selectedUretimAlani.id);
+      setHasatKayitlari(filteredKayitlar);
+      setFilteredRecords(filteredKayitlar); // Başlangıçta tüm kayıtları göster
     } catch (err) {
       setError('Hasat kayıtları yüklenemedi');
     } finally {
@@ -130,30 +148,36 @@ const HasatBilgisiComponent = () => {
 
   const handleProducerSelect = (producer: Producer) => {
     setSelectedProducer(producer);
+    setCurrentStep('select-area');
+  };
+
+  const handleUretimAlaniSelect = (area: any) => {
+    setSelectedUretimAlani(area);
     setCurrentStep('list');
   };
 
   const handleSubmit = async (values: Record<string, string | number>) => {
-    if (!selectedProducer) return;
+    if (!selectedProducer || !selectedUretimAlani) return;
 
     setLoading(true);
     setError(null);
 
     try {
-      const kazanc = Number(values.kasaAdeti) * Number(values.kasaFiyati);
+      const kazanc = Number(values.kasaAdeti || 0) * Number(values.kasaFiyati || 0);
 
       
       const hasatData: Omit<HasatBilgisi, 'id' | 'createdAt' | 'updatedAt'> = {
         producerId: selectedProducer.id,
-        donem: String(values.donem),
-        cesit: String(values.cesit),
-        dikimTarihi: String(values.dikimTarihi),
-        tonajDa: Number(values.tonajDa),
-        ciroDa: Number(values.ciroDa),
-        ortalamaFiyat: Number(values.ortalamaFiyat),
-        kacDa: Number(values.kacDa),
-        kasaAdeti: Number(values.kasaAdeti),
-        kasaFiyati: Number(values.kasaFiyati),
+        uretimAlaniId: selectedUretimAlani.id,
+        donem: String(values.donem || ''),
+        cesit: String(values.cesit || ''),
+        dikimTarihi: String(values.dikimTarihi || ''),
+        tonajDa: Number(values.tonajDa || 0),
+        ciroDa: Number(values.ciroDa || 0),
+        ortalamaFiyat: Number(values.ortalamaFiyat || 0),
+        kacDa: Number(values.kacDa || 0),
+        kasaAdeti: Number(values.kasaAdeti || 0),
+        kasaFiyati: Number(values.kasaFiyati || 0),
         kazanc: kazanc,
         halFisiUrl: values.halFisiUrl ? String(values.halFisiUrl) : undefined,
         teknikEkipNotu: values.teknikEkipNotu ? String(values.teknikEkipNotu) : undefined,
@@ -296,45 +320,129 @@ const HasatBilgisiComponent = () => {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="p-4 lg:p-6">
-          <div className="max-w-7xl mx-auto">
+          <div className="mb-6 text-center">
+            <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-2">
+              Hasat Bilgisi Sistemi
+            </h1>
+            <p className="text-slate-600 text-lg">
+              Hasat bilgilerini görüntülemek için önce bir üretici seçin
+            </p>
+          </div>
 
-            
-            {/* Header */}
-            <div className="mb-6 text-center">
-              <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-2">
-                Hasat Bilgileri Sistemi
-              </h1>
-              <p className="text-slate-600 text-lg">
-                Hasat bilgilerini görüntülemek için önce bir üretici seçin
-              </p>
-            </div>
-
-            {/* Progress Steps */}
-            <div className="mb-8 max-w-md mx-auto">
-              <div className="flex items-center">
-                <div className="flex items-center text-emerald-600">
-                  <div className="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                    1
-                  </div>
-                  <span className="ml-2 font-medium">Üretici Seç</span>
+          {/* Progress Steps */}
+          <div className="mb-8 max-w-md mx-auto">
+            <div className="flex items-center">
+              <div className="flex items-center text-emerald-600">
+                <div className="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                  1
                 </div>
-                <div className="flex-1 mx-4 h-1 bg-gray-200 rounded"></div>
-                <div className="flex items-center text-gray-400">
-                  <div className="w-8 h-8 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-sm font-bold">
-                    2
-                  </div>
-                  <span className="ml-2">Hasat Bilgileri</span>
+                <span className="ml-2 font-medium">Üretici Seç</span>
+              </div>
+              <div className="flex-1 mx-4 h-1 bg-gray-200 rounded"></div>
+              <div className="flex items-center text-gray-400">
+                <div className="w-8 h-8 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-sm font-bold">
+                  2
                 </div>
+                <span className="ml-2">Üretim Alanı Seç</span>
+              </div>
+              <div className="flex-1 mx-4 h-1 bg-gray-200 rounded"></div>
+              <div className="flex items-center text-gray-400">
+                <div className="w-8 h-8 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-sm font-bold">
+                  3
+                </div>
+                <span className="ml-2">Hasat Bilgileri</span>
               </div>
             </div>
-
-            {/* Producer Selection */}
-            <UreticiListesi
-              selectionMode={true}
-              onSelect={handleProducerSelect}
-              selectedProducer={selectedProducer}
-            />
           </div>
+
+          {/* Producer Selection */}
+          <UreticiListesi
+            selectionMode={true}
+            onSelect={handleProducerSelect}
+            selectedProducer={selectedProducer}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Üretim Alanı Seçim Step
+  if (currentStep === 'select-area') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="p-4 lg:p-6">
+          <div className="mb-6 text-center">
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">Üretim Alanı Seç</h2>
+            <p className="text-slate-600 text-lg">Lütfen üreticiye ait bir üretim alanı seçin</p>
+          </div>
+          
+          {/* Progress Steps */}
+          <div className="max-w-md mx-auto mb-8">
+            <div className="flex items-center">
+              <div className="flex items-center text-emerald-600">
+                <div className="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                  1
+                </div>
+                <span className="ml-2 font-medium">Üretici Seç</span>
+              </div>
+              <div className="flex-1 mx-4 h-1 bg-emerald-500 rounded"></div>
+              <div className="flex items-center text-emerald-600">
+                <div className="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                  2
+                </div>
+                <span className="ml-2 font-medium">Üretim Alanı Seç</span>
+              </div>
+              <div className="flex-1 mx-4 h-1 bg-gray-200 rounded"></div>
+              <div className="flex items-center text-gray-400">
+                <div className="w-8 h-8 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-sm font-bold">
+                  3
+                </div>
+                <span className="ml-2">Hasat Bilgileri</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Geri Dönüş Butonu */}
+          <div className="mb-6">
+            <button
+              onClick={resetSelection}
+              className="text-slate-600 hover:text-slate-800 transition-colors flex items-center"
+            >
+              ← Geri Dön
+            </button>
+          </div>
+
+          {uretimAlanlari.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">🏭</div>
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">Üretim alanı bulunamadı</h3>
+              <p className="text-gray-600 mb-4">Bu üreticiye ait üretim alanı yok.</p>
+              <button
+                onClick={resetSelection}
+                className="px-6 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-colors"
+              >
+                Başka Üretici Seç
+              </button>
+            </div>
+          ) : (
+            <div className="max-w-2xl mx-auto">
+              <div className="mb-4 text-center text-lg font-semibold text-emerald-700">Üretim Alanı Listesi</div>
+              <ul className="space-y-4">
+                {uretimAlanlari.map((area) => (
+                  <li key={area.id}>
+                    <button
+                      className={`w-full text-left border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow cursor-pointer ${selectedUretimAlani?.id === area.id ? 'bg-emerald-50 border-emerald-400' : 'bg-white'}`}
+                      onClick={() => handleUretimAlaniSelect(area)}
+                    >
+                      <div className="font-bold text-lg text-emerald-700 mb-1">{area.urunIsmi} - {area.cesitIsmi}</div>
+                      <div className="text-sm text-gray-600">Alan: {area.alanM2} m² | Parsel: {area.parsel} | Ada: {area.ada}</div>
+                      <div className="text-xs text-gray-500">Dikim Tarihi: {area.dikimTarihi} | Sera Tipi: {area.seraType}</div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -354,7 +462,7 @@ const HasatBilgisiComponent = () => {
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-center space-x-4">
                 <button
-                  onClick={resetSelection}
+                  onClick={() => setCurrentStep('select-area')}
                   className="text-slate-600 hover:text-slate-800 transition-colors"
                 >
                   ← Geri
@@ -363,7 +471,9 @@ const HasatBilgisiComponent = () => {
                   <h1 className="text-2xl font-bold text-slate-800">
                     {selectedProducer?.firstName} {selectedProducer?.lastName} - Hasat Bilgileri
                   </h1>
-                  <p className="text-slate-600 mt-1">Dönemsel hasat kayıtları ve analizi</p>
+                  <p className="text-slate-600 mt-1">
+                    Üretim Alanı: {selectedUretimAlani?.urunIsmi} - {selectedUretimAlani?.cesitIsmi} ({selectedUretimAlani?.alanM2} m²)
+                  </p>
                 </div>
               </div>
               
@@ -391,6 +501,13 @@ const HasatBilgisiComponent = () => {
                 <div className="flex items-center text-emerald-600">
                   <div className="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
                     2
+                  </div>
+                  <span className="ml-2 font-medium">Üretim Alanı Seç</span>
+                </div>
+                <div className="flex-1 mx-4 h-1 bg-emerald-500 rounded"></div>
+                <div className="flex items-center text-emerald-600">
+                  <div className="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                    3
                   </div>
                   <span className="ml-2 font-medium">Hasat Bilgileri</span>
                 </div>
@@ -712,14 +829,14 @@ const HasatBilgisiComponent = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Dönem *
+                        Dönem
                       </label>
                       <Field
                         as="select"
                         name="donem"
                         className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm"
                       >
-                        <option value="">Dönem seçin</option>
+                        <option value="">Seçiniz</option>
                         <option value="2023-2024">2023-2024</option>
                         <option value="2024-2025">2024-2025</option>
                         <option value="2025-2026">2025-2026</option>
@@ -732,7 +849,7 @@ const HasatBilgisiComponent = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Çeşit *
+                        Çeşit
                       </label>
                       <Field
                         type="text"
@@ -747,7 +864,7 @@ const HasatBilgisiComponent = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Dikim Tarihi *
+                        Dikim Tarihi
                       </label>
                       <Field
                         type="date"
@@ -761,7 +878,7 @@ const HasatBilgisiComponent = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Kaç Da *
+                        Kaç Da
                       </label>
                       <Field
                         type="number"
@@ -782,7 +899,7 @@ const HasatBilgisiComponent = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div>
                         <label className="block text-sm font-medium text-slate-700 mb-2">
-                          Tonaj/da *
+                          Tonaj/da
                         </label>
                         <Field
                           type="number"
@@ -798,7 +915,7 @@ const HasatBilgisiComponent = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-slate-700 mb-2">
-                          Ciro/da *
+                          Ciro/da
                         </label>
                         <Field
                           type="number"
@@ -814,7 +931,7 @@ const HasatBilgisiComponent = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-slate-700 mb-2">
-                          Ortalama Fiyat *
+                          Ortalama Fiyat
                         </label>
                         <Field
                           type="number"
@@ -836,7 +953,7 @@ const HasatBilgisiComponent = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div>
                         <label className="block text-sm font-medium text-slate-700 mb-2">
-                          Kasa Adeti *
+                          Kasa Adeti
                         </label>
                         <Field
                           type="number"
@@ -851,7 +968,7 @@ const HasatBilgisiComponent = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-slate-700 mb-2">
-                          Kasa Fiyatı *
+                          Kasa Fiyatı
                         </label>
                         <Field
                           type="number"

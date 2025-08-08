@@ -27,7 +27,7 @@ export const getHasatBilgileriByUretimAlani = async (uretimAlaniId: string): Pro
     throw new Error('Hasat bilgileri yüklenemedi');
   }
 };
-import { getFirestore, doc, setDoc, getDoc, updateDoc, serverTimestamp, collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc, serverTimestamp, collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
 
 // Firestore'da uretimAlanlari koleksiyonunda producerId ile sorgu
 // Tek ve doğru tanım
@@ -502,5 +502,65 @@ export const getSeraKontrolRecords = async (producerId: string): Promise<any[]> 
   } catch (error) {
     console.error('Sera kontrol verileri yükleme hatası:', error);
     throw new Error('Sera kontrol verileri yüklenemedi');
+  }
+};
+
+// SeraKontrol kayıtları için fonksiyonlar
+export const saveSeraKontrolRecord = async (seraKontrolData: {
+  producerId: string;
+  uretimAlaniId: string;
+  items: any[];
+  date: string;
+  dateFormatted: string;
+  timeFormatted: string;
+  producerName: string;
+}): Promise<string> => {
+  try {
+    const docRef = doc(collection(db, 'seraKontrolRecords'));
+    const cleanData = {
+      ...seraKontrolData,
+      id: docRef.id,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    await setDoc(docRef, cleanData);
+    return docRef.id;
+  } catch (error) {
+    console.error('SeraKontrol kayıt hatası:', error);
+    throw new Error('SeraKontrol kaydı eklenemedi');
+  }
+};
+
+export const getSeraKontrolRecordsByUretimAlani = async (uretimAlaniId: string): Promise<any[]> => {
+  try {
+    const q = query(collection(db, 'seraKontrolRecords'), where('uretimAlaniId', '==', uretimAlaniId));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error('Üretim alanına ait sera kontrol kayıtları yükleme hatası:', error);
+    throw new Error('SeraKontrol kayıtları yüklenemedi');
+  }
+};
+
+export const updateSeraKontrolRecord = async (id: string, seraKontrolData: Partial<any>): Promise<void> => {
+  try {
+    const docRef = doc(db, 'seraKontrolRecords', id);
+    const cleanData = {
+      ...seraKontrolData,
+      updatedAt: new Date().toISOString()
+    };
+    await updateDoc(docRef, cleanData);
+  } catch (error) {
+    console.error('SeraKontrol kayıt güncelleme hatası:', error);
+    throw new Error('SeraKontrol kaydı güncellenemedi');
+  }
+};
+
+export const deleteSeraKontrolRecord = async (id: string): Promise<void> => {
+  try {
+    await deleteDoc(doc(db, 'seraKontrolRecords', id));
+  } catch (error) {
+    console.error('SeraKontrol kayıt silme hatası:', error);
+    throw new Error('SeraKontrol kaydı silinemedi');
   }
 };

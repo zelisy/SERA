@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { getProducerById, getSeraKontrolRecords } from '../utils/firestoreUtils';
 import { saveRecipe } from '../utils/recipeUtils';
@@ -32,6 +32,8 @@ interface FormData {
 const RecipeCreatePage: React.FC = () => {
   const { producerId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const uretimAlaniId = searchParams.get('uretimAlaniId');
   const [producer, setProducer] = useState<Producer | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -381,6 +383,7 @@ const RecipeCreatePage: React.FC = () => {
       const recipeData = {
         producerId: producer.id,
         producerName: `${producer.firstName} ${producer.lastName}`,
+        uretimAlaniId: uretimAlaniId || undefined,
         fertilization1: data.fertilizations[0] ? 
           `${data.fertilizations[0].date} ${data.fertilizations[0].time} - Su: ${data.fertilizations[0].water}ml, Süre: ${data.fertilizations[0].duration}dk, Ürünler: ${(data.fertilizations[0].products || []).filter(p => p && p.trim()).join(', ')}` : '',
         fertilization2: data.fertilizations[1] ? 

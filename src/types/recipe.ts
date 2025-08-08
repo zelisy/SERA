@@ -48,6 +48,7 @@ export interface Recipe {
   id: string;
   producerId: string;
   producerName: string;
+  uretimAlaniId?: string; // Üretim alanı ID'si
   fertilization1: string;
   fertilization2: string;
   fertilization3: string;
@@ -73,6 +74,7 @@ export interface WeatherData {
 export interface CreateRecipeData {
   producerId: string;
   producerName: string;
+  uretimAlaniId?: string; // Üretim alanı ID'si
   fertilization1: string;
   fertilization2: string;
   fertilization3: string;
