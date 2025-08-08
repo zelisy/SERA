@@ -915,7 +915,7 @@ const Admin = () => {
   // Route kontrolü - eğer recipe route'undaysa Recipe component'ini göster
   const isRecipeRoute = location.pathname.startsWith('/admin/recipe');
   const isRecipesRoute = location.pathname === '/admin/recipes';
-  const isRecipeCreateRoute = location.pathname.includes('/admin/recipe/create/');
+  const isRecipeCreateRoute = location.pathname.startsWith('/admin/recipe/create');
   
   // Route'a göre activeSection'ı ayarla
   React.useEffect(() => {

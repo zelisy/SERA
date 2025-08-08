@@ -2,6 +2,7 @@ import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Login from './pages/Login'
 import Header from './components/Header';
+import RecipeCreate from './pages/RecipeCreate';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import About from './pages/About';
@@ -64,9 +65,9 @@ function AppContent() {
               <Admin />
             </PrivateRoute>
           } />
-          <Route path="/admin/recipe/create/:producerId" element={
+          <Route path="/admin/recipes/create/:producerId" element={
             <PrivateRoute>
-              <Admin />
+              <RecipeCreate />
             </PrivateRoute>
           } />
           <Route path="/admin/recipes" element={
