@@ -4,21 +4,32 @@ import UreticiListesi from './UreticiListesi';
 import { dikimOncesiConfig } from '../data/dikimOncesiConfig';
 import { loadChecklistData, updateChecklistItem, saveChecklistData } from '../utils/firestoreUtils';
 import { getUretimAlanlariByProducer } from '../utils/firestoreUtils';
-import type { ChecklistSection } from '../types/checklist';
+import type { ChecklistSection, UretimAlani, ChecklistItem as ChecklistItemType } from '../types/checklist';
 import type { Producer } from '../types/producer';
+import ImageLightbox from './ImageLightbox';
 
+
+interface DikimOncesiRecord {
+  id: string;
+  producerId: string;
+  producerName: string;
+  date: string;
+  checklistData: ChecklistSection;
+  completionStats: { totalItems: number; completedItems: number; percentage: number };
+  productionArea: UretimAlani;
+}
 
 const DikimOncesiDonem: React.FC = () => {
   const [checklistData, setChecklistData] = useState<ChecklistSection>(dikimOncesiConfig);
   const [selectedProducer, setSelectedProducer] = useState<Producer | null>(null);
-  const [selectedProductionArea, setSelectedProductionArea] = useState<any | null>(null);
-  const [productionAreas, setProductionAreas] = useState<any[]>([]);
+  const [selectedProductionArea, setSelectedProductionArea] = useState<UretimAlani | null>(null);
+  const [productionAreas, setProductionAreas] = useState<UretimAlani[]>([]);
   const [currentStep, setCurrentStep] = useState<'select-producer' | 'select-production-area' | 'list' | 'checklist'>('select-producer');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [savedRecords, setSavedRecords] = useState<any[]>([]);
+  const [savedRecords, setSavedRecords] = useState<DikimOncesiRecord[]>([]);
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
-  const [editingRecord, setEditingRecord] = useState<any | null>(null);
+  const [editingRecord, setEditingRecord] = useState<DikimOncesiRecord | null>(null);
   const [showForm, setShowForm] = useState(false);
 
 
@@ -67,7 +78,7 @@ const DikimOncesiDonem: React.FC = () => {
       // Burada Firestore'dan kayıtlı kayıtları çekebilirsiniz
       // Şimdilik boş array olarak bırakıyorum
       setSavedRecords([]);
-    } catch (err) {
+    } catch {
       setError('Kayıtlı kayıtlar yüklenemedi');
     }
   };
@@ -81,7 +92,8 @@ const DikimOncesiDonem: React.FC = () => {
     try {
       const areas = await getUretimAlanlariByProducer(producer.id);
       console.log('Firebase productionAreas:', areas);
-      setProductionAreas(Array.isArray(areas) ? areas : []);
+      const typedAreas: UretimAlani[] = Array.isArray(areas) ? (areas as UretimAlani[]) : [];
+      setProductionAreas(typedAreas);
     } catch (err) {
       console.error('Alanlar çekilemedi:', err);
       setProductionAreas([]);
@@ -89,7 +101,7 @@ const DikimOncesiDonem: React.FC = () => {
   };
 
   // Üretim Alanı Seçimi
-  const handleProductionAreaSelect = (area: any) => {
+  const handleProductionAreaSelect = (area: UretimAlani) => {
     setSelectedProductionArea(area);
     setCurrentStep('list');
   };
@@ -158,13 +170,13 @@ const DikimOncesiDonem: React.FC = () => {
       setCurrentStep('list');
       setChecklistData(dikimOncesiConfig); // Reset form
       setError(null);
-    } catch (err) {
+    } catch {
       setError('Kayıt başarısız');
     }
   };
 
 
-  const handleEditRecord = (record: any) => {
+  const handleEditRecord = (record: DikimOncesiRecord) => {
     setEditingRecord(record);
     setChecklistData(record.checklistData);
     setSelectedProductionArea(record.productionArea || null);
@@ -179,7 +191,7 @@ const DikimOncesiDonem: React.FC = () => {
       // Burada Firestore'dan silme işlemi yapılabilir
       setSavedRecords(prev => prev.filter(r => r.id !== recordId));
       setError(null);
-    } catch (err) {
+    } catch {
       setError('Silme işlemi başarısız');
     }
   };
@@ -422,7 +434,7 @@ const DikimOncesiDonem: React.FC = () => {
                 {savedRecords.map((record) => {
                   const stats = record.completionStats;
                   // Fotoğrafları topla
-                  const photoFields = record.checklistData?.items?.filter((item: any) => {
+                  const photoFields = record.checklistData?.items?.filter((item: ChecklistItemType) => {
                     // Tekli fotoğraf
                     if (item.data && typeof item.data === 'object') {
                       if (typeof item.data.photo === 'string' && item.data.photo) return true;
@@ -433,7 +445,7 @@ const DikimOncesiDonem: React.FC = () => {
                     return false;
                   }) || [];
                   // Tüm fotoğraf url'lerini sırala
-                  const allPhotos = photoFields.flatMap((item: any) => {
+                  const allPhotos: string[] = photoFields.flatMap((item: ChecklistItemType) => {
                     if (item.data) {
                       if (typeof item.data.photo === 'string' && item.data.photo) return [item.data.photo];
                       if (Array.isArray(item.data)) return item.data;
@@ -490,7 +502,7 @@ const DikimOncesiDonem: React.FC = () => {
                         <div className="mb-2">
                           <div className="font-semibold text-slate-700 mb-1">Eklenen Fotoğraflar</div>
                           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                            {allPhotos.map((url: any, idx: any) => (
+                            {allPhotos.map((url: string, idx: number) => (
                               <button key={idx} type="button" onClick={() => setPreviewImageUrl(url)} className="focus:outline-none">
                                 <img src={url} alt={`Fotoğraf ${idx + 1}`} className="w-full h-20 object-cover rounded-lg border border-gray-200 hover:scale-105 transition-transform duration-200 cursor-pointer" />
                               </button>
@@ -501,23 +513,7 @@ const DikimOncesiDonem: React.FC = () => {
                     </div>
                   );
                 })}
-      {/* Fotoğraf büyük önizleme modalı */}
-      {previewImageUrl && typeof previewImageUrl === 'string' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70" onClick={() => setPreviewImageUrl(null)}>
-          <div className="relative" onClick={e => e.stopPropagation()}>
-            <img src={previewImageUrl || ''} alt="Büyük Önizleme" className="max-w-[90vw] max-h-[80vh] rounded-xl shadow-2xl border-4 border-white" />
-            <button
-              type="button"
-              onClick={() => setPreviewImageUrl(null)}
-              className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-2 shadow-lg hover:bg-red-700 focus:outline-none"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      )}
+      <ImageLightbox imageUrl={previewImageUrl} onClose={() => setPreviewImageUrl(null)} />
               </div>
             )}
           </div>

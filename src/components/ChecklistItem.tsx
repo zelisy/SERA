@@ -5,6 +5,7 @@ import type { FormField, ChecklistItem as ChecklistItemType } from '../types/che
 import { uploadToCloudinaryDirect, validateImageFile } from '../utils/tempCloudinaryUtils';
 import MobileCameraButton from './MobileCameraButton';
 import PlantControlButton from './PlantControlButton';
+import ImageLightbox from './ImageLightbox';
 
 interface ChecklistItemProps {
   item: ChecklistItemType;
@@ -388,23 +389,6 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate, onPlantCo
             </div>
           );
         }
-  {/* Fotoğraf büyük önizleme modalı */}
-  {previewImageUrl && typeof previewImageUrl === 'string' && (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70" onClick={() => setPreviewImageUrl(null)}>
-      <div className="relative" onClick={e => e.stopPropagation()}>
-        <img src={previewImageUrl || ''} alt="Büyük Önizleme" className="max-w-[90vw] max-h-[80vh] rounded-xl shadow-2xl border-4 border-white" />
-        <button
-          type="button"
-          onClick={() => setPreviewImageUrl(null)}
-          className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-2 shadow-lg hover:bg-red-700 focus:outline-none"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-    </div>
-  )}
 
       case 'pest-control':
         {
@@ -460,11 +444,13 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate, onPlantCo
                     
                     {pestValue.photo && (
                       <div className="relative group">
-                        <img 
-                          src={pestValue.photo} 
-                          alt="Zararlı fotoğrafı" 
-                          className="w-full max-w-xs lg:max-w-sm max-h-32 lg:max-h-48 object-cover rounded-lg shadow-md border border-gray-200"
-                        />
+                        <button type="button" onClick={() => setPreviewImageUrl(pestValue.photo)} className="focus:outline-none">
+                          <img 
+                            src={pestValue.photo} 
+                            alt="Zararlı fotoğrafı" 
+                            className="w-full max-w-xs lg:max-w-sm max-h-32 lg:max-h-48 object-cover rounded-lg shadow-md border border-gray-200 hover:scale-105 transition-transform duration-200 cursor-pointer"
+                          />
+                        </button>
                         <button
                           type="button"
                           onClick={() => {
@@ -719,6 +705,8 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate, onPlantCo
             </Formik>
           </div>
         )}
+        {/* Global image lightbox for this item */}
+        <ImageLightbox imageUrl={previewImageUrl} onClose={() => setPreviewImageUrl(null)} />
       </div>
     </div>
   );
