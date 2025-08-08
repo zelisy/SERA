@@ -60,13 +60,13 @@ const Home = () => {
         {/* Hero Section */}
         <div className="min-h-screen flex items-center justify-center px-4">
           <div className="text-center text-white max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+            <h1 className="text-5xl md:text-7xl font-display mb-6 leading-tight">
               AGROVİA
             </h1>
-            <p className="text-xl md:text-3xl mb-8 text-emerald-400 font-light leading-relaxed">
+            <p className="text-xl md:text-3xl mb-8 text-emerald-400 font-heading leading-relaxed">
               Sera Takip Sistemi
             </p>
-            <p className="text-lg md:text-xl mb-12 text-gray-300 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-lg md:text-xl mb-12 text-gray-300 max-w-3xl mx-auto leading-relaxed font-body">
             Sera üretiminizi dijital dünyaya taşıyın.
             AGROVİA, dikim öncesinden hasada kadar tüm üretim sürecinizi adım adım takip etmenizi sağlayan yenilikçi bir kontrol platformudur.
             <br />
@@ -80,12 +80,7 @@ const Home = () => {
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
               {!isAuthenticated() ? (
                 <>
-                  <button 
-                    onClick={() => navigate('/login')}
-                    className="bg-emerald-500 hover:bg-emerald-400 text-black font-semibold py-4 px-12 rounded-full transition-all duration-300 transform hover:scale-105 shadow-xl text-lg border-2 border-emerald-500 hover:border-emerald-400"
-                  >
-                    Sisteme Giriş Yap
-                  </button>
+            
                   <button 
                     onClick={() => navigate('/about')}
                     className="border-2 border-emerald-400 text-emerald-400 hover:bg-emerald-400 hover:text-black font-semibold py-4 px-12 rounded-full transition-all duration-300 text-lg"

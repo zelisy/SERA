@@ -244,7 +244,7 @@ const ReportTable: React.FC<ReportTableProps> = ({
       const pdfContent = document.createElement('div');
       pdfContent.style.width = '210mm';
       pdfContent.style.padding = '20mm';
-      pdfContent.style.fontFamily = 'Arial, sans-serif';
+      pdfContent.style.fontFamily = 'Poppins, Inter, Arial, sans-serif';
       pdfContent.style.fontSize = '10px';
       pdfContent.style.color = '#333';
       pdfContent.style.background = 'white';
@@ -265,15 +265,15 @@ const ReportTable: React.FC<ReportTableProps> = ({
         <style>
           .pdf-container { max-width: 170mm; margin: 0 auto; }
           .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #10b981; padding-bottom: 15px; }
-          .title { font-size: 18px; font-weight: bold; color: #1f2937; margin-bottom: 8px; }
-          .subtitle { font-size: 12px; color: #6b7280; margin-bottom: 5px; }
-          .date { font-size: 10px; color: #9ca3af; }
+          .title { font-size: 18px; font-weight: bold; color: #1f2937; margin-bottom: 8px; font-family: 'Poppins', sans-serif; }
+          .subtitle { font-size: 12px; color: #6b7280; margin-bottom: 5px; font-family: 'Inter', sans-serif; }
+          .date { font-size: 10px; color: #9ca3af; font-family: 'Inter', sans-serif; }
           .table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 7px; table-layout: fixed; }
-          .table th, .table td { border: 1px solid #d1d5db; padding: 3px; text-align: left; word-wrap: break-word; overflow-wrap: break-word; }
+          .table th, .table td { border: 1px solid #d1d5db; padding: 3px; text-align: left; word-wrap: break-word; overflow-wrap: break-word; font-family: 'Inter', sans-serif; }
           .table th { background: #f3f4f6; font-weight: bold; }
           .table tr:nth-child(even) { background: #f9fafb; }
-          .footer { margin-top: 20px; text-align: center; font-size: 8px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 10px; }
-          .summary { margin-bottom: 15px; font-size: 10px; }
+          .footer { margin-top: 20px; text-align: center; font-size: 8px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 10px; font-family: 'Inter', sans-serif; }
+          .summary { margin-bottom: 15px; font-size: 10px; font-family: 'Inter', sans-serif; }
           .summary-item { margin-bottom: 5px; }
           .table-container { overflow-x: auto; }
         </style>

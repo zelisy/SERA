@@ -22,11 +22,11 @@ const Footer = () => {
               <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-lg flex items-center justify-center">
                 <span className="text-white text-sm font-bold">S</span>
               </div>
-              <h3 className="text-lg font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+              <h3 className="text-lg font-display bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
                 AGROVİA
               </h3>
             </div>
-            <p className="text-slate-600 text-xs leading-relaxed max-w-sm">
+            <p className="text-slate-600 text-xs leading-relaxed max-w-sm font-body">
               Modern tarım ve seracılık uygulamalarında verimliliği artırmak için geliştirilmiş 
               akıllı takip sistemi.
             </p>

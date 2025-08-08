@@ -21,7 +21,7 @@ const ReportPDFExport: React.FC<ReportPDFExportProps> = ({
     const container = document.createElement('div');
     container.style.width = '210mm';
     container.style.padding = '20mm';
-    container.style.fontFamily = 'Arial, sans-serif';
+    container.style.fontFamily = 'Poppins, Inter, Arial, sans-serif';
     container.style.fontSize = '12px';
     container.style.color = '#333';
     container.style.background = 'white';
@@ -30,20 +30,20 @@ const ReportPDFExport: React.FC<ReportPDFExportProps> = ({
       <style>
         .pdf-container { max-width: 170mm; margin: 0 auto; }
         .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #10b981; padding-bottom: 10px; }
-        .title { font-size: 20px; font-weight: bold; color: #1f2937; margin-bottom: 8px; }
-        .subtitle { font-size: 12px; color: #6b7280; margin-bottom: 4px; }
-        .date { font-size: 10px; color: #9ca3af; }
+        .title { font-size: 20px; font-weight: bold; color: #1f2937; margin-bottom: 8px; font-family: 'Poppins', sans-serif; }
+        .subtitle { font-size: 12px; color: #6b7280; margin-bottom: 4px; font-family: 'Inter', sans-serif; }
+        .date { font-size: 10px; color: #9ca3af; font-family: 'Inter', sans-serif; }
         .section { margin-bottom: 15px; max-height: 80mm; overflow: auto; }
-        .section-title { font-size: 14px; font-weight: bold; color: #1f2937; margin-bottom: 10px; border-bottom: 1px solid #e5e7eb; padding-bottom: 3px; }
+        .section-title { font-size: 14px; font-weight: bold; color: #1f2937; margin-bottom: 10px; border-bottom: 1px solid #e5e7eb; padding-bottom: 3px; font-family: 'Poppins', sans-serif; }
         .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
         .kpi-card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px; background: #f9fafb; }
-        .kpi-label { font-size: 9px; color: #6b7280; margin-bottom: 3px; }
-        .kpi-value { font-size: 13px; font-weight: bold; color: #1f2937; }
+        .kpi-label { font-size: 9px; color: #6b7280; margin-bottom: 3px; font-family: 'Inter', sans-serif; }
+        .kpi-value { font-size: 13px; font-weight: bold; color: #1f2937; font-family: 'Inter', sans-serif; }
         .table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
-        .table th, .table td { border: 1px solid #d1d5db; padding: 6px; text-align: left; font-size: 9px; }
+        .table th, .table td { border: 1px solid #d1d5db; padding: 6px; text-align: left; font-size: 9px; font-family: 'Inter', sans-serif; }
         .table th { background: #f3f4f6; font-weight: bold; }
         .table tr:nth-child(even) { background: #f9fafb; }
-        .footer { margin-top: 15px; text-align: center; font-size: 9px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 8px; }
+        .footer { margin-top: 15px; text-align: center; font-size: 9px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 8px; font-family: 'Inter', sans-serif; }
         .page-break { page-break-before: always; }
       </style>
       

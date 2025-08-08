@@ -24,7 +24,7 @@ export const generateDenemePDFContent = (formData: DenemeFormData): HTMLElement 
   const container = document.createElement('div');
   container.style.width = '210mm';
   container.style.padding = '20mm';
-  container.style.fontFamily = 'Arial, sans-serif';
+  container.style.fontFamily = 'Poppins, Inter, Arial, sans-serif';
   container.style.fontSize = '12px';
   container.style.color = '#333';
   container.style.background = 'white';
@@ -33,20 +33,20 @@ export const generateDenemePDFContent = (formData: DenemeFormData): HTMLElement 
     <style>
       .pdf-container { max-width: 170mm; margin: 0 auto; }
       .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #10b981; padding-bottom: 20px; }
-      .title { font-size: 24px; font-weight: bold; color: #1f2937; margin-bottom: 10px; }
-      .subtitle { font-size: 14px; color: #6b7280; margin-bottom: 5px; }
-      .date { font-size: 12px; color: #9ca3af; }
+      .title { font-size: 24px; font-weight: bold; color: #1f2937; margin-bottom: 10px; font-family: 'Poppins', sans-serif; }
+      .subtitle { font-size: 14px; color: #6b7280; margin-bottom: 5px; font-family: 'Inter', sans-serif; }
+      .date { font-size: 12px; color: #9ca3af; font-family: 'Inter', sans-serif; }
       .section { margin-bottom: 25px; }
-      .section-title { font-size: 16px; font-weight: bold; color: #1f2937; margin-bottom: 15px; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; }
+      .section-title { font-size: 16px; font-weight: bold; color: #1f2937; margin-bottom: 15px; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; font-family: 'Poppins', sans-serif; }
       .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
       .info-item { margin-bottom: 12px; }
-      .info-label { font-size: 11px; color: #6b7280; margin-bottom: 3px; font-weight: bold; }
-      .info-value { font-size: 12px; color: #1f2937; }
+      .info-label { font-size: 11px; color: #6b7280; margin-bottom: 3px; font-weight: bold; font-family: 'Inter', sans-serif; }
+      .info-value { font-size: 12px; color: #1f2937; font-family: 'Inter', sans-serif; }
       .images-section { margin-top: 20px; }
       .images-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
       .image-item { text-align: center; }
-      .image-placeholder { width: 80px; height: 80px; border: 2px dashed #d1d5db; display: flex; align-items: center; justify-content: center; margin: 0 auto; border-radius: 8px; color: #9ca3af; font-size: 10px; }
-      .footer { margin-top: 30px; text-align: center; font-size: 10px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 15px; }
+      .image-placeholder { width: 80px; height: 80px; border: 2px dashed #d1d5db; display: flex; align-items: center; justify-content: center; margin: 0 auto; border-radius: 8px; color: #9ca3af; font-size: 10px; font-family: 'Inter', sans-serif; }
+      .footer { margin-top: 30px; text-align: center; font-size: 10px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 15px; font-family: 'Inter', sans-serif; }
     </style>
     
     <div class="pdf-container">

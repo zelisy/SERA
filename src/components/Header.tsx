@@ -68,7 +68,7 @@ const Header = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3 group">
             <div className="hidden sm:block">
-              <h1 className={`text-xl font-bold ${
+              <h1 className={`text-xl font-display ${
                 isWhiteTextPage 
                   ? 'text-white' 
                   : 'bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent'

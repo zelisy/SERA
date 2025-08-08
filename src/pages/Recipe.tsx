@@ -139,44 +139,44 @@ const RecipePage: React.FC = () => {
       const container = document.createElement('div');
       container.style.width = '210mm';
       container.style.padding = '20mm';
-      container.style.fontFamily = 'Arial, sans-serif';
+      container.style.fontFamily = 'Poppins, Inter, Arial, sans-serif';
       container.style.fontSize = '12px';
       container.style.color = '#333';
       container.style.background = 'white';
 
       container.innerHTML = `
         <style>
-          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+          body { font-family: 'Poppins', 'Inter', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
           .pdf-container { max-width: 210mm; margin: 0 auto; padding: 20px; background: white; border: 1px solid #000; }
           
           /* Header Section */
           .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid #10b981; }
-          .logo { font-size: 50px; font-weight: 900; color: #10b981; text-shadow: 2px 2px 4px rgba(0,0,0,0.3), 1px 1px 2px rgba(0,0,0,0.2), 0 0 8px rgba(16, 185, 129, 0.4); font-family: 'Segoe UI', sans-serif; -webkit-text-stroke: 1px rgba(16, 185, 129, 0.8); letter-spacing: 2px; }
+          .logo { font-size: 50px; font-weight: 900; color: #10b981; text-shadow: 2px 2px 4px rgba(0,0,0,0.3), 1px 1px 2px rgba(0,0,0,0.2), 0 0 8px rgba(16, 185, 129, 0.4); font-family: 'Poppins', sans-serif; -webkit-text-stroke: 1px rgba(16, 185, 129, 0.8); letter-spacing: 2px; }
           .header-info { text-align: right; }
-          .header-title { font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 5px; font-family: 'Segoe UI', sans-serif; }
-          .header-datetime { font-size: 11px; color: #6b7280; margin-bottom: 10px; font-family: 'Segoe UI', sans-serif; font-weight: 500; }
+          .header-title { font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 5px; font-family: 'Inter', sans-serif; }
+          .header-datetime { font-size: 11px; color: #6b7280; margin-bottom: 10px; font-family: 'Inter', sans-serif; font-weight: 500; }
           .header-producer-details { display: flex; flex-direction: column; gap: 3px; }
           .producer-detail-row { display: flex; justify-content: space-between; align-items: center; font-size: 10px; line-height: 1.1; }
-          .producer-detail-label { color: #6b7280; font-weight: 600; font-family: 'Segoe UI', sans-serif; }
-          .producer-detail-value { color: #111827; font-weight: 700; font-family: 'Segoe UI', sans-serif; }
+          .producer-detail-label { color: #6b7280; font-weight: 600; font-family: 'Inter', sans-serif; }
+          .producer-detail-value { color: #111827; font-weight: 700; font-family: 'Inter', sans-serif; }
           
           /* Producer Info Section */
           .producer-info { background: #f8fafc; border-radius: 12px; padding: 15px; margin-bottom: 25px; border: 1px solid #e2e8f0; }
           .producer-info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
           .producer-info-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; }
-          .producer-info-label { font-size: 12px; color: #64748b; font-weight: 600; }
-          .producer-info-value { font-size: 13px; color: #1f2937; font-weight: 700; }
+          .producer-info-label { font-size: 12px; color: #64748b; font-weight: 600; font-family: 'Inter', sans-serif; }
+          .producer-info-value { font-size: 13px; color: #1f2937; font-weight: 700; font-family: 'Inter', sans-serif; }
           
           /* Main Content Grid */
           .content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
           
           /* Section Cards */
           .section-card { background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
-          .section-title { font-size: 18px; font-weight: bold; color: #1f2937; margin-bottom: 10px; display: flex; align-items: center; }
-          .section-subtitle { font-size: 12px; color: #6b7280; margin-bottom: 15px; font-weight: 500; }
+          .section-title { font-size: 18px; font-weight: bold; color: #1f2937; margin-bottom: 10px; display: flex; align-items: center; font-family: 'Poppins', sans-serif; }
+          .section-subtitle { font-size: 12px; color: #6b7280; margin-bottom: 15px; font-weight: 500; font-family: 'Inter', sans-serif; }
           
           /* Application Cards */
-          .application-card { background: #10b981; border-radius: 8px; padding: 7px 8px; margin-bottom: 6px; color: white; font-size: 9px; }
+          .application-card { background: #10b981; border-radius: 8px; padding: 7px 8px; margin-bottom: 6px; color: white; font-size: 9px; font-family: 'Inter', sans-serif; }
           .application-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
           .application-time { font-size: 11px; font-weight: 600; }
           .application-date { font-size: 11px; font-weight: 600; }
@@ -192,14 +192,14 @@ const RecipePage: React.FC = () => {
           
           /* Weather Section */
           .weather-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-          .weather-table th, .weather-table td { padding: 4px 6px; text-align: center; font-size: 10px; }
+          .weather-table th, .weather-table td { padding: 4px 6px; text-align: center; font-size: 10px; font-family: 'Inter', sans-serif; }
           .weather-table th { background: #10b981; color: white; font-weight: 600; }
           .weather-table td { background: #f8fafc; }
           .weather-icon { font-size: 12px; }
           .temp-bar { background: #10b981; height: 4px; border-radius: 2px; margin: 2px 0; }
           
           /* Footer */
-          .footer { margin-top: 30px; text-align: center; font-size: 10px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 15px; }
+          .footer { margin-top: 30px; text-align: center; font-size: 10px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 15px; font-family: 'Inter', sans-serif; }
         </style>
         
                 <div class="pdf-container">

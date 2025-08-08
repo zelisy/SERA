@@ -450,10 +450,10 @@ const DenemeComponent: React.FC = () => {
                 <span className="text-white text-xl">🧪</span>
               </div>
               <div>
-                <h1 className="text-xl lg:text-2xl font-bold text-slate-800">
+                <h1 className="text-xl lg:text-2xl font-display text-slate-800">
                   Deneme - {selected.firstName} {selected.lastName}
                 </h1>
-                <p className="text-sm text-slate-600">Trial Form Details</p>
+                <p className="text-sm text-slate-600 font-caption">Trial Form Details</p>
               </div>
             </div>
             <button
