@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import arkaplanImage from '../assets/arkaplan1.jpg';
 import { getAllProducts } from '../utils/firestoreUtils';
 import type { Product } from '../types/product';
+import OptimizedImage from '../components/OptimizedImage';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -40,7 +41,7 @@ const Home = () => {
     <div className="relative min-h-screen">
       {/* Full Screen Background - Image + Overlay */}
       <div className="absolute inset-0">
-        <img 
+        <OptimizedImage 
           src={arkaplanImage} 
           alt="AGROVİA Sistemi Arkaplan"
           className="w-full h-full object-cover"
@@ -48,8 +49,9 @@ const Home = () => {
           onLoad={() => console.log('Arkaplan resmi başarıyla yüklendi')}
           onError={(e) => {
             console.log('Arkaplan resmi yüklenemedi:', e);
-            e.currentTarget.style.display = 'none';
+            (e.currentTarget as HTMLImageElement).style.display = 'none';
           }}
+          optimize={{ width: 1920, height: 1080, crop: 'limit' }}
         />
         {/* Dark Overlay with Green Gradient for better text readability */}
         <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-gray-900/60 to-emerald-900/70"></div>
@@ -248,10 +250,11 @@ const Home = () => {
                                           <div key={product.id} className="bg-slate-800/60 backdrop-blur-sm rounded-2xl shadow-xl border border-slate-600 p-3 md:p-4 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 flex-shrink-0" style={{ width: '220px', minWidth: '220px' }}>
                        {product.imageUrl && (
                          <div className="mb-2 md:mb-3">
-                           <img 
+                           <OptimizedImage 
                              src={product.imageUrl} 
                              alt={product.name} 
                              className="w-full h-28 md:h-36 object-cover rounded-xl shadow-lg"
+                             optimize={{ width: 400, height: 300, crop: 'fill' }}
                            />
                          </div>
                        )}

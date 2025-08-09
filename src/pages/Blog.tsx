@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import arkaplanImage from '../assets/arkaplan1.jpg';
+import OptimizedImage from '../components/OptimizedImage';
 import { getPublishedBlogs, getFeaturedBlogs, getBlogById, incrementBlogViewCount } from '../utils/blogUtils';
 import type { Blog } from '../types/blog';
 
@@ -86,11 +87,12 @@ const BlogPage: React.FC = () => {
     <div className="relative min-h-screen">
     {/* Full Screen Background - Image + Overlay */}
     <div className="absolute inset-0">
-      <img 
+      <OptimizedImage 
         src={arkaplanImage} 
-                  alt="AGROVİA Sistemi Arkaplan"
+        alt="AGROVİA Sistemi Arkaplan"
         className="w-full h-full object-cover"
-        style={{ minHeight: '100vh' }}
+        style={{ minHeight: '100vh' } as React.CSSProperties}
+        optimize={{ width: 1920, height: 1080, crop: 'limit' }}
       />
       {/* Dark Overlay with Green Gradient for better text readability */}
       <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-gray-900/60 to-emerald-900/70"></div>
@@ -143,10 +145,11 @@ const BlogPage: React.FC = () => {
                     onClick={() => handleBlogClick(blog)}
                   >
                     {blog.imageUrl && (
-                      <img
+                      <OptimizedImage
                         src={blog.imageUrl}
                         alt={blog.title}
                         className="w-full h-48 object-cover rounded-xl mb-4"
+                        optimize={{ width: 800, height: 480, crop: 'fill' }}
                       />
                     )}
                     <div className="flex items-center space-x-2 mb-3">
@@ -214,10 +217,11 @@ const BlogPage: React.FC = () => {
                   onClick={() => handleBlogClick(blog)}
                 >
                   {blog.imageUrl && (
-                    <img
+                    <OptimizedImage
                       src={blog.imageUrl}
                       alt={blog.title}
                       className="w-full h-48 object-cover rounded-xl mb-4"
+                      optimize={{ width: 600, height: 360, crop: 'fill' }}
                     />
                   )}
                   <div className="flex items-center space-x-2 mb-3">
@@ -286,10 +290,11 @@ const BlogPage: React.FC = () => {
                   {/* Blog Image */}
                   {selectedBlog.imageUrl && (
                     <div className="mb-6">
-                      <img
+                      <OptimizedImage
                         src={selectedBlog.imageUrl}
                         alt={selectedBlog.title}
                         className="w-full h-64 lg:h-80 object-cover rounded-xl shadow-lg"
+                        optimize={{ width: 1280, height: 720, crop: 'fill' }}
                       />
                     </div>
                   )}

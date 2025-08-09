@@ -6,6 +6,7 @@ import { uploadToCloudinaryDirect, validateImageFile } from '../utils/tempCloudi
 import MobileCameraButton from './MobileCameraButton';
 import PlantControlButton from './PlantControlButton';
 import ImageLightbox from './ImageLightbox';
+import OptimizedImage from './OptimizedImage';
 
 interface ChecklistItemProps {
   item: ChecklistItemType;
@@ -342,9 +343,9 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate, onPlantCo
               {values[field.id] && (
                 <div className="relative group">
                   <button type="button" onClick={() => setPreviewImageUrl(values[field.id] as string)} className="focus:outline-none">
-                    <img 
-                      src={values[field.id] as string} 
-                      alt="Preview" 
+                    <OptimizedImage
+                      src={values[field.id] as string}
+                      alt="Preview"
                       className="w-full max-w-xs lg:max-w-sm max-h-32 lg:max-h-48 object-cover rounded-lg shadow-md border border-gray-200 hover:scale-105 transition-transform duration-200 cursor-pointer"
                     />
                   </button>
@@ -395,9 +396,9 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate, onPlantCo
                     {currentUrls.map((url, index) => (
                       <div key={index} className="relative group">
                         <button type="button" onClick={() => setPreviewImageUrl(url)} className="focus:outline-none">
-                          <img 
-                            src={url} 
-                            alt={`Fotoğraf ${index + 1}`} 
+                          <OptimizedImage
+                            src={url}
+                            alt={`Fotoğraf ${index + 1}`}
                             className="w-full h-24 lg:h-32 object-cover rounded-lg shadow-md border border-gray-200 hover:scale-105 transition-transform duration-200 cursor-pointer"
                           />
                         </button>
@@ -482,9 +483,9 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate, onPlantCo
                     {pestValue.photo && (
                       <div className="relative group">
                         <button type="button" onClick={() => setPreviewImageUrl(pestValue.photo)} className="focus:outline-none">
-                          <img 
-                            src={pestValue.photo} 
-                            alt="Zararlı fotoğrafı" 
+                          <OptimizedImage
+                            src={pestValue.photo}
+                            alt="Zararlı fotoğrafı"
                             className="w-full max-w-xs lg:max-w-sm max-h-32 lg:max-h-48 object-cover rounded-lg shadow-md border border-gray-200 hover:scale-105 transition-transform duration-200 cursor-pointer"
                           />
                         </button>

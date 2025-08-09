@@ -1,4 +1,5 @@
 import arkaplanImage from '../assets/arkaplan1.jpg';
+import OptimizedImage from '../components/OptimizedImage';
 
 const About = () => {
   const features = [
@@ -35,11 +36,12 @@ const About = () => {
     <div className="relative min-h-screen">
       {/* Full Screen Background - Image + Overlay */}
       <div className="absolute inset-0">
-        <img 
+        <OptimizedImage 
           src={arkaplanImage} 
           alt="AGROVİA Sistemi Arkaplan"
           className="w-full h-full object-cover"
-          style={{ minHeight: '100vh' }}
+          style={{ minHeight: '100vh' } as React.CSSProperties}
+          optimize={{ width: 1920, height: 1080, crop: 'limit' }}
         />
         {/* Dark Overlay with Green Gradient for better text readability */}
         <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-gray-900/60 to-emerald-900/70"></div>

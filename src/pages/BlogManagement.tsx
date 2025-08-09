@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import OptimizedImage from '../components/OptimizedImage';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { uploadToCloudinary } from '../utils/cloudinaryUtils';
@@ -387,10 +388,11 @@ const BlogManagement: React.FC = () => {
                         {imagePreview && (
                           <div className="relative">
                             <button type="button" onClick={() => setModalImg(imagePreview)} className="focus:outline-none">
-                              <img
+                              <OptimizedImage
                                 src={imagePreview}
                                 alt="Önizleme"
                                 className="w-full max-w-xs h-32 object-cover rounded-lg border border-gray-200 hover:scale-105 transition-transform duration-200 cursor-pointer"
+                                optimize={{ width: 512, height: 256, crop: 'fill' }}
                               />
                             </button>
                             <button
@@ -550,10 +552,11 @@ const BlogManagement: React.FC = () => {
                         <div className="flex items-center space-x-3">
                           {blog.imageUrl && (
                             <button type="button" onClick={() => setModalImg(blog.imageUrl || '')} className="focus:outline-none">
-                              <img
+                              <OptimizedImage
                                 src={blog.imageUrl}
                                 alt={blog.title}
                                 className="w-12 h-12 object-cover rounded-lg hover:scale-105 transition-transform duration-200 cursor-pointer"
+                                optimize={{ width: 96, height: 96, crop: 'fill' }}
                               />
                             </button>
                           )}

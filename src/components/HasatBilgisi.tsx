@@ -3,6 +3,7 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import UreticiListesi from './UreticiListesi';
 import { uploadToCloudinaryDirect } from '../utils/tempCloudinaryUtils';
+import OptimizedImage from './OptimizedImage';
 import {
   saveHasatBilgisi,
   updateHasatBilgisi,
@@ -1020,17 +1021,17 @@ const HasatBilgisiComponent = () => {
                       )}
                       {values.halFisiUrl && (
                         <div className="mt-4">
-                          <button
-                            type="button"
-                            onClick={() => setPreviewImageUrl(values.halFisiUrl)}
-                            className="focus:outline-none"
-                          >
-                            <img
-                              src={values.halFisiUrl}
-                              alt="Hal Fişi"
-                              className="w-32 h-32 object-cover rounded-lg border border-gray-200 hover:scale-105 transition-transform duration-200 cursor-pointer"
-                            />
-                          </button>
+                              <button
+                                type="button"
+                                onClick={() => setPreviewImageUrl(values.halFisiUrl)}
+                                className="focus:outline-none"
+                              >
+                                <OptimizedImage
+                                  src={values.halFisiUrl}
+                                  alt="Hal Fişi"
+                                  className="w-32 h-32 object-cover rounded-lg border border-gray-200 hover:scale-105 transition-transform duration-200 cursor-pointer"
+                                />
+                              </button>
       {/* Fotoğraf büyük önizleme modalı */}
       {previewImageUrl && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70" onClick={() => setPreviewImageUrl(null)}>

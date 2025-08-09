@@ -6,6 +6,7 @@ import { loadChecklistData, updateChecklistItem, saveChecklistData, getUretimAla
 import type { ChecklistSection, UretimAlani, ChecklistItem as ChecklistItemType } from '../types/checklist';
 import type { Producer } from '../types/producer';
 import ImageLightbox from './ImageLightbox';
+import OptimizedImage from './OptimizedImage';
 
 
 interface DikimOncesiRecord {
@@ -510,7 +511,7 @@ const DikimOncesiDonem: React.FC = () => {
                           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                             {allPhotos.map((url: string, idx: number) => (
                               <button key={idx} type="button" onClick={() => setPreviewImageUrl(url)} className="focus:outline-none">
-                                <img src={url} alt={`Fotoğraf ${idx + 1}`} className="w-full h-20 object-cover rounded-lg border border-gray-200 hover:scale-105 transition-transform duration-200 cursor-pointer" />
+                                <OptimizedImage src={url} alt={`Fotoğraf ${idx + 1}`} className="w-full h-20 object-cover rounded-lg border border-gray-200 hover:scale-105 transition-transform duration-200 cursor-pointer" />
                               </button>
                             ))}
                           </div>

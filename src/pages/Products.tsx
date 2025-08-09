@@ -3,6 +3,7 @@ import { getAllProducts } from '../utils/firestoreUtils';
 import type { Product } from '../types/product';
 import { useNavigate } from 'react-router-dom';
 import arkaplanImage from '../assets/arkaplan1.jpg';
+import OptimizedImage from '../components/OptimizedImage';
 
 // Authentication kontrolü
 const isAuthenticated = () => {
@@ -33,11 +34,12 @@ const Products: React.FC = () => {
     <div className="relative min-h-screen">
       {/* Full Screen Background - Image + Overlay */}
       <div className="absolute inset-0">
-        <img 
+        <OptimizedImage 
           src={arkaplanImage} 
           alt="AGROVİA Sistemi Arkaplan"
           className="w-full h-full object-cover"
-          style={{ minHeight: '100vh' }}
+          style={{ minHeight: '100vh' } as React.CSSProperties}
+          optimize={{ width: 1920, height: 1080, crop: 'limit' }}
         />
         {/* Dark Overlay with Green Gradient for better text readability */}
         <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-gray-900/60 to-emerald-900/70"></div>
@@ -73,7 +75,7 @@ const Products: React.FC = () => {
                   {products.map(product => (
                     <div key={product.id} className="bg-gray-700/50 backdrop-blur-sm rounded-xl shadow border border-gray-600 p-6 flex flex-col items-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                       {product.imageUrl && (
-                        <img src={product.imageUrl} alt={product.name} className="w-32 h-32 object-cover rounded mb-4" />
+                        <OptimizedImage src={product.imageUrl} alt={product.name} className="w-32 h-32 object-cover rounded mb-4" optimize={{ width: 256, height: 256, crop: 'fill' }} />
                       )}
                       <h3 className="text-lg font-bold text-white mb-2">{product.name}</h3>
                       <p className="text-gray-300 mb-2 text-center">{product.description}</p>

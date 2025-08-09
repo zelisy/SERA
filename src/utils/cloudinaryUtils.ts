@@ -1,3 +1,5 @@
+import { getOptimizedCloudinaryUrl } from './cloudinaryDelivery';
+
 interface CloudinaryResponse {
   secure_url: string;
   public_id: string;
@@ -29,7 +31,8 @@ export const uploadToCloudinary = async (file: File): Promise<string> => {
     }
 
     const data: CloudinaryResponse = await response.json();
-    return data.secure_url;
+    // Return an optimized delivery URL by default
+    return getOptimizedCloudinaryUrl(data.secure_url);
   } catch (error) {
     console.error('Cloudinary upload error:', error);
     if (error instanceof Error) {

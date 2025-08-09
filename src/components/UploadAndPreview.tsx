@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import OptimizedImage from './OptimizedImage';
 
 const UploadAndPreview = () => {
   const [preview, setPreview] = useState<string | null>(null);
@@ -60,10 +61,11 @@ const UploadAndPreview = () => {
         <div className="flex flex-col items-center">
           <h3 className="text-sm font-semibold text-gray-700 mb-2">Önizleme:</h3>
           <button type="button" onClick={() => setModalImg(preview)} className="focus:outline-none">
-            <img 
-              src={preview} 
-              alt="Preview" 
-              className="w-full max-w-xs md:w-48 h-auto rounded-lg shadow-lg border-2 border-gray-200 hover:scale-105 transition-transform duration-200 cursor-pointer" 
+            <OptimizedImage
+              src={preview}
+              alt="Preview"
+              className="w-full max-w-xs md:w-48 h-auto rounded-lg shadow-lg border-2 border-gray-200 hover:scale-105 transition-transform duration-200 cursor-pointer"
+              optimize={{ width: 600, crop: 'limit' }}
             />
           </button>
         </div>
@@ -74,10 +76,11 @@ const UploadAndPreview = () => {
         <div className="flex flex-col items-center">
           <h3 className="text-sm font-semibold text-gray-700 mb-2">Yüklenen Görsel:</h3>
           <button type="button" onClick={() => setModalImg(imageUrl)} className="focus:outline-none">
-            <img 
-              src={imageUrl} 
-              alt="Cloudinary" 
-              className="w-full max-w-xs md:w-64 h-auto rounded-lg shadow-lg border-2 border-emerald-200 hover:scale-105 transition-transform duration-200 cursor-pointer" 
+            <OptimizedImage
+              src={imageUrl || ''}
+              alt="Cloudinary"
+              className="w-full max-w-xs md:w-64 h-auto rounded-lg shadow-lg border-2 border-emerald-200 hover:scale-105 transition-transform duration-200 cursor-pointer"
+              optimize={{ width: 600, crop: 'limit' }}
             />
           </button>
           <div className="mt-2 text-xs text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">
@@ -90,7 +93,7 @@ const UploadAndPreview = () => {
       {modalImg && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80" onClick={() => setModalImg(null)}>
           <div className="relative" onClick={e => e.stopPropagation()}>
-            <img src={modalImg} alt="Büyük Önizleme" className="max-w-[90vw] max-h-[80vh] rounded-xl shadow-2xl border-4 border-white" />
+            <OptimizedImage src={modalImg || ''} alt="Büyük Önizleme" className="max-w-[90vw] max-h-[80vh] rounded-xl shadow-2xl border-4 border-white" optimize={{ width: 1600, height: 1200, crop: 'limit' }} />
             <button
               type="button"
               onClick={() => setModalImg(null)}

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { saveProduct, getAllProducts, deleteProduct, updateProduct } from '../utils/firestoreUtils';
 import type { Product } from '../types/product';
 import { useNavigate } from 'react-router-dom';
+import OptimizedImage from '../components/OptimizedImage';
 
 const AdminProducts: React.FC = () => {
   const [showForm, setShowForm] = useState(true);
@@ -192,7 +193,7 @@ const AdminProducts: React.FC = () => {
                 <tr key={product.id} className="border-t">
                   <td className="px-4 py-2">
                     {product.imageUrl && (
-                      <img src={product.imageUrl} alt={product.name} className="w-16 h-16 object-cover rounded" />
+                      <OptimizedImage src={product.imageUrl} alt={product.name} className="w-16 h-16 object-cover rounded" optimize={{ width: 128, height: 128, crop: 'fill' }} />
                     )}
                   </td>
                   <td className="px-4 py-2 font-semibold">{product.name}</td>

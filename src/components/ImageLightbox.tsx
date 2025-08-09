@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import OptimizedImage from './OptimizedImage';
 
 interface ImageLightboxProps {
   imageUrl: string | null;
@@ -31,10 +32,11 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ imageUrl, onClose, alt })
       aria-modal="true"
     >
       <div className="relative" onClick={(e) => e.stopPropagation()}>
-        <img
+        <OptimizedImage
           src={imageUrl}
           alt={alt || 'Büyük Önizleme'}
           className="max-w-[90vw] max-h-[80vh] rounded-xl shadow-2xl border-4 border-white"
+          optimize={{ width: 1600, height: 1200, crop: 'limit' }}
         />
         <button
           type="button"

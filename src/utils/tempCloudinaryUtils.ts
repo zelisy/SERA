@@ -1,4 +1,5 @@
 // Temporary Cloudinary utils without env variables
+import { getOptimizedCloudinaryUrl } from './cloudinaryDelivery';
 interface CloudinaryResponse {
   secure_url: string;
   public_id: string;
@@ -30,7 +31,7 @@ export const uploadToCloudinaryDirect = async (file: File): Promise<string> => {
       throw new Error(data.error?.message || 'Upload failed');
     }
 
-    return data.secure_url;
+    return getOptimizedCloudinaryUrl(data.secure_url);
   } catch (error) {
     console.error('Cloudinary upload error:', error);
     if (error instanceof Error) {
