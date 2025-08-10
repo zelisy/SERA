@@ -41,6 +41,11 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 function AppContent() {
   const location = useLocation();
   const isAdminPage = location.pathname.startsWith('/admin') && !location.pathname.includes('/admin/products');
+  
+  // Route değiştiğinde sayfanın en üstüne kaydır
+  React.useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  }, [location.pathname]);
 
   return (
     <>

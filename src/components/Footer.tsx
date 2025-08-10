@@ -32,16 +32,29 @@ const Footer = () => {
             </p>
             <div className="mt-3 flex space-x-3">
               {socialLinks.map((social, index) => (
-                <a
-                  key={index}
-                  href={social.href}
-                  className="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-lg flex items-center justify-center transition-colors group"
-                  title={social.label}
-                >
-                  <span className="text-slate-600 group-hover:text-slate-800 transition-colors text-sm">
-                    {social.icon}
-                  </span>
-                </a>
+                social.label === 'Website' ? (
+                  <Link
+                    key={index}
+                    to="/"
+                    className="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-lg flex items-center justify-center transition-colors group"
+                    title={social.label}
+                  >
+                    <span className="text-slate-600 group-hover:text-slate-800 transition-colors text-sm">
+                      {social.icon}
+                    </span>
+                  </Link>
+                ) : (
+                  <a
+                    key={index}
+                    href={social.href}
+                    className="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-lg flex items-center justify-center transition-colors group"
+                    title={social.label}
+                  >
+                    <span className="text-slate-600 group-hover:text-slate-800 transition-colors text-sm">
+                      {social.icon}
+                    </span>
+                  </a>
+                )
               ))}
             </div>
           </div>
