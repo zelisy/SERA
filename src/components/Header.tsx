@@ -183,20 +183,20 @@ const Header = () => {
         <div 
           ref={mobileMenuRef}
           className={`
-            md:hidden transition-all duration-300 ease-in-out overflow-hidden
-            ${mobileMenuOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'}
+            md:hidden transition-all duration-300 ease-in-out overflow-hidden z-50
+            ${mobileMenuOpen ? 'max-h-[85vh] opacity-100' : 'max-h-0 opacity-0'}
           `}
         >
-          <div className={`py-4 space-y-2 ${
+          <div className={`px-2 py-4 space-y-2 ${
             isWhiteTextPage ? 'border-t border-white/20' : 'border-t border-gray-100'
-          }`}>
+          } max-h-[85vh] overflow-y-auto`}> 
             {navItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
                 onClick={() => setMobileMenuOpen(false)}
                 className={`
-                  px-4 py-3 rounded-lg text-base font-medium transition-all duration-200
+                  block w-full px-4 py-3 rounded-lg text-base font-medium transition-all duration-200
                   ${location.pathname === item.path
                     ? isWhiteTextPage 
                       ? 'bg-white/20 text-white border border-white/30'
