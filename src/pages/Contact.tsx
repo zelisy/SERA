@@ -33,8 +33,8 @@ const Contact = () => {
     {
       icon: '📍',
       title: 'Adres',
-      value: 'Demre Mah. 100. Sok. No: 100, Antalya',
-      link: 'https://maps.google.com'
+      value: 'Göksu, Altınova Cd. NO:38, 07170 Kepez/Antalya, Türkiye',
+      link: 'https://www.google.com/maps?q=Göksu,+Altınova+Cd.+NO:38,+07170+Kepez/Antalya,+Türkiye'
     },
     {
       icon: '🕒',
