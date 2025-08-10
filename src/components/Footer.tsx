@@ -6,7 +6,7 @@ const Footer = () => {
 
 
   const socialLinks = [
-    { icon: '📧', label: 'Email', href: 'mailto:zyldrm066@gmail.com' },
+    { icon: '📧', label: 'Email', href: 'mailto:agroviatr@gmail.com' },
     { icon: '📱', label: 'Telefon', href: 'tel:+905377383743' },
     { icon: '🌐', label: 'Website', href: 'https://sera.com' },
   ];

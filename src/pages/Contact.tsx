@@ -20,8 +20,8 @@ const Contact = () => {
     {
       icon: '📧',
       title: 'E-posta',
-      value: 'info@seratakip.com',
-      link: 'mailto:info@seratakip.com'
+      value: 'agroviatr@gmail.com',
+      link: 'mailto:agroviatr@gmail.com'
     },
     {
       icon: '📱',
