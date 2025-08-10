@@ -270,7 +270,7 @@ const Home = () => {
               </div>
             )}
 
-                         <div className="text-center mt-8">
+              <div className="text-center mt-8">
               <button 
                 onClick={() => navigate('/products')}
                 className="bg-emerald-500 hover:bg-emerald-400 text-black font-semibold py-4 px-12 rounded-full transition-all duration-300 transform hover:scale-105 shadow-xl text-lg border-2 border-emerald-500 hover:border-emerald-400"
@@ -283,12 +283,12 @@ const Home = () => {
 
         {/* CTA Section */}
         {!isAuthenticated() && (
-          <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 py-20">
+          <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 py-20">
             <div className="max-w-4xl mx-auto px-4 text-center">
-              <h2 className="text-4xl md:text-5xl font-bold text-black mb-6">
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
                 Hemen Başlayın
               </h2>
-              <p className="text-xl text-emerald-900 mb-8 leading-relaxed">
+              <p className="text-xl text-gray-300 mb-8 leading-relaxed">
                 Sera üretim süreçlerinizi dijitalleştirin ve verimliliğinizi artırın
               </p>
               <button 
