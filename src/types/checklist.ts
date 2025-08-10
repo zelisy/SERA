@@ -118,6 +118,7 @@ export interface HasatBilgisi {
   kacDa: number; // Kaç da alan
   
   // Satış Detayları
+  satisKg?: number; // Satış için kullanılan kilogram (opsiyonel)
   kasaAdeti: number;
   kasaFiyati: number;
   kazanc: number; // Hesaplanacak: kasaAdeti * kasaFiyati

@@ -45,26 +45,46 @@ const HasatBilgisiComponent = () => {
       ciroDa: Yup.number(),
       ortalamaFiyat: Yup.number(),
       kacDa: Yup.number(),
+      satisKg: Yup.number(),
       kasaAdeti: Yup.number(),
       kasaFiyati: Yup.number(),
       teknikEkipNotu: Yup.string(),
       ciftciNotu: Yup.string()
     });
 
-  const getInitialValues = () => ({
-    donem: editingHasat?.donem || '',
-    cesit: editingHasat?.cesit || '',
-    dikimTarihi: editingHasat?.dikimTarihi || '',
-    tonajDa: editingHasat?.tonajDa || 0,
-    ciroDa: editingHasat?.ciroDa || 0,
-    ortalamaFiyat: editingHasat?.ortalamaFiyat || 0,
-    kacDa: editingHasat?.kacDa || 0,
-    kasaAdeti: editingHasat?.kasaAdeti || 0,
-    kasaFiyati: editingHasat?.kasaFiyati || 0,
-    halFisiUrl: editingHasat?.halFisiUrl || '',
-    teknikEkipNotu: editingHasat?.teknikEkipNotu || '',
-    ciftciNotu: editingHasat?.ciftciNotu || ''
-  });
+  const getInitialValues = () => {
+    const formatDateForInput = (dateStr?: string) => {
+      if (!dateStr) return '';
+      const isoMatch = /^\d{4}-\d{2}-\d{2}$/.test(dateStr ?? '');
+      if (isoMatch) return dateStr;
+      const dmyMatch = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(dateStr);
+      if (dmyMatch) {
+        const [, dd, mm, yyyy] = dmyMatch;
+        return `${yyyy}-${mm}-${dd}`;
+      }
+      const parsed = new Date(dateStr);
+      if (!isNaN(parsed.getTime())) return parsed.toISOString().slice(0, 10);
+      return '';
+    };
+
+    const alanDa = selectedUretimAlani?.alanM2 ? Number(selectedUretimAlani.alanM2) / 1000 : 0;
+
+    return {
+      donem: editingHasat?.donem || '',
+      cesit: editingHasat?.cesit || selectedUretimAlani?.cesitIsmi || '',
+      dikimTarihi: formatDateForInput(editingHasat?.dikimTarihi || selectedUretimAlani?.dikimTarihi),
+      tonajDa: editingHasat?.tonajDa || 0,
+      ciroDa: editingHasat?.ciroDa || 0,
+      ortalamaFiyat: editingHasat?.ortalamaFiyat || 0,
+      kacDa: editingHasat?.kacDa ?? alanDa,
+      satisKg: editingHasat?.satisKg || 0,
+      kasaAdeti: editingHasat?.kasaAdeti || 0,
+      kasaFiyati: editingHasat?.kasaFiyati || 0,
+      halFisiUrl: editingHasat?.halFisiUrl || '',
+      teknikEkipNotu: editingHasat?.teknikEkipNotu || '',
+      ciftciNotu: editingHasat?.ciftciNotu || ''
+    };
+  };
 
   // Load hasat kayıtları when producer is selected
   useEffect(() => {
@@ -73,6 +93,13 @@ const HasatBilgisiComponent = () => {
       loadUretimAlanlari();
     }
   }, [selectedProducer]);
+
+  // Üretim alanı seçildiğinde kayıtları listele
+  useEffect(() => {
+    if (selectedProducer && selectedUretimAlani) {
+      loadHasatKayitlari();
+    }
+  }, [selectedUretimAlani]);
 
   // Üretim alanlarını çek
   const loadUretimAlanlari = async () => {
@@ -156,6 +183,10 @@ const HasatBilgisiComponent = () => {
   const handleUretimAlaniSelect = (area: any) => {
     setSelectedUretimAlani(area);
     setCurrentStep('list');
+    // Seçimle birlikte kayıtları getir
+    setTimeout(() => {
+      loadHasatKayitlari();
+    }, 0);
   };
 
   const handleSubmit = async (values: Record<string, string | number>) => {
@@ -165,7 +196,8 @@ const HasatBilgisiComponent = () => {
     setError(null);
 
     try {
-      const kazanc = Number(values.kasaAdeti || 0) * Number(values.kasaFiyati || 0);
+      // Toplam kazanç yalnızca satış kilogramı × kilogram fiyatı üzerinden hesaplanır
+      const kazanc = Number(values.satisKg || 0) * Number(values.kasaFiyati || 0);
 
       
       const hasatData: Omit<HasatBilgisi, 'id' | 'createdAt' | 'updatedAt'> = {
@@ -178,6 +210,7 @@ const HasatBilgisiComponent = () => {
         ciroDa: Number(values.ciroDa || 0),
         ortalamaFiyat: Number(values.ortalamaFiyat || 0),
         kacDa: Number(values.kacDa || 0),
+        satisKg: Number(values.satisKg || 0),
         kasaAdeti: Number(values.kasaAdeti || 0),
         kasaFiyati: Number(values.kasaFiyati || 0),
         kazanc: kazanc,
@@ -251,21 +284,42 @@ const HasatBilgisiComponent = () => {
     }), { totalTonaj: 0, totalCiro: 0, totalKazanc: 0, totalAlan: 0 });
   };
 
+  const formatCurrencyTRY = (value: number) => {
+    try {
+      return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 2 }).format(value);
+    } catch {
+      return `₺${Number(value || 0).toLocaleString('tr-TR')}`;
+    }
+  };
+
   // PDF'e aktar fonksiyonu
   const exportToPDF = async () => {
     setIsExportingPDF(true);
     const input = document.getElementById('hasat-pdf-table');
-    if (!input) return;
+    if (!input) { setIsExportingPDF(false); return; }
     
     try {
       const html2canvas = (await import('html2canvas')).default;
       const jsPDF = (await import('jspdf')).default;
       
-      await new Promise(resolve => setTimeout(resolve, 100)); // render flush
+      // Geçici olarak görünür hale getir (hidden olduğu için boş PNG hatası oluşuyordu)
+      const wasHidden = input.classList.contains('hidden');
+      const prevStyle = { display: input.style.display, position: input.style.position, top: input.style.top, left: input.style.left, visibility: input.style.visibility, background: (input as HTMLElement).style.background };
+      if (wasHidden) {
+        input.classList.remove('hidden');
+        input.style.display = 'block';
+        input.style.position = 'fixed';
+        input.style.top = '-10000px';
+        input.style.left = '-10000px';
+        input.style.visibility = 'visible';
+        (input as HTMLElement).style.background = '#ffffff';
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 150)); // render flush
       
-      html2canvas(input, { scale: 2 } as any).then((canvas: any) => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('l', 'mm', 'a4');
+      const canvas = await html2canvas(input, { scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff' } as any);
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('l', 'mm', 'a4');
         
         // PDF başlığı ekle
         pdf.setFontSize(16);
@@ -301,7 +355,13 @@ const HasatBilgisiComponent = () => {
         const pdfWidth = pageWidth - 40; // Kenar boşlukları
         const pdfHeight = (imgHeight * pdfWidth) / imgWidth;
         
-        pdf.addImage(imgData, 'PNG', 20, yPosition, pdfWidth, pdfHeight);
+        try {
+          pdf.addImage(imgData, 'PNG', 20, yPosition, pdfWidth, pdfHeight);
+        } catch (e) {
+          console.error('PDF image add error:', e);
+          setIsExportingPDF(false);
+          return;
+        }
         
                  // Dosya adı oluştur
          let fileName = 'hasat_bilgileri';
@@ -309,8 +369,18 @@ const HasatBilgisiComponent = () => {
          fileName += '.pdf';
         
         pdf.save(fileName);
+        // Görünürlüğü eski haline getir
+        if (wasHidden) {
+          input.classList.add('hidden');
+          input.style.display = prevStyle.display;
+          input.style.position = prevStyle.position;
+          input.style.top = prevStyle.top;
+          input.style.left = prevStyle.left;
+          input.style.visibility = prevStyle.visibility;
+          (input as HTMLElement).style.background = prevStyle.background;
+        }
         setIsExportingPDF(false);
-      });
+      
     } catch (error) {
       console.error('PDF export hatası:', error);
       setIsExportingPDF(false);
@@ -548,7 +618,7 @@ const HasatBilgisiComponent = () => {
                     <p className="text-slate-600 text-sm">Tüm dönemler</p>
                   </div>
                 </div>
-                <p className="text-3xl font-bold text-slate-800">₺{allTotals.totalCiro.toLocaleString()}</p>
+                <p className="text-3xl font-bold text-slate-800">{formatCurrencyTRY(allTotals.totalCiro)}</p>
                 <p className="text-slate-600 text-sm">TL</p>
               </div>
 
@@ -562,7 +632,7 @@ const HasatBilgisiComponent = () => {
                     <p className="text-slate-600 text-sm">Satış kazançları</p>
                   </div>
                 </div>
-                <p className="text-3xl font-bold text-slate-800">₺{allTotals.totalKazanc.toLocaleString()}</p>
+                <p className="text-3xl font-bold text-slate-800">{formatCurrencyTRY(allTotals.totalKazanc)}</p>
                 <p className="text-slate-600 text-sm">TL</p>
               </div>
 
@@ -576,7 +646,7 @@ const HasatBilgisiComponent = () => {
                     <p className="text-slate-600 text-sm">Ekili alan</p>
                   </div>
                 </div>
-                <p className="text-3xl font-bold text-slate-800">{allTotals.totalAlan}</p>
+                <p className="text-3xl font-bold text-slate-800">{Number(allTotals.totalAlan).toFixed(3)}</p>
                 <p className="text-slate-600 text-sm">da</p>
               </div>
             </div>
@@ -670,7 +740,7 @@ const HasatBilgisiComponent = () => {
                         <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Sezon</th>
                         <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Kasa Adeti</th>
                         <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Kg</th>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Fiyat</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Kg Fiyatı</th>
                         <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Kazanç</th>
                         <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Hal Fişi Foto</th>
                         <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">İşlemler</th>
@@ -686,7 +756,7 @@ const HasatBilgisiComponent = () => {
                           <td className="px-4 py-3">{record.donem}</td>
                           <td className="px-4 py-3">{record.kasaAdeti ? String(record.kasaAdeti) : ''}</td>
                           <td className="px-4 py-3">{(Number(record.tonajDa) * Number(record.kacDa) * 1000).toLocaleString()} kg</td>
-                          <td className="px-4 py-3">₺{record.ortalamaFiyat ? String(record.ortalamaFiyat) : ''}</td>
+                          <td className="px-4 py-3">₺{record.kasaFiyati ? String(record.kasaFiyati) : ''}</td>
                           <td className="px-4 py-3 font-bold text-emerald-600">₺{record.kazanc ? Number(record.kazanc).toLocaleString() : ''}</td>
                           <td className="px-4 py-3">
                             {record.halFisiUrl ? (
@@ -763,7 +833,7 @@ const HasatBilgisiComponent = () => {
                           <td className="px-4 py-3">{record.donem}</td>
                           <td className="px-4 py-3">{record.kasaAdeti ? String(record.kasaAdeti) : ''}</td>
                           <td className="px-4 py-3">{(Number(record.tonajDa) * Number(record.kacDa) * 1000).toLocaleString()} kg</td>
-                          <td className="px-4 py-3">₺{record.ortalamaFiyat ? String(record.ortalamaFiyat) : ''}</td>
+                          <td className="px-4 py-3">₺{record.kasaFiyati ? String(record.kasaFiyati) : ''}</td>
                           <td className="px-4 py-3 font-bold text-emerald-600">₺{record.kazanc ? Number(record.kazanc).toLocaleString() : ''}</td>
                         </tr>
                       ))}
@@ -986,10 +1056,26 @@ const HasatBilgisiComponent = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-slate-700 mb-2">
+                          Satılan Kilogram
+                        </label>
+                        <Field
+                          type="number"
+                          name="satisKg"
+                          step="0.01"
+                          placeholder="Örn: 1200"
+                          className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm"
+                        />
+                        <div className="text-red-500 text-sm mt-1">
+                          <ErrorMessage name="satisKg" />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">
                           Toplam Kazanç
                         </label>
                         <div className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold text-emerald-600">
-                          ₺{(values.kasaAdeti * values.kasaFiyati).toLocaleString()}
+                          ₺{(Number(values.satisKg || 0) * Number(values.kasaFiyati || 0)).toLocaleString()}
                         </div>
                       </div>
                     </div>
