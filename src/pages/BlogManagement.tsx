@@ -132,7 +132,6 @@ const BlogManagement: React.FC = () => {
         setSuccess('Blog başarıyla güncellendi!');
       } else {
         const blogId = await createBlog(blogData);
-        console.log('Yeni blog oluşturuldu:', blogId, blogData);
         setSuccess('Blog başarıyla oluşturuldu!');
       }
 

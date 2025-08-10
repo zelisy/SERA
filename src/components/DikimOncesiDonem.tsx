@@ -90,7 +90,6 @@ const DikimOncesiDonem: React.FC = () => {
     // Üreticiye ait üretim alanlarını Firebase'den çek
     try {
       const areas = await getUretimAlanlariByProducer(producer.id);
-      console.log('Firebase productionAreas:', areas);
       const typedAreas: UretimAlani[] = Array.isArray(areas) ? (areas as UretimAlani[]) : [];
       setProductionAreas(typedAreas);
     } catch (err) {

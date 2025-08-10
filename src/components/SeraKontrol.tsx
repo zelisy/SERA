@@ -14,7 +14,7 @@ const SeraKontrol: React.FC = () => {
   const [uretimAlanlari, setUretimAlanlari] = useState<any[]>([]);
   // Debug loading state changes
   useEffect(() => {
-    console.log('Loading state changed to:', loading);
+    // loading state watcher (silent)
   }, [loading]);
   const [error, setError] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
@@ -180,7 +180,6 @@ const SeraKontrol: React.FC = () => {
   };
 
   const handleEditRecord = (record: any) => {
-    console.log('handleEditRecord called with:', record);
     setEditingRecord(record);
     // Düzenleme sırasında kayıtlı verileri yükle
     setChecklistData({
@@ -190,7 +189,7 @@ const SeraKontrol: React.FC = () => {
     setCurrentStep('checklist');
     setLoading(false); // Ensure loading is false when editing
     setError(null); // Clear any previous errors
-    console.log('handleEditRecord completed, loading should be false');
+    
   };
 
   const handleDeleteRecord = async (recordId: string) => {
@@ -266,7 +265,6 @@ const SeraKontrol: React.FC = () => {
   };
 
   const startNewRecord = () => {
-    console.log('startNewRecord called');
     setEditingRecord(null);
     // Yeni kayıt oluştururken formu temizle
     const cleanConfig = {
@@ -283,7 +281,7 @@ const SeraKontrol: React.FC = () => {
     // Clear any error messages and loading state
     setError(null);
     setLoading(false);
-    console.log('startNewRecord completed, currentStep should be checklist');
+    
   };
 
   const handlePlantControlComplete = async (data: { dekar: number; plants: any[] }) => {
@@ -329,7 +327,7 @@ const SeraKontrol: React.FC = () => {
   // useEffect for loading initial data when editing
   useEffect(() => {
     if (selectedProducer && currentStep === 'checklist' && editingRecord) {
-      console.log('useEffect triggered for editing record, setting loading to false');
+      
       // When editing, we don't need to load from Firestore since we already have the data
       // Just set loading to false to show the form
       setLoading(false);
@@ -767,7 +765,6 @@ const SeraKontrol: React.FC = () => {
   }
 
   if (loading) {
-    console.log('Loading state is true, showing loading screen');
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4">
         <div className="max-w-6xl mx-auto">

@@ -38,8 +38,7 @@ const BlogPage: React.FC = () => {
         getPublishedBlogs(),
         getFeaturedBlogs()
       ]);
-      console.log('Yayınlanmış bloglar:', publishedBlogs);
-      console.log('Öne çıkan bloglar:', featured);
+      // Loaded blog lists
       setBlogs(publishedBlogs);
       setFeaturedBlogs(featured);
     } catch (err) {
@@ -73,9 +72,7 @@ const BlogPage: React.FC = () => {
         setSelectedBlog(fullBlog);
         setShowBlogDetail(true);
       }
-    } catch (err) {
-      console.error('Blog detayı yüklenemedi:', err);
-    }
+    } catch (err) {}
   };
 
   const closeBlogDetail = () => {

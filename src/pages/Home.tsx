@@ -46,9 +46,7 @@ const Home = () => {
           alt="AGROVİA Sistemi Arkaplan"
           className="w-full h-full object-cover"
           style={{ minHeight: '100vh' }}
-          onLoad={() => console.log('Arkaplan resmi başarıyla yüklendi')}
           onError={(e) => {
-            console.log('Arkaplan resmi yüklenemedi:', e);
             (e.currentTarget as HTMLImageElement).style.display = 'none';
           }}
           optimize={{ width: 1920, height: 1080, crop: 'limit' }}

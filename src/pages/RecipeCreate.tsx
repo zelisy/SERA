@@ -154,7 +154,7 @@ const RecipeCreatePage: React.FC = () => {
       // Her iki API de başarısız olursa koordinatları göster
       return `📍 ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
     } catch (error) {
-      console.log('Konum adı alınamadı, koordinat kullanılıyor');
+      // fallback to coordinates when reverse geocoding fails
       return `📍 ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
     }
   };
@@ -192,7 +192,7 @@ const RecipeCreatePage: React.FC = () => {
           fetchWeatherData()
         ]);
         
-        console.log('Weather data result:', weatherDataResult);
+        
         
         if (producerData) {
           setProducer(producerData);
@@ -216,7 +216,7 @@ const RecipeCreatePage: React.FC = () => {
                 Math.abs(lastLocation.lon - longitude) > 0.01;
               
               if (locationChanged) {
-                console.log('Konum değişikliği tespit edildi, hava durumu güncelleniyor...');
+                
                 setLastLocation(currentLocation);
                 setLocationLoading(true);
                 
@@ -232,7 +232,7 @@ const RecipeCreatePage: React.FC = () => {
                   setWeatherLoading(false);
                   
                           } catch (error) {
-            console.log('Konum adı alınamadı, koordinat kullanılıyor');
+            // fallback to coordinates when reverse geocoding fails
             setUserLocation(`📍 ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
           } finally {
             setLocationLoading(false);
