@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { getBrandName } from '../utils/brand';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -23,7 +24,7 @@ const Footer = () => {
                 <span className="text-white text-sm font-bold">S</span>
               </div>
               <h3 className="text-lg font-display bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                AGROVİA
+                {getBrandName()}
               </h3>
             </div>
             <p className="text-slate-600 text-xs leading-relaxed max-w-sm font-body">
@@ -97,7 +98,7 @@ const Footer = () => {
         <div className="border-t border-gray-100 py-4">
           <div className="flex flex-col sm:flex-row items-center justify-between">
             <p className="text-slate-500 text-xs">
-              © {currentYear} AGROVİA. TÜM HAKLARI SAKLIDIR.
+              © {currentYear} {getBrandName()}. TÜM HAKLARI SAKLIDIR.
             </p>
             <div className="mt-2 sm:mt-0 flex items-center space-x-3">
               <span className="text-slate-400 text-xs">v1.0.0</span>

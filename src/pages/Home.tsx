@@ -42,8 +42,8 @@ const Home = () => {
       {/* Full Screen Background - Image + Overlay */}
       <div className="absolute inset-0">
         <OptimizedImage 
-          src={arkaplanImage} 
-          alt="AGROVİA Sistemi Arkaplan"
+          src={arkaplanImage}
+          alt="AGROVIA Sistemi Arkaplan"
           className="w-full h-full object-cover"
           style={{ minHeight: '100vh' }}
           onError={(e) => {
@@ -61,14 +61,14 @@ const Home = () => {
         <div className="min-h-screen flex items-center justify-center px-4">
           <div className="text-center text-white max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-7xl font-display mb-6 leading-tight">
-              AGROVİA
+              AGROVIA
             </h1>
             <p className="text-xl md:text-3xl mb-8 text-emerald-400 font-heading leading-relaxed">
               Sera Takip Sistemi
             </p>
             <p className="text-lg md:text-xl mb-12 text-gray-300 max-w-3xl mx-auto leading-relaxed font-body">
             Sera üretiminizi dijital dünyaya taşıyın.
-            AGROVİA, dikim öncesinden hasada kadar tüm üretim sürecinizi adım adım takip etmenizi sağlayan yenilikçi bir kontrol platformudur.
+            AGROVIA, dikim öncesinden hasada kadar tüm üretim sürecinizi adım adım takip etmenizi sağlayan yenilikçi bir kontrol platformudur.
             <br />
           
             📊 İklim verileri, 🌱 bitki gelişimi, 💧 sulama planlaması ve 🐛 zararlı gözlemleri artık tek yerde, parmaklarınızın ucunda.

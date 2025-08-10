@@ -37,8 +37,8 @@ const About = () => {
       {/* Full Screen Background - Image + Overlay */}
       <div className="absolute inset-0">
         <OptimizedImage 
-          src={arkaplanImage} 
-          alt="AGROVİA Sistemi Arkaplan"
+          src={arkaplanImage}
+          alt="AGROVIA Sistemi Arkaplan"
           className="w-full h-full object-cover"
           style={{ minHeight: '100vh' } as React.CSSProperties}
           optimize={{ width: 1920, height: 1080, crop: 'limit' }}
@@ -57,7 +57,7 @@ const About = () => {
                 Hakkımızda
               </h1>
               <p className="text-xl text-gray-200 max-w-3xl mx-auto leading-relaxed">
-                              AGROVİA, modern tarım ve seracılık alanında yenilikçi çözümler sunan 
+                              AGROVIA, modern tarım ve seracılık alanında yenilikçi çözümler sunan 
               bir platformdur. Dijital dönüşümle geleceğin tarımını bugün gerçekleştiriyoruz.
               </p>
             </div>
@@ -91,7 +91,7 @@ const About = () => {
             {/* Features Grid */}
             <div className="mb-16">
               <h2 className="text-3xl font-bold text-center text-white mb-12">
-                Neden <span className="text-emerald-400">AGROVİA</span>?
+                Neden <span className="text-emerald-400">AGROVIA</span>?
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 {features.map((feature, index) => (
@@ -110,7 +110,7 @@ const About = () => {
             {/* Stats Section */}
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-700 p-8 md:p-12 mb-16">
               <h2 className="text-3xl font-bold text-center text-white mb-12">
-                Rakamlarla <span className="text-emerald-400">AGROVİA</span>
+                Rakamlarla <span className="text-emerald-400">AGROVIA</span>
               </h2>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
                 {stats.map((stat, index) => (

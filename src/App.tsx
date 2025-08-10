@@ -47,6 +47,28 @@ function AppContent() {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
   }, [location.pathname]);
 
+  // Dil ve locale meta etiketlerini doğrudan DOM üzerinden ayarla
+  React.useEffect(() => {
+    try {
+      // Varsayılan Türkçe
+      const lang = 'tr';
+      const locale = 'tr_TR';
+      document.documentElement.setAttribute('lang', lang);
+
+      const ensureMeta = (selector: string, attrs: Record<string, string>) => {
+        let meta = document.querySelector(selector) as HTMLMetaElement | null;
+        if (!meta) {
+          meta = document.createElement('meta');
+          document.head.appendChild(meta);
+        }
+        Object.entries(attrs).forEach(([k, v]) => meta!.setAttribute(k, v));
+      };
+
+      ensureMeta('meta[http-equiv="Content-Language"]', { 'http-equiv': 'Content-Language', content: lang });
+      ensureMeta('meta[property="og:locale"]', { property: 'og:locale', content: locale });
+    } catch {}
+  }, [location.pathname]);
+
   return (
     <>
       {!isAdminPage && <Header />}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { getOptimizedCloudinaryUrl } from '../utils/cloudinaryDelivery';
+import { getOptimizedCloudinaryUrl, toCloudinaryFromLocal } from '../utils/cloudinaryDelivery';
 import type { CloudinaryOptimizeOptions } from '../utils/cloudinaryDelivery';
 
 type Props = React.ImgHTMLAttributes<HTMLImageElement> & {
@@ -7,7 +7,8 @@ type Props = React.ImgHTMLAttributes<HTMLImageElement> & {
 };
 
 const OptimizedImage: React.FC<Props> = ({ src, optimize, ...imgProps }) => {
-  const finalSrc = typeof src === 'string' ? getOptimizedCloudinaryUrl(src, optimize) : src;
+  const normalized = typeof src === 'string' ? toCloudinaryFromLocal(src) : src;
+  const finalSrc = typeof normalized === 'string' ? getOptimizedCloudinaryUrl(normalized, optimize) : normalized;
   // Ensure decoding hint and lazy loading by default
   return (
     <img

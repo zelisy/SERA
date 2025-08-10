@@ -8,6 +8,15 @@ export type CloudinaryOptimizeOptions = {
 };
 
 const CLOUDINARY_HOST = 'res.cloudinary.com';
+const FALLBACK_CLOUD_NAME = import.meta?.env?.VITE_CLOUDINARY_CLOUD_NAME || '';
+
+// Convert local asset path to Cloudinary delivery URL if configured
+export function toCloudinaryFromLocal(localPath: string): string {
+  if (!FALLBACK_CLOUD_NAME) return localPath;
+  // Expect assets like /assets/arkaplan1.jpg or relative '.../assets/arkaplan1.jpg'
+  const filename = localPath.split('/').pop() || localPath;
+  return `https://${CLOUDINARY_HOST}/${FALLBACK_CLOUD_NAME}/image/upload/${filename}`;
+}
 
 /**
  * Inserts Cloudinary delivery transformations (f_auto,q_auto,dpr_auto,c_limit,w_...) into a Cloudinary URL.

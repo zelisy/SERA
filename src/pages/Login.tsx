@@ -4,6 +4,7 @@ import { auth } from '../firebase/config';
 import { useNavigate, Link } from 'react-router-dom';
 import arkaplanImage from '../assets/arkaplan1.jpg';
 import OptimizedImage from '../components/OptimizedImage';
+import { getBrandName } from '../utils/brand';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -63,7 +64,7 @@ const Login: React.FC = () => {
       <div className="absolute inset-0">
         <OptimizedImage 
           src={arkaplanImage} 
-          alt="AGROVİA Sistemi Arkaplan"
+          alt="AGROVIA Sistemi Arkaplan"
           className="w-full h-full object-cover"
           style={{ minHeight: '100vh' } as React.CSSProperties}
           optimize={{ width: 1920, height: 1080, crop: 'limit' }}
@@ -93,10 +94,10 @@ const Login: React.FC = () => {
             {/* Header */}
             <div className="text-center mb-8">
               <div className="mb-4">
-                <h1 className="text-3xl font-bold text-white">AGROVİA</h1>
+                <h1 className="text-3xl font-bold text-white">{getBrandName()}</h1>
               </div>
               <h2 className="text-xl font-bold text-white mb-2">Admin Giriş</h2>
-              <p className="text-gray-300">AGROVİA yönetim paneline erişim</p>
+              <p className="text-gray-300">{getBrandName()} yönetim paneline erişim</p>
             </div>
 
             {/* Error Message */}
@@ -205,7 +206,7 @@ const Login: React.FC = () => {
           {/* Footer */}
           <div className="text-center mt-8">
             <p className="text-gray-400 text-sm">
-              © 2024 AGROVİA. Tüm hakları saklıdır.
+              © 2024 {getBrandName()}. Tüm hakları saklıdır.
             </p>
           </div>
         </div>

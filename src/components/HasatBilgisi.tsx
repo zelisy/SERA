@@ -761,7 +761,7 @@ const HasatBilgisiComponent = () => {
                           <td className="px-4 py-3">
                             {record.halFisiUrl ? (
                               <a href={record.halFisiUrl} target="_blank" rel="noopener noreferrer">
-                                <img src={record.halFisiUrl} alt="Hal Fişi" className="w-16 h-16 object-cover rounded border" />
+                                <img src={record.halFisiUrl} alt="Hal Fişi" className="w-16 h-16 object-cover rounded border" loading="lazy" decoding="async" />
                               </a>
                             ) : (
                               <span className="text-gray-400">-</span>

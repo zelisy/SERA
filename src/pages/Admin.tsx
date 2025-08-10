@@ -874,7 +874,7 @@ const DenemeComponent: React.FC = () => {
                 onClick={e => { e.stopPropagation(); setImageModalIndex((prev) => (prev - 1 + imageModalImages.length) % imageModalImages.length); }}
                 disabled={imageModalImages.length < 2}
               >&#8592;</button>
-              <img src={imageModalImages[imageModalIndex]} alt="Büyük görsel" className="max-w-full max-h-[80vh] rounded-xl shadow-2xl border-2 md:border-4 border-white" />
+              <img src={imageModalImages[imageModalIndex]} alt="Büyük görsel" className="max-w-full max-h-[80vh] rounded-xl shadow-2xl border-2 md:border-4 border-white" loading="lazy" decoding="async" />
               <button
                 className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 text-2xl md:text-4xl text-white bg-black/40 rounded-full px-2 md:px-3 py-1 hover:bg-black/70 z-10 min-w-[44px] min-h-[44px] flex items-center justify-center"
                 onClick={e => { e.stopPropagation(); setImageModalIndex((prev) => (prev + 1) % imageModalImages.length); }}
@@ -889,7 +889,7 @@ const DenemeComponent: React.FC = () => {
         {previewImageUrl && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70" onClick={() => setPreviewImageUrl(null)}>
             <div className="relative" onClick={e => e.stopPropagation()}>
-              <img src={previewImageUrl} alt="Büyük Önizleme" className="max-w-[90vw] max-h-[80vh] rounded-xl shadow-2xl border-4 border-white" />
+              <img src={previewImageUrl} alt="Büyük Önizleme" className="max-w-[90vw] max-h-[80vh] rounded-xl shadow-2xl border-4 border-white" loading="lazy" decoding="async" />
               <button
                 type="button"
                 onClick={() => setPreviewImageUrl(null)}
@@ -1002,7 +1002,7 @@ const Admin = () => {
               <span className="text-white text-xl font-bold">A</span>
             </div>
             <div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">AGROVİA</h1>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">AGROVIA</h1>
               <p className="text-sm text-emerald-600 font-medium">Admin Panel</p>
             </div>
           </div>

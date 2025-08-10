@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { getBrandName } from '../utils/brand';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 const Header = () => {
@@ -73,7 +74,7 @@ const Header = () => {
                   ? 'text-white' 
                   : 'bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent'
               }`}>
-                AGROVİA
+                {getBrandName()} 
               </h1>
             </div>
           </Link>

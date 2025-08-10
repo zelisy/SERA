@@ -1,5 +1,11 @@
-// Temporary Cloudinary utils without env variables
+// Temporary Cloudinary utils with env variables
 import { getOptimizedCloudinaryUrl } from './cloudinaryDelivery';
+const CLOUD_NAME = (import.meta as any)?.env?.VITE_CLOUDINARY_CLOUD_NAME || '';
+const UPLOAD_PRESET = (import.meta as any)?.env?.VITE_CLOUDINARY_UPLOAD_PRESET || 'sera_upload_preset';
+const DEFAULT_FOLDER = (import.meta as any)?.env?.VITE_CLOUDINARY_FOLDER || 'agrovia';
+const UPLOAD_URL = CLOUD_NAME
+  ? `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`
+  : 'https://api.cloudinary.com/v1_1/dq93lo9e6/image/upload';
 interface CloudinaryResponse {
   secure_url: string;
   public_id: string;
@@ -72,14 +78,14 @@ export const uploadToCloudinaryDirect = async (file: File): Promise<string> => {
 
     const formData = new FormData();
     formData.append('file', new File([uploadBlob], filename, { type: (compressed ? 'image/webp' : file.type) || 'image/jpeg' }));
-    formData.append('upload_preset', 'sera_upload_preset'); // unsigned preset
+    formData.append('upload_preset', UPLOAD_PRESET); // unsigned preset
     // Optional: keep filenames and avoid duplicates
     formData.append('use_filename', 'true');
     formData.append('unique_filename', 'false');
     // Optional: organize files in a folder
-    formData.append('folder', 'agrovia');
+    formData.append('folder', DEFAULT_FOLDER);
 
-    const response = await fetch('https://api.cloudinary.com/v1_1/dq93lo9e6/image/upload', {
+    const response = await fetch(UPLOAD_URL, {
       method: 'POST',
       body: formData,
     });

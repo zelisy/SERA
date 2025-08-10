@@ -75,7 +75,7 @@ const Contact = () => {
         <div className="absolute inset-0">
           <OptimizedImage 
             src={arkaplanImage} 
-            alt="AGROVİA Sistemi Arkaplan"
+            alt="AGROVIA Sistemi Arkaplan"
             className="w-full h-full object-cover"
             style={{ minHeight: '100vh' } as React.CSSProperties}
             optimize={{ width: 1920, height: 1080, crop: 'limit' }}
@@ -112,7 +112,7 @@ const Contact = () => {
       <div className="absolute inset-0">
           <OptimizedImage 
             src={arkaplanImage} 
-            alt="AGROVİA Sistemi Arkaplan"
+            alt="AGROVIA Sistemi Arkaplan"
             className="w-full h-full object-cover"
             style={{ minHeight: '100vh' } as React.CSSProperties}
             optimize={{ width: 1920, height: 1080, crop: 'limit' }}
