@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import OptimizedImage from './OptimizedImage';
+import ImageLightbox from './ImageLightbox';
 
 const UploadAndPreview = () => {
   const [preview, setPreview] = useState<string | null>(null);
@@ -59,11 +60,10 @@ const UploadAndPreview = () => {
       {/* Preview Image */}
       {preview && (
         <div className="flex flex-col items-center">
-          <h3 className="text-sm font-semibold text-gray-700 mb-2">Önizleme:</h3>
           <button type="button" onClick={() => setModalImg(preview)} className="focus:outline-none">
             <OptimizedImage
               src={preview}
-              alt="Preview"
+              alt="Yüklenen fotoğraf"
               className="w-full max-w-xs md:w-48 h-auto rounded-lg shadow-lg border-2 border-gray-200 hover:scale-105 transition-transform duration-200 cursor-pointer"
               optimize={{ width: 600, crop: 'limit' }}
             />
@@ -89,23 +89,8 @@ const UploadAndPreview = () => {
         </div>
       )}
 
-      {/* Modal for large image preview */}
-      {modalImg && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80" onClick={() => setModalImg(null)}>
-          <div className="relative" onClick={e => e.stopPropagation()}>
-            <OptimizedImage src={modalImg || ''} alt="Büyük Önizleme" className="max-w-[90vw] max-h-[80vh] rounded-xl shadow-2xl border-4 border-white" optimize={{ width: 1600, height: 1200, crop: 'limit' }} />
-            <button
-              type="button"
-              onClick={() => setModalImg(null)}
-              className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-2 shadow-lg hover:bg-red-700 focus:outline-none"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Modal for large image preview (unified) */}
+      <ImageLightbox imageUrl={modalImg} onClose={() => setModalImg(null)} />
     </div>
   );
 };

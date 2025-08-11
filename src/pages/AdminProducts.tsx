@@ -3,6 +3,7 @@ import { saveProduct, getAllProducts, deleteProduct, updateProduct } from '../ut
 import type { Product } from '../types/product';
 import { useNavigate } from 'react-router-dom';
 import OptimizedImage from '../components/OptimizedImage';
+import ImageLightbox from '../components/ImageLightbox';
 
 const AdminProducts: React.FC = () => {
   const [showForm, setShowForm] = useState(true);
@@ -10,6 +11,7 @@ const AdminProducts: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -193,7 +195,9 @@ const AdminProducts: React.FC = () => {
                 <tr key={product.id} className="border-t">
                   <td className="px-4 py-2">
                     {product.imageUrl && (
-                      <OptimizedImage src={product.imageUrl} alt={product.name} className="w-16 h-16 object-cover rounded" optimize={{ width: 128, height: 128, crop: 'fill' }} />
+                      <button type="button" className="focus:outline-none" onClick={() => setPreviewImageUrl(product.imageUrl)}>
+                        <OptimizedImage src={product.imageUrl} alt={product.name} className="w-16 h-16 object-cover rounded hover:scale-105 transition-transform duration-200 cursor-pointer" optimize={{ width: 128, height: 128, crop: 'fill' }} />
+                      </button>
                     )}
                   </td>
                   <td className="px-4 py-2 font-semibold">{product.name}</td>
@@ -214,6 +218,7 @@ const AdminProducts: React.FC = () => {
           </table>
         </div>
         </div>
+        <ImageLightbox imageUrl={previewImageUrl} onClose={() => setPreviewImageUrl(null)} />
       </div>
     </div>
   );

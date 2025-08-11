@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import OptimizedImage from '../components/OptimizedImage';
+import ImageLightbox from '../components/ImageLightbox';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { uploadToCloudinary } from '../utils/cloudinaryUtils';
@@ -389,7 +390,7 @@ const BlogManagement: React.FC = () => {
                             <button type="button" onClick={() => setModalImg(imagePreview)} className="focus:outline-none">
                               <OptimizedImage
                                 src={imagePreview}
-                                alt="Önizleme"
+                                alt="Kapak fotoğrafı"
                                 className="w-full max-w-xs h-32 object-cover rounded-lg border border-gray-200 hover:scale-105 transition-transform duration-200 cursor-pointer"
                                 optimize={{ width: 512, height: 256, crop: 'fill' }}
                               />
@@ -629,23 +630,8 @@ const BlogManagement: React.FC = () => {
           )}
         </div>
       </div>
-      {/* Modal for large image preview */}
-      {modalImg && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80" onClick={() => setModalImg(null)}>
-          <div className="relative" onClick={e => e.stopPropagation()}>
-            <img src={modalImg} alt="Büyük Önizleme" className="max-w-[90vw] max-h-[80vh] rounded-xl shadow-2xl border-4 border-white" />
-            <button
-              type="button"
-              onClick={() => setModalImg(null)}
-              className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-2 shadow-lg hover:bg-red-700 focus:outline-none"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Modal for large image preview (unified) */}
+      <ImageLightbox imageUrl={modalImg} onClose={() => setModalImg(null)} />
     </div>
   );
 };

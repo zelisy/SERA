@@ -17,6 +17,7 @@ import { uploadToCloudinary } from '../utils/cloudinaryUtils';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { exportDenemeFormToPDF } from '../utils/denemePDFUtils';
 import { FaFilePdf, FaSpinner } from 'react-icons/fa';
+import ImageLightbox from '../components/ImageLightbox';
 
 
 
@@ -885,19 +886,8 @@ const DenemeComponent: React.FC = () => {
           </div>
         )}
         
-        {/* Fotoğraf büyük önizleme modalı */}
-        {previewImageUrl && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70" onClick={() => setPreviewImageUrl(null)}>
-            <div className="relative" onClick={e => e.stopPropagation()}>
-              <img src={previewImageUrl} alt="Büyük Önizleme" className="max-w-[90vw] max-h-[80vh] rounded-xl shadow-2xl border-4 border-white" loading="lazy" decoding="async" />
-              <button
-                type="button"
-                onClick={() => setPreviewImageUrl(null)}
-                className="absolute top-8 right-8 text-white text-3xl font-bold bg-black bg-opacity-50 rounded-full px-4 py-2"
-              >×</button>
-            </div>
-          </div>
-        )}
+        {/* Fotoğraf büyük önizleme modalı (unified) */}
+        <ImageLightbox imageUrl={previewImageUrl} onClose={() => setPreviewImageUrl(null)} />
       </div>
     </div>
   );
