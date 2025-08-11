@@ -32,11 +32,13 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ imageUrl, onClose, alt })
       aria-modal="true"
     >
       <div className="relative" onClick={(e) => e.stopPropagation()}>
-        <OptimizedImage
+        {/* Büyük önizlemede herhangi bir yeniden yazım/optimizasyon hatasını önlemek için doğrudan img */}
+        <img
           src={imageUrl}
           alt={alt || 'Büyük Önizleme'}
           className="max-w-[90vw] max-h-[80vh] rounded-xl shadow-2xl border-4 border-white"
-          optimize={{ width: 1600, height: 1200, crop: 'limit' }}
+          loading="eager"
+          decoding="sync"
         />
         <button
           type="button"

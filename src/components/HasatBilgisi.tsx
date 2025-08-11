@@ -761,9 +761,9 @@ const HasatBilgisiComponent = () => {
                           <td className="px-4 py-3 font-bold text-emerald-600">₺{record.kazanc ? Number(record.kazanc).toLocaleString() : ''}</td>
                           <td className="px-4 py-3">
                             {record.halFisiUrl ? (
-                              <a href={record.halFisiUrl} target="_blank" rel="noopener noreferrer">
-                                <img src={record.halFisiUrl} alt="Hal Fişi" className="w-16 h-16 object-cover rounded border" loading="lazy" decoding="async" />
-                              </a>
+                              <button type="button" onClick={() => setPreviewImageUrl(record.halFisiUrl || null)} className="focus:outline-none">
+                                <OptimizedImage src={record.halFisiUrl} alt="Hal Fişi" className="w-16 h-16 object-cover rounded border hover:scale-105 transition-transform duration-200 cursor-pointer" />
+                              </button>
                             ) : (
                               <span className="text-gray-400">-</span>
                             )}

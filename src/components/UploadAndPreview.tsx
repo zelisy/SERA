@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+// axios kaldırıldı
+import { uploadToCloudinaryDirect } from '../utils/tempCloudinaryUtils';
 import OptimizedImage from './OptimizedImage';
 import ImageLightbox from './ImageLightbox';
 
@@ -13,19 +14,12 @@ const UploadAndPreview = () => {
     const file = event.target.files?.[0];
     if (!file) return;
     
-    setPreview(URL.createObjectURL(file)); 
     setUploading(true);
 
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', 'my_preset'); 
-
     try {
-      const response = await axios.post(
-        'https://api.cloudinary.com/v1_1/dq93lo9e6/image/upload', 
-        formData
-      );
-      setImageUrl(response.data.secure_url);
+      const url = await uploadToCloudinaryDirect(file);
+      setImageUrl(url);
+      setPreview(url);
     } catch (error) {
       console.error('Yükleme hatası:', error);
     } finally {

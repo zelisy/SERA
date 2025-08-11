@@ -79,10 +79,8 @@ export const uploadToCloudinaryDirect = async (file: File): Promise<string> => {
     const formData = new FormData();
     formData.append('file', new File([uploadBlob], filename, { type: (compressed ? 'image/webp' : file.type) || 'image/jpeg' }));
     formData.append('upload_preset', UPLOAD_PRESET); // unsigned preset
-    // Optional: keep filenames and avoid duplicates
-    formData.append('use_filename', 'true');
-    formData.append('unique_filename', 'false');
-    // Optional: organize files in a folder
+    // Note: For unsigned uploads, avoid sending unsupported params like use_filename/unique_filename
+    // Optional: organize files in a folder (allowed for unsigned presets)
     formData.append('folder', DEFAULT_FOLDER);
 
     const response = await fetch(UPLOAD_URL, {

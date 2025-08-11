@@ -90,12 +90,21 @@ const DenemeComponent: React.FC = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
-      setImageFiles(prev => [...prev, ...files]);
-      const urls = files.map(f => URL.createObjectURL(f));
-      setForm(prev => ({ ...prev, goruntuler: [...prev.goruntuler, ...urls] }));
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+    const files = Array.from(e.target.files);
+    setImageFiles(prev => [...prev, ...files]);
+    try {
+      const { uploadToCloudinary } = await import('../utils/cloudinaryUtils');
+      const uploaded = await Promise.all(
+        files.map(async (f) => {
+          return await uploadToCloudinary(f);
+        })
+      );
+      setForm(prev => ({ ...prev, goruntuler: [...prev.goruntuler, ...uploaded] }));
+    } catch (err) {
+      console.error('Görsel yükleme hatası:', err);
+      setMessage('Görseller yüklenemedi. Lütfen tekrar deneyin.');
     }
   };
 

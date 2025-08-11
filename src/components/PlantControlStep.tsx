@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import ImageLightbox from './ImageLightbox';
+import OptimizedImage from './OptimizedImage';
+import { uploadToCloudinaryDirect, validateImageFile } from '../utils/tempCloudinaryUtils';
 
 interface PlantData {
   id: string;
@@ -151,13 +153,14 @@ const PlantDetailControl: React.FC<{
   const renderImagePreviews = (images: string[]) => (
     <div className="flex flex-wrap gap-2 mt-2">
       {images.map((url, idx) => (
-        <img
-          key={idx}
-          src={url}
-          alt="preview"
-          className="w-16 h-16 object-cover rounded-lg cursor-pointer border border-gray-300 hover:ring-2 hover:ring-emerald-500"
-          onClick={() => setModalImg(url)}
-        />
+        <button key={idx} type="button" className="focus:outline-none" onClick={() => setModalImg(url)}>
+          <OptimizedImage
+            src={url}
+            alt={`Fotoğraf ${idx + 1}`}
+            className="w-16 h-16 object-cover rounded-lg cursor-pointer border border-gray-300 hover:ring-2 hover:ring-emerald-500"
+            optimize={{ width: 160, height: 160, crop: 'fill' }}
+          />
+        </button>
       ))}
     </div>
   );
@@ -175,10 +178,21 @@ const PlantDetailControl: React.FC<{
           multiple
           accept="image/*"
           className="hidden"
-          onChange={(e) => {
+          onChange={async (e) => {
             const files = Array.from(e.target.files || []);
-            const urls = files.map(file => URL.createObjectURL(file));
-            onUpdate(plantIndex, field, [...images, ...urls]);
+            if (files.length === 0) return;
+            try {
+              const uploadPromises = files.map(async (file) => {
+                validateImageFile(file);
+                const uploadedUrl = await uploadToCloudinaryDirect(file);
+                return uploadedUrl;
+              });
+              const uploadedUrls = await Promise.all(uploadPromises);
+              onUpdate(plantIndex, field, [...images, ...uploadedUrls]);
+            } catch (err) {
+              // no-op: show simple alert for now
+              alert(err instanceof Error ? err.message : 'Fotoğraf yükleme başarısız');
+            }
           }}
         />
       </label>

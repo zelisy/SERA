@@ -340,7 +340,7 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate, onPlantCo
                   <span className="text-xs lg:text-sm font-medium">Fotoğraf yükleniyor...</span>
                 </div>
               )}
-              {values[field.id] && (
+              {typeof values[field.id] === 'string' && (values[field.id] as string).startsWith('http') && (
                 <div className="relative group">
                   <button type="button" onClick={() => setPreviewImageUrl(values[field.id] as string)} className="focus:outline-none">
                     <OptimizedImage
@@ -372,7 +372,8 @@ const ChecklistItem: React.FC<ChecklistItemProps> = ({ item, onUpdate, onPlantCo
 
       case 'multiple-files':
         {
-          const currentUrls = Array.isArray(values[field.id]) ? values[field.id] as string[] : [];
+          const currentUrlsRaw = Array.isArray(values[field.id]) ? values[field.id] as string[] : [];
+          const currentUrls = currentUrlsRaw.filter(u => typeof u === 'string' && (u.startsWith('http') || u.startsWith('data:')));
           return (
             <div key={field.id} className={fieldWidth}>
               <label className="block text-sm font-semibold text-gray-700 mb-2">

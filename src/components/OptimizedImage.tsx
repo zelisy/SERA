@@ -7,8 +7,14 @@ type Props = React.ImgHTMLAttributes<HTMLImageElement> & {
 };
 
 const OptimizedImage: React.FC<Props> = ({ src, optimize, ...imgProps }) => {
-  const normalized = typeof src === 'string' ? toCloudinaryFromLocal(src) : src;
-  const finalSrc = typeof normalized === 'string' ? getOptimizedCloudinaryUrl(normalized, optimize) : normalized;
+  const normalized = typeof src === 'string'
+    ? (src.startsWith('http') || src.startsWith('blob:') || src.startsWith('data:')
+        ? src
+        : toCloudinaryFromLocal(src))
+    : src;
+  const finalSrc = typeof normalized === 'string'
+    ? (optimize ? getOptimizedCloudinaryUrl(normalized, optimize) : normalized)
+    : normalized;
   // Ensure decoding hint and lazy loading by default
   return (
     <img
